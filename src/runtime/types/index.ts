@@ -29,3 +29,11 @@ export type {
 
 export type { Handler, HandlerExecutionOptions } from './handler';
 export { HandlerError } from './handler';
+
+export type {
+  Route,
+  RoutePattern,
+  RouteMatch,
+  RouteOptions,
+  RouterConfig,
+} from './route';
