@@ -51,6 +51,7 @@ graph LR
 ```
 
 **Steps:**
+
 1. Select issue from [Milestone 1 board](https://github.com/krishnapaul242/gati/milestone/1)
 2. Verify acceptance criteria are clear
 3. Check dependencies are complete
@@ -74,6 +75,7 @@ gh copilot assign 1
 ```
 
 **What Copilot Does:**
+
 - Reads issue description and acceptance criteria
 - Analyzes codebase context
 - Creates implementation plan
@@ -82,6 +84,7 @@ gh copilot assign 1
 - Opens PR with detailed description
 
 **When to Use:**
+
 - ✅ Task has clear acceptance criteria
 - ✅ Dependencies are satisfied
 - ✅ File paths specified in issue
@@ -110,6 +113,7 @@ Please start with the type definitions.
 ```
 
 **When to Use:**
+
 - ✅ Need iterative refinement
 - ✅ Want to discuss architecture first
 - ✅ Multiple approaches to consider
@@ -152,28 +156,33 @@ Every PR must pass:
 
 Create `.github/copilot-instructions.md`:
 
-```markdown
+````markdown
 # Copilot Instructions for Gati
 
 ## Project Context
+
 Gati is a cloud-native Node.js framework for versioned APIs.
 
 ## Code Style
+
 - TypeScript strict mode
 - Functional > OOP where possible
 - Clear, descriptive names
 - Comments for complex logic only
 
 ## Testing Requirements
+
 - Unit tests for all public APIs
 - Use Vitest framework
 - Test edge cases and errors
 - Mock external dependencies
 
 ## File Structure
+
 Follow the structure in MILESTONES.md - files are pre-specified per task.
 
 ## Import Conventions
+
 ```typescript
 // External imports first
 import { createServer } from 'http';
@@ -182,12 +191,15 @@ import { createServer } from 'http';
 import { Handler } from './types/handler';
 import { Context } from './types/context';
 ```
+````
 
 ## Error Handling
+
 - Use custom error classes
 - Always include error context
 - Log errors with structured logging
-```
+
+````
 
 ### Issue Templates for AI
 
@@ -235,7 +247,7 @@ describe('FeatureName', () => {
   it('should handle basic case', () => {});
   it('should handle error case', () => {});
 });
-```
+````
 
 ## 📚 Context & References
 
@@ -251,7 +263,8 @@ describe('FeatureName', () => {
 ## 💡 Implementation Hints
 
 [Optional: architectural guidance, preferred patterns]
-```
+
+````
 
 ---
 
@@ -276,9 +289,10 @@ Issue #13: TypeScript Config (Completed manually)
 
 # 🤖 Assign to Copilot
 gh copilot assign 7  # Context Managers (low risk, clear spec)
-```
+````
 
 #### Week 2: Core Runtime
+
 ```bash
 # 💬 Interactive Development
 # Open Copilot Chat:
@@ -290,12 +304,14 @@ gh copilot assign 1  # Handler Pipeline
 ```
 
 #### Week 3: Routing
+
 ```bash
 # 🤖 Direct Assignment (dependencies ready)
 gh copilot assign 6  # Route Registration
 ```
 
 #### Week 4-5: Integration
+
 ```bash
 # 💬 Interactive (complex integration)
 "Let's integrate all components for #8 - App Core.
@@ -310,6 +326,7 @@ Show me how the pieces fit together first."
 
 ```markdown
 Checklist:
+
 - [ ] Issue has clear acceptance criteria
 - [ ] Dependencies satisfied (check MILESTONES.md)
 - [ ] File paths specified
@@ -321,6 +338,7 @@ Checklist:
 
 ```markdown
 Monitor:
+
 - PR description explains changes
 - Commits are logical and atomic
 - Tests written alongside code
@@ -332,6 +350,7 @@ Monitor:
 
 ```markdown
 Review:
+
 - [ ] Run locally: `npm install && npm test`
 - [ ] Code matches issue requirements
 - [ ] Edge cases covered
@@ -345,12 +364,14 @@ Review:
 ## Best Practices
 
 ### 1. Start Small
+
 ```
 ❌ "Implement entire handler system"
 ✅ "Implement Request type definition"
 ```
 
 ### 2. Provide Context
+
 ```
 ❌ "@workspace write handler code"
 ✅ "@workspace Implement handler execution based on #1.
@@ -359,6 +380,7 @@ signature: handler(req, res, gctx, lctx)"
 ```
 
 ### 3. Iterate on Feedback
+
 ```
 Agent: [creates PR]
 You: "Good start, but we need error boundaries. See Milestone doc."
@@ -366,6 +388,7 @@ Agent: [updates PR with error handling]
 ```
 
 ### 4. Use Examples
+
 ```
 "Implement module loader similar to:
 - Node.js require() for discovery
@@ -376,6 +399,7 @@ See examples/hello-world for usage pattern."
 ```
 
 ### 5. Test First (Sometimes)
+
 ```
 "Before implementing handler-engine.ts, create tests in
 handler-engine.test.ts that define expected behavior."
@@ -451,6 +475,7 @@ gh issue view 1
 ```
 
 Output shows:
+
 - Description: Handler execution pipeline
 - Files to create: handler-engine.ts, request.ts, response.ts
 - Acceptance criteria: 4 specific points
@@ -458,6 +483,7 @@ Output shows:
 ### Step 2: Choose Approach
 
 **Option A: Direct Assignment**
+
 ```bash
 gh copilot assign 1
 # Wait for PR
@@ -507,6 +533,7 @@ gh pr merge 123
 ### "Agent got stuck or incorrect implementation"
 
 **Solution:**
+
 ```bash
 # Close PR
 gh pr close 123
@@ -520,6 +547,7 @@ git checkout -b fix/issue-1-take-2
 ### "Too many changes in one PR"
 
 **Solution:**
+
 ```
 Break into sub-tasks:
 #1.1: Request/Response types
@@ -531,6 +559,7 @@ Break into sub-tasks:
 ### "Tests failing"
 
 **Solution:**
+
 ```
 "@workspace The tests for handler-engine are failing.
 Here's the error: [paste error].
@@ -543,12 +572,12 @@ Please fix the implementation in handler-engine.ts."
 
 ### Dashboard (Weekly Update)
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Issues completed | 2-3/week | - |
-| Test coverage | >80% | - |
-| PR review time | <24h | - |
-| AI accuracy | >90% | - |
+| Metric           | Target   | Current |
+| ---------------- | -------- | ------- |
+| Issues completed | 2-3/week | -       |
+| Test coverage    | >80%     | -       |
+| PR review time   | <24h     | -       |
+| AI accuracy      | >90%     | -       |
 
 ### AI Effectiveness
 
@@ -556,7 +585,7 @@ Track in `AGENTIC_METRICS.md`:
 
 ```markdown
 | Issue | Method | Human Time | AI Saves | Quality |
-|-------|--------|------------|----------|---------|
+| ----- | ------ | ---------- | -------- | ------- |
 | #1    | Chat   | 2h review  | ~8h code | 9/10    |
 | #12   | Human  | 1h         | N/A      | 10/10   |
 ```

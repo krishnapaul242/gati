@@ -71,38 +71,50 @@ gati/
 ## Purpose of Each Directory
 
 ### `/src`
+
 Main framework source code organized by functional area:
+
 - **`/cli`**: Command-line tools for developers (`gati create`, `gati dev`, etc.)
 - **`/runtime`**: Core runtime engine (handlers, modules, routing, contexts)
 - **`/plugins`**: Cloud provider integrations (AWS, GCP, Azure)
 
 ### `/packages`
+
 Published npm packages that will be distributed:
+
 - `@gati/core`: Main framework package
 - `@gati/aws`: AWS deployment plugin
 - `@gati/gcp`: GCP deployment plugin
 - `@gati/sdk`: Generated SDK client utilities
 
 ### `/examples`
+
 Example applications demonstrating Gati usage:
+
 - `hello-world`: Basic example with handlers and modules
 - (Future): More complex examples for different use cases
 
 ### `/tests`
+
 Test suites organized by test type:
+
 - `unit/`: Fast, isolated tests for individual functions
 - `integration/`: Tests for multiple components working together
 - `e2e/`: Full end-to-end request flow tests
 
 ### `/docs`
+
 User and developer documentation:
+
 - Getting started guides
 - API references
 - Tutorials
 - Architecture documentation
 
 ### `/.github`
+
 GitHub-specific configuration:
+
 - Workflows (CI/CD)
 - Issue templates
 - PR templates
@@ -142,6 +154,7 @@ pnpm lint
 ## Issue Tracking
 
 Each file/directory references the GitHub issue where it will be implemented:
+
 - See inline comments for issue numbers
 - Check [MILESTONES.md](../MILESTONES.md) for detailed breakdown
 - Check [M1_PRIORITY_REVIEW.md](./.github/M1_PRIORITY_REVIEW.md) for priorities

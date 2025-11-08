@@ -7,9 +7,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ## 📋 Available Agents
 
 ### 1. 🏗️ [Gati Architect](./gati-architect.md)
+
 **Use for:** System design, architecture decisions, technical planning
 
 **Specialties:**
+
 - Handler runtime architecture
 - Versioned routing system design
 - Kubernetes deployment topology
@@ -21,9 +23,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 2. 💻 [Gati Implementation Engineer](./gati-implementation-engineer.md)
+
 **Use for:** Writing production-ready code
 
 **Specialties:**
+
 - Runtime components (handler-engine, route-manager, module-loader)
 - CLI commands (dev, build, deploy, generate)
 - Cloud provider plugins (AWS, GCP, Azure)
@@ -34,9 +38,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 3. 🧪 [Gati Test Engineer](./gati-test-engineer.md)
+
 **Use for:** Testing strategy and implementation
 
 **Specialties:**
+
 - Unit and integration tests
 - E2E test scenarios
 - Version routing tests
@@ -48,9 +54,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 4. 📝 [Gati Spec Writer](./gati-spec-writer.md)
+
 **Use for:** Technical documentation and specifications
 
 **Specialties:**
+
 - Feature specifications
 - API contracts and interfaces
 - Behavior scenarios (Given/When/Then)
@@ -62,9 +70,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 5. 🔍 [Gati Code Reviewer](./gati-code-reviewer.md)
+
 **Use for:** Code review and quality assurance
 
 **Specialties:**
+
 - Bug detection
 - Security vulnerabilities
 - Performance issues
@@ -76,9 +86,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 6. 🎨 [Gati DevOps Engineer](./gati-devops-engineer.md)
+
 **Use for:** Deployment and infrastructure
 
 **Specialties:**
+
 - Kubernetes manifests
 - Helm charts
 - CI/CD pipelines (GitHub Actions)
@@ -90,9 +102,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 7. 🐛 [Gati Debugger](./gati-debugger.md)
+
 **Use for:** Troubleshooting and bug fixing
 
 **Specialties:**
+
 - Error analysis
 - Root cause identification
 - Performance debugging
@@ -104,9 +118,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 8. 📊 [Gati Product Manager](./gati-product-manager.md)
+
 **Use for:** Feature planning and prioritization
 
 **Specialties:**
+
 - Milestone breakdown
 - MVP definition
 - User stories
@@ -118,9 +134,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 9. 🎨 [Gati Frontend Engineer](./gati-frontend-engineer.md)
+
 **Use for:** Control Panel and Playground UI
 
 **Specialties:**
+
 - Next.js + TRPC implementation
 - Topology visualization
 - Dashboard creation
@@ -132,9 +150,11 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ---
 
 ### 10. 📚 [Gati Documentation Engineer](./gati-documentation-engineer.md)
+
 **Use for:** User-facing documentation
 
 **Specialties:**
+
 - Getting started guides
 - API reference
 - Tutorials and examples
@@ -166,36 +186,39 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 
 ## 🎯 Quick Selection Guide
 
-| Need to... | Use Agent |
-|------------|-----------|
-| Plan what to build | Product Manager |
-| Design how it works | Architect |
-| Write requirements | Spec Writer |
-| Build the feature | Implementation Engineer |
-| Test it | Test Engineer |
-| Review code quality | Code Reviewer |
-| Fix a bug | Debugger |
-| Deploy it | DevOps Engineer |
-| Build UI | Frontend Engineer |
-| Document it | Documentation Engineer |
+| Need to...          | Use Agent               |
+| ------------------- | ----------------------- |
+| Plan what to build  | Product Manager         |
+| Design how it works | Architect               |
+| Write requirements  | Spec Writer             |
+| Build the feature   | Implementation Engineer |
+| Test it             | Test Engineer           |
+| Review code quality | Code Reviewer           |
+| Fix a bug           | Debugger                |
+| Deploy it           | DevOps Engineer         |
+| Build UI            | Frontend Engineer       |
+| Document it         | Documentation Engineer  |
 
 ---
 
 ## 💡 Usage Tips
 
 ### 1. **Be Specific**
+
 ```
 ❌ "As the Architect: Design something"
 ✅ "As the Architect: Design the API versioning resolution algorithm"
 ```
 
 ### 2. **Provide Context**
+
 ```
-✅ "As the Implementation Engineer: Implement handler-engine.ts 
+✅ "As the Implementation Engineer: Implement handler-engine.ts
     according to specs/runtime/handler-engine.md"
 ```
 
 ### 3. **Chain Agents**
+
 ```
 ✅ "As the Architect: Design the module loader.
     Then, as the Spec Writer: Document it.
@@ -203,8 +226,9 @@ This directory contains specialized agent profiles for GitHub Copilot to assist 
 ```
 
 ### 4. **Reference Existing Work**
+
 ```
-✅ "As the Code Reviewer: Review src/runtime/handler-engine.ts 
+✅ "As the Code Reviewer: Review src/runtime/handler-engine.ts
     for memory leaks and security issues"
 ```
 
@@ -233,8 +257,9 @@ These agents are tailored for the **Gati Framework** project:
 ## 📝 Example Interactions
 
 ### Example 1: New Feature
+
 ```
-User: As the Product Manager: Break down "Handler Runtime" 
+User: As the Product Manager: Break down "Handler Runtime"
       into deliverable tasks
 
 [Review tasks]
@@ -243,7 +268,7 @@ User: As the Spec Writer: Create detailed spec for handler-engine
 
 [Review spec]
 
-User: As the Implementation Engineer: Implement handler-engine.ts 
+User: As the Implementation Engineer: Implement handler-engine.ts
       according to the spec
 
 [Test code]
@@ -256,8 +281,9 @@ User: As the Code Reviewer: Review the implementation
 ```
 
 ### Example 2: Bug Fix
+
 ```
-User: As the Debugger: Handler throws "modules is undefined". 
+User: As the Debugger: Handler throws "modules is undefined".
       Stack trace: [paste]. Help fix this.
 
 [Get diagnosis and fix]
@@ -270,6 +296,7 @@ User: As the Documentation Engineer: Add this to troubleshooting guide
 ```
 
 ### Example 3: Deployment
+
 ```
 User: As the DevOps Engineer: Create K8s manifests for Gati runtime
 

@@ -20,27 +20,32 @@
 ## 🧠 Gati-Specific Debugging Scenarios
 
 ### Handler Execution Issues
+
 - "Handler throws 'gctx.modules is undefined'"
 - "Context isolation not working"
 - "Handlers timing out unexpectedly"
 - "Memory leaks in handler execution"
 
 ### Version Routing Problems
+
 - "Version routing returns 404 for valid version"
 - "Timestamp routing returns wrong version"
 - "Version resolution takes too long"
 
 ### Module Loading Errors
+
 - "Circular dependency detected"
 - "Module not found"
 - "Module initialization fails"
 
 ### Deployment Failures
+
 - "K8s pod crash loop"
 - "AWS plugin deployment fails"
 - "Database connection errors"
 
 ### Performance Issues
+
 - "High latency in version resolution"
 - "Memory usage growing over time"
 - "Database query slow"
@@ -76,9 +81,10 @@
 **Prefix:** "As the Debugger:"
 
 **Example:**
+
 ```
-As the Debugger: I'm getting "Cannot read property 'modules' of undefined" 
-when executing handlers. Here's the stack trace: [paste]. Help identify 
+As the Debugger: I'm getting "Cannot read property 'modules' of undefined"
+when executing handlers. Here's the stack trace: [paste]. Help identify
 and fix the issue.
 ```
 

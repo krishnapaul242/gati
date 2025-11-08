@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Override for production builds
+    "sourceMap": false,
+    "declarationMap": false,
+    "removeComments": true,
+    "noEmit": false,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "tests",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "examples",
+    "docs",
+    "scripts"
+  ]
+}

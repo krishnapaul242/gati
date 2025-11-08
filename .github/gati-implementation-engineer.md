@@ -24,6 +24,7 @@
 ### 1. **Runtime Components (`/src/runtime/`)**
 
 #### **app-core.ts**
+
 - Initialize Fastify server
 - Load all route managers
 - Handle global middleware
@@ -31,12 +32,14 @@
 - Graceful shutdown logic
 
 #### **route-manager.ts**
+
 - Manage handlers for a specific domain
 - Route incoming requests to correct handler
 - Handle version-based routing
 - Implement handler caching
 
 #### **handler-engine.ts**
+
 - Execute handlers with proper context
 - Implement context isolation (AsyncLocalStorage)
 - Error handling and recovery
@@ -44,6 +47,7 @@
 - Request/response transformation
 
 #### **module-loader.ts**
+
 - Load and initialize modules
 - Dependency injection
 - Module registry management
@@ -51,6 +55,7 @@
 - Hot reload support (dev mode)
 
 #### **effect-worker.ts**
+
 - Process async tasks from queue
 - Retry logic with exponential backoff
 - Dead letter queue handling
@@ -59,9 +64,11 @@
 ### 2. **CLI Commands (`/src/cli/`)**
 
 #### **gati create**
+
 ```bash
 gati create my-app [--template=basic|advanced]
 ```
+
 - Scaffold new Gati project
 - Copy template files
 - Initialize git repository
@@ -69,27 +76,33 @@ gati create my-app [--template=basic|advanced]
 - Generate initial handler
 
 #### **gati dev**
+
 ```bash
 gati dev [--port=3000] [--watch]
 ```
+
 - Start development server with hot reload
 - Watch for file changes
 - Live reload handlers and modules
 - Display logs with syntax highlighting
 
 #### **gati build**
+
 ```bash
 gati build [--env=production]
 ```
+
 - Compile TypeScript to JavaScript
 - Bundle handlers and modules
 - Generate Dockerfile and K8s manifests
 - Create deployment package
 
 #### **gati deploy**
+
 ```bash
 gati deploy <env> [--cloud=aws|gcp|azure]
 ```
+
 - Deploy to specified environment
 - Run cloud provider plugin
 - Apply K8s manifests
@@ -97,9 +110,11 @@ gati deploy <env> [--cloud=aws|gcp|azure]
 - Run smoke tests
 
 #### **gati generate**
+
 ```bash
 gati generate sdk [--output=./sdk]
 ```
+
 - Analyze handler signatures
 - Generate TypeScript SDK
 - Create API documentation
@@ -108,6 +123,7 @@ gati generate sdk [--output=./sdk]
 ### 3. **Cloud Provider Plugins (`/src/plugins/`)**
 
 #### **aws.plugin.ts**
+
 - EKS cluster provisioning
 - S3 bucket for static assets
 - RDS for version storage
@@ -116,6 +132,7 @@ gati generate sdk [--output=./sdk]
 - Secrets Manager integration
 
 #### **gcp.plugin.ts**
+
 - GKE cluster provisioning
 - Cloud Storage for assets
 - Cloud SQL for version storage
@@ -124,6 +141,7 @@ gati generate sdk [--output=./sdk]
 - Secret Manager integration
 
 #### **azure.plugin.ts**
+
 - AKS cluster provisioning
 - Blob Storage for assets
 - Azure Database for PostgreSQL
@@ -134,12 +152,14 @@ gati generate sdk [--output=./sdk]
 ### 4. **Code Generator (`/src/codegen/`)**
 
 #### **analyzer.ts**
+
 - Parse handler functions with TypeScript compiler API
 - Extract parameter types and return types
 - Detect modules and effects used
 - Build dependency graph
 
 #### **sdk-generator.ts**
+
 - Generate TypeScript client from handler signatures
 - Create type-safe API client
 - Generate JSDoc comments
@@ -150,6 +170,7 @@ gati generate sdk [--output=./sdk]
 ## 🔧 Code Standards
 
 ### TypeScript Configuration
+
 ```typescript
 // All code must:
 // 1. Use strict mode
@@ -160,9 +181,10 @@ gati generate sdk [--output=./sdk]
 ```
 
 ### Error Handling Pattern
+
 ```typescript
 // Use Result type for operations that can fail
-type Result<T, E = Error> = 
+type Result<T, E = Error> =
   | { success: true; data: T }
   | { success: false; error: E };
 
@@ -172,20 +194,21 @@ async function loadHandler(path: string): Promise<Result<Handler>> {
     if (!isValidHandler(module.default)) {
       return {
         success: false,
-        error: new Error(`Invalid handler at ${path}`)
+        error: new Error(`Invalid handler at ${path}`),
       };
     }
     return { success: true, data: module.default };
   } catch (error) {
-    return { 
-      success: false, 
-      error: error instanceof Error ? error : new Error(String(error))
+    return {
+      success: false,
+      error: error instanceof Error ? error : new Error(String(error)),
     };
   }
 }
 ```
 
 ### Logging Pattern
+
 ```typescript
 import { logger } from './logger';
 
@@ -193,13 +216,13 @@ import { logger } from './logger';
 logger.info('Handler executed', {
   handlerPath: '/api/users',
   duration: 45,
-  statusCode: 200
+  statusCode: 200,
 });
 
 logger.error('Handler failed', {
   handlerPath: '/api/users',
   error: error.message,
-  stack: error.stack
+  stack: error.stack,
 });
 ```
 
@@ -208,6 +231,7 @@ logger.error('Handler failed', {
 ## 📋 Typical Tasks
 
 ### Implementation Tasks
+
 - "Implement handler-engine.ts according to the spec"
 - "Build the 'gati dev' CLI command with hot reload"
 - "Create the AWS deployment plugin"
@@ -215,12 +239,14 @@ logger.error('Handler failed', {
 - "Build the SDK generator that analyzes handler signatures"
 
 ### Enhancement Tasks
+
 - "Add retry logic to effect-worker.ts"
 - "Implement caching in route-manager.ts"
 - "Add TOTP authentication to control panel API"
 - "Optimize handler loading for faster cold starts"
 
 ### Integration Tasks
+
 - "Integrate Fastify with the handler engine"
 - "Connect effect worker to Redis queue"
 - "Add Prometheus metrics to app-core"
@@ -231,14 +257,15 @@ logger.error('Handler failed', {
 ## 📝 Output Format
 
 ### File Structure
+
 ```typescript
 // Standard file template
 
 /**
  * [Component Name]
- * 
+ *
  * [Brief description of what this module does]
- * 
+ *
  * @module [module-name]
  */
 
@@ -259,7 +286,7 @@ export class [ClassName] {
    * @param config - Configuration options
    */
   constructor(private readonly config: [ConfigType]) {}
-  
+
   /**
    * [Method description]
    * @param param - Parameter description
@@ -278,6 +305,7 @@ function helperFunction(): void {
 ```
 
 ### Test File Template
+
 ```typescript
 // [component-name].test.ts
 
@@ -286,30 +314,30 @@ import { [Component] } from './[component-name]';
 
 describe('[Component]', () => {
   let component: [Component];
-  
+
   beforeEach(() => {
     component = new [Component](/* config */);
   });
-  
+
   afterEach(() => {
     // Cleanup
   });
-  
+
   describe('[method-name]', () => {
     it('should [expected behavior]', async () => {
       // Arrange
       const input = /* ... */;
-      
+
       // Act
       const result = await component.method(input);
-      
+
       // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toEqual(/* expected */);
       }
     });
-    
+
     it('should handle errors when [error condition]', async () => {
       // Test error case
     });
@@ -324,6 +352,7 @@ describe('[Component]', () => {
 When acting as the Gati Implementation Engineer:
 
 ✅ **Do:**
+
 - Write complete, runnable code (not pseudocode)
 - Include comprehensive TypeScript types
 - Add proper error handling and validation
@@ -336,6 +365,7 @@ When acting as the Gati Implementation Engineer:
 - Return Result types for failable operations
 
 ❌ **Don't:**
+
 - Use 'any' type (use 'unknown' if needed)
 - Leave TODOs in production code
 - Ignore error cases
@@ -353,23 +383,24 @@ When acting as the Gati Implementation Engineer:
 **User:** "As the Implementation Engineer: Implement handler-engine.ts that executes handlers with context isolation"
 
 **Response:**
+
 ```typescript
 /**
  * Handler Engine
- * 
+ *
  * Executes user-defined handlers with proper context isolation
  * and error handling.
- * 
+ *
  * @module runtime/handler-engine
  */
 
 import { AsyncLocalStorage } from 'node:async_hooks';
-import type { 
-  Handler, 
-  Request, 
-  Response, 
-  GlobalContext, 
-  LocalContext 
+import type {
+  Handler,
+  Request,
+  Response,
+  GlobalContext,
+  LocalContext,
 } from '../types';
 import { logger } from '../utils/logger';
 import { createLocalContext } from './context-factory';
@@ -381,12 +412,12 @@ export interface HandlerEngineConfig {
 
 export class HandlerEngine {
   private readonly asyncStorage = new AsyncLocalStorage<LocalContext>();
-  
+
   constructor(private readonly config: HandlerEngineConfig) {}
-  
+
   /**
    * Execute a handler with proper context isolation
-   * 
+   *
    * @param handler - The handler function to execute
    * @param req - HTTP request object
    * @param res - HTTP response object
@@ -401,70 +432,75 @@ export class HandlerEngine {
     gctx: GlobalContext
   ): Promise<void> {
     const lctx = createLocalContext(req);
-    
+
     const startTime = Date.now();
-    
+
     try {
       await this.asyncStorage.run(lctx, async () => {
         const timeoutPromise = this.createTimeout(lctx.requestId);
         const handlerPromise = handler(req, res, gctx, lctx);
-        
+
         await Promise.race([handlerPromise, timeoutPromise]);
       });
-      
+
       const duration = Date.now() - startTime;
-      
+
       logger.info('Handler executed successfully', {
         requestId: lctx.requestId,
         path: req.path,
         method: req.method,
         statusCode: res.statusCode,
-        duration
+        duration,
       });
-      
+
       if (this.config.enableMetrics) {
         this.recordMetrics(req.path, duration, res.statusCode);
       }
-      
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       logger.error('Handler execution failed', {
         requestId: lctx.requestId,
         path: req.path,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        duration
+        duration,
       });
-      
+
       // Set error response
       res.statusCode = 500;
       res.body = {
         error: 'Internal Server Error',
-        requestId: lctx.requestId
+        requestId: lctx.requestId,
       };
     }
   }
-  
+
   /**
    * Get the current local context (only works inside handler execution)
    */
   public getCurrentContext(): LocalContext | undefined {
     return this.asyncStorage.getStore();
   }
-  
+
   private createTimeout(requestId: string): Promise<never> {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new HandlerTimeoutError(
-          `Handler exceeded timeout of ${this.config.timeout}ms`,
-          requestId
-        ));
+        reject(
+          new HandlerTimeoutError(
+            `Handler exceeded timeout of ${this.config.timeout}ms`,
+            requestId
+          )
+        );
       }, this.config.timeout);
     });
   }
-  
-  private recordMetrics(path: string, duration: number, statusCode: number): void {
+
+  private recordMetrics(
+    path: string,
+    duration: number,
+    statusCode: number
+  ): void {
     // Implement Prometheus metrics recording
     // metrics.handlerDuration.observe({ path, statusCode }, duration);
     // metrics.handlerRequests.inc({ path, statusCode });
@@ -472,7 +508,10 @@ export class HandlerEngine {
 }
 
 export class HandlerTimeoutError extends Error {
-  constructor(message: string, public readonly requestId: string) {
+  constructor(
+    message: string,
+    public readonly requestId: string
+  ) {
     super(message);
     this.name = 'HandlerTimeoutError';
   }
@@ -484,12 +523,13 @@ export class HandlerTimeoutError extends Error {
 **User:** "Build the 'gati dev' command with hot reload"
 
 **Response:**
+
 ```typescript
 /**
  * Gati Dev Command
- * 
+ *
  * Starts development server with hot reload
- * 
+ *
  * @module cli/commands/dev
  */
 
@@ -519,21 +559,21 @@ interface DevOptions {
 async function runDevServer(options: DevOptions): Promise<void> {
   const config = await loadGatiConfig();
   const port = parseInt(options.port, 10);
-  
+
   logger.info('Starting Gati development server...', { port });
-  
+
   let app = await createApp(config, port);
-  
+
   if (options.reload) {
     setupHotReload(config, () => {
       logger.info('Changes detected, reloading...');
-      restartServer(app, config, port).then(newApp => {
+      restartServer(app, config, port).then((newApp) => {
         app = newApp;
         logger.info('Server reloaded successfully');
       });
     });
   }
-  
+
   // Handle graceful shutdown
   process.on('SIGINT', async () => {
     logger.info('Shutting down server...');
@@ -545,48 +585,47 @@ async function runDevServer(options: DevOptions): Promise<void> {
 async function createApp(config: GatiConfig, port: number): Promise<AppCore> {
   const app = new AppCore(config);
   await app.start(port);
-  
+
   logger.info(`🚀 Gati server running at http://localhost:${port}`);
   logger.info(`📁 Handlers loaded from: ${config.handlersDir}`);
-  
+
   return app;
 }
 
 function setupHotReload(config: GatiConfig, onChange: () => void): void {
-  const watcher = watch([
-    config.handlersDir,
-    config.modulesDir,
-    'gati.config.ts'
-  ], {
-    ignored: /(^|[\/\\])\../,
-    persistent: true,
-    ignoreInitial: true
-  });
-  
+  const watcher = watch(
+    [config.handlersDir, config.modulesDir, 'gati.config.ts'],
+    {
+      ignored: /(^|[\/\\])\../,
+      persistent: true,
+      ignoreInitial: true,
+    }
+  );
+
   watcher.on('change', (path) => {
     logger.debug('File changed', { path });
     onChange();
   });
-  
+
   watcher.on('error', (error) => {
     logger.error('Watcher error', { error: error.message });
   });
 }
 
 async function restartServer(
-  app: AppCore, 
-  config: GatiConfig, 
+  app: AppCore,
+  config: GatiConfig,
   port: number
 ): Promise<AppCore> {
   await app.close();
-  
+
   // Clear require cache for hot reload
-  Object.keys(require.cache).forEach(key => {
+  Object.keys(require.cache).forEach((key) => {
     if (key.includes(config.handlersDir) || key.includes(config.modulesDir)) {
       delete require.cache[key];
     }
   });
-  
+
   return createApp(config, port);
 }
 
@@ -613,9 +652,10 @@ To engage the Gati Implementation Engineer:
 4. **Mention dependencies:** What this integrates with
 
 **Example:**
+
 ```
-As the Implementation Engineer: Implement the RouteManager class 
-according to specs/runtime/route-manager.md. It should integrate 
+As the Implementation Engineer: Implement the RouteManager class
+according to specs/runtime/route-manager.md. It should integrate
 with HandlerEngine and support version-based routing.
 ```
 

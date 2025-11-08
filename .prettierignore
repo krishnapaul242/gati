@@ -1,0 +1,16 @@
+# Ignore build outputs
+dist
+build
+coverage
+
+# Ignore dependencies
+node_modules
+.pnpm-store
+
+# Ignore generated files
+*.generated.*
+.gati/
+
+# Ignore config files
+pnpm-lock.yaml
+package-lock.json
