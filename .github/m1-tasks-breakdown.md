@@ -34,6 +34,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can build API endpoints for my application
 
 **Tasks:**
+
 - [ ] Implement Request object (req) with HTTP data
 - [ ] Implement Response object (res) with mutation capabilities
 - [ ] Create Global context manager (gctx) for shared resources
@@ -42,11 +43,13 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Implement handler execution flow with error handling
 
 **Files to Create:**
+
 - `src/runtime/handler-engine.ts`
 - `src/runtime/types/request.ts`
 - `src/runtime/types/response.ts`
 
 **Acceptance Criteria:**
+
 - [ ] Handler receives req, res, gctx, lctx parameters
 - [ ] Request object contains HTTP method, path, headers, body
 - [ ] Response object can set status, headers, and body
@@ -67,6 +70,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can organize my business logic efficiently
 
 **Tasks:**
+
 - [ ] Design module interface and lifecycle
 - [ ] Implement module registry for tracking loaded modules
 - [ ] Create dependency injection system
@@ -75,11 +79,13 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Handle module initialization and cleanup
 
 **Files to Create:**
+
 - `src/runtime/module-loader.ts`
 - `src/runtime/types/module.ts`
 - `src/runtime/module-registry.ts`
 
 **Acceptance Criteria:**
+
 - [ ] Modules can be registered and loaded dynamically
 - [ ] Dependencies are injected automatically
 - [ ] Modules execute in isolated contexts
@@ -100,6 +106,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** requests are routed to the correct handlers
 
 **Tasks:**
+
 - [ ] Implement route parser for extracting route definitions
 - [ ] Create HTTP method handlers (GET, POST, PUT, DELETE, PATCH)
 - [ ] Implement path parameter extraction (e.g., `/users/:id`)
@@ -108,11 +115,13 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Add query parameter support
 
 **Files to Create:**
+
 - `src/runtime/route-manager.ts`
 - `src/runtime/router.ts`
 - `src/runtime/types/route.ts`
 
 **Acceptance Criteria:**
+
 - [ ] Routes defined with `GET /path/:param` syntax
 - [ ] Path parameters are correctly extracted
 - [ ] Route matching works for exact and parameterized paths
@@ -134,6 +143,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can maintain state across handlers and per-request
 
 **Tasks:**
+
 - [ ] Design global context (gctx) structure
 - [ ] Design local context (lctx) structure
 - [ ] Implement context lifecycle management
@@ -142,12 +152,14 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Implement context cleanup on request completion
 
 **Files to Create:**
+
 - `src/runtime/context-manager.ts`
 - `src/runtime/types/context.ts`
 - `src/runtime/global-context.ts`
 - `src/runtime/local-context.ts`
 
 **Acceptance Criteria:**
+
 - [ ] Global context provides access to modules, DB, effects
 - [ ] Local context created per request
 - [ ] Context lifecycle manages resources properly
@@ -168,6 +180,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** my application can serve HTTP traffic
 
 **Tasks:**
+
 - [ ] Implement main HTTP server setup
 - [ ] Integrate router with app core
 - [ ] Connect handler engine to routing
@@ -176,11 +189,13 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Add graceful shutdown handling
 
 **Files to Create:**
+
 - `src/runtime/app-core.ts`
 - `src/runtime/server.ts`
 - `src/runtime/middleware.ts`
 
 **Acceptance Criteria:**
+
 - [ ] HTTP server starts and listens on configured port
 - [ ] Requests routed to correct handlers
 - [ ] Handler execution completes end-to-end
@@ -204,6 +219,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can start building my application immediately
 
 **Tasks:**
+
 - [ ] Create CLI entry point and command parser
 - [ ] Design project scaffolding templates
 - [ ] Implement interactive prompts (name, type, etc.)
@@ -213,6 +229,7 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Add README and config files
 
 **Files to Create:**
+
 - `src/cli/index.ts`
 - `src/cli/commands/create.ts`
 - `src/cli/templates/default/`
@@ -220,6 +237,7 @@ Establish the basic handler system and developer tooling to enable local develop
 - `src/cli/utils/file-generator.ts`
 
 **Acceptance Criteria:**
+
 - [ ] `npx gati create my-app` creates new project
 - [ ] Interactive prompts guide the user
 - [ ] Generated project has correct structure
@@ -241,6 +259,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can test my changes quickly
 
 **Tasks:**
+
 - [ ] Implement local development server
 - [ ] Add file watching for hot reload
 - [ ] Support environment variable loading (.env)
@@ -249,11 +268,13 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Configure source map support
 
 **Files to Create:**
+
 - `src/cli/commands/dev.ts`
 - `src/cli/utils/watcher.ts`
 - `src/cli/utils/env-loader.ts`
 
 **Acceptance Criteria:**
+
 - [ ] `gati dev` starts local server successfully
 - [ ] Server starts in <5 seconds
 - [ ] File changes trigger hot reload
@@ -275,6 +296,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can ensure code quality and optimize for deployment
 
 **Tasks:**
+
 - [ ] Implement build validation logic
 - [ ] Add TypeScript type checking
 - [ ] Configure bundle optimization
@@ -283,11 +305,13 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Support build configurations (dev/prod)
 
 **Files to Create:**
+
 - `src/cli/commands/build.ts`
 - `src/cli/utils/validator.ts`
 - `src/cli/utils/bundler.ts`
 
 **Acceptance Criteria:**
+
 - [ ] `gati build` validates the project
 - [ ] TypeScript errors are caught
 - [ ] Production bundle is optimized
@@ -311,6 +335,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** code is well-organized and maintainable
 
 **Tasks:**
+
 - [ ] Create `/src` for source code
 - [ ] Create `/packages` for published packages
 - [ ] Create `/examples` for sample apps
@@ -320,12 +345,14 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Add .gitignore and .npmignore
 
 **Files to Create:**
+
 - Directory structure
 - `.gitignore`
 - `.npmignore`
 - `pnpm-workspace.yaml` or workspace config
 
 **Acceptance Criteria:**
+
 - [ ] All directories created
 - [ ] Folder structure documented
 - [ ] Git ignores build artifacts
@@ -346,6 +373,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I get type safety and good developer experience
 
 **Tasks:**
+
 - [ ] Create root `tsconfig.json`
 - [ ] Configure compiler options
 - [ ] Setup path aliases
@@ -354,11 +382,13 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Setup dev/prod configs if needed
 
 **Files to Create:**
+
 - `tsconfig.json`
 - `tsconfig.build.json` (optional)
 - Update `package.json` with scripts
 
 **Acceptance Criteria:**
+
 - [ ] TypeScript compiles without errors
 - [ ] Path aliases work correctly
 - [ ] Strict mode enabled
@@ -380,6 +410,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can learn how to use Gati
 
 **Tasks:**
+
 - [ ] Create `examples/hello-world` directory
 - [ ] Add sample handler for GET /hello
 - [ ] Create gati.config.ts
@@ -388,12 +419,14 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Add simple module usage example
 
 **Files to Create:**
+
 - `examples/hello-world/src/handlers/hello.ts`
 - `examples/hello-world/gati.config.ts`
 - `examples/hello-world/package.json`
 - `examples/hello-world/README.md`
 
 **Acceptance Criteria:**
+
 - [ ] Example runs with `gati dev`
 - [ ] GET /hello returns "Hello, World!"
 - [ ] Config file properly structured
@@ -417,6 +450,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can build my first application
 
 **Tasks:**
+
 - [ ] Write installation instructions
 - [ ] Create quick start tutorial
 - [ ] Explain project structure
@@ -425,9 +459,11 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Include troubleshooting section
 
 **Files to Create:**
+
 - `docs/getting-started.md`
 
 **Acceptance Criteria:**
+
 - [ ] Installation steps clear and tested
 - [ ] Tutorial takes <15 minutes
 - [ ] New dev can build first app
@@ -449,6 +485,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can build API endpoints
 
 **Tasks:**
+
 - [ ] Document handler anatomy
 - [ ] Explain request/response handling
 - [ ] Show context usage examples
@@ -458,9 +495,11 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Add best practices
 
 **Files to Create:**
+
 - `docs/handlers.md`
 
 **Acceptance Criteria:**
+
 - [ ] Handler signature clearly explained
 - [ ] Multiple working examples
 - [ ] Request/response API documented
@@ -482,6 +521,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can organize my code effectively
 
 **Tasks:**
+
 - [ ] Explain module patterns
 - [ ] Document module lifecycle
 - [ ] Show dependency injection examples
@@ -490,9 +530,11 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Add real-world examples
 
 **Files to Create:**
+
 - `docs/modules.md`
 
 **Acceptance Criteria:**
+
 - [ ] Module creation clear
 - [ ] Lifecycle well explained
 - [ ] Best practices actionable
@@ -514,6 +556,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **So that** I can extend or contribute to the framework
 
 **Tasks:**
+
 - [ ] Document overall architecture
 - [ ] Explain component interactions
 - [ ] Create architecture diagrams
@@ -522,10 +565,12 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Include extension points
 
 **Files to Create:**
+
 - `docs/architecture.md`
 - Architecture diagrams
 
 **Acceptance Criteria:**
+
 - [ ] Architecture clearly explained
 - [ ] Component relationships documented
 - [ ] Visual diagrams included
@@ -543,6 +588,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ## 📅 Weekly Sprint Plan
 
 ### Week 1 (Nov 9-15, 2025)
+
 **Focus:** Foundation Setup & Core Runtime Start
 
 - [x] Story 1.3.1: Setup Monorepo Structure (1d)
@@ -555,6 +601,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 ### Week 2 (Nov 16-22, 2025)
+
 **Focus:** Handler Runtime Core
 
 - [ ] Story 1.1.1: Handler Pipeline - COMPLETE (3d)
@@ -565,6 +612,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 ### Week 3 (Nov 23-29, 2025)
+
 **Focus:** Module System & App Core
 
 - [ ] Story 1.1.2: Module Loader (5d)
@@ -575,6 +623,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 ### Week 4 (Nov 30 - Dec 6, 2025)
+
 **Focus:** Complete Runtime & Start CLI
 
 - [ ] Story 1.1.5: App Core - COMPLETE (3d)
@@ -585,6 +634,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 ### Week 5 (Dec 7-13, 2025)
+
 **Focus:** CLI Commands
 
 - [ ] Story 1.2.2: `gati dev` (3d)
@@ -596,6 +646,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 ### Week 6 (Dec 14-20, 2025)
+
 **Focus:** Documentation Sprint
 
 - [ ] Story 1.4.1: Getting Started Guide (3d)
@@ -607,6 +658,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 ### Week 7-8 (Dec 21 - Jan 3, 2026)
+
 **Focus:** Buffer & Polish
 
 - [ ] Story 1.4.4: Architecture Docs (3d)
@@ -624,9 +676,10 @@ Establish the basic handler system and developer tooling to enable local develop
 **Total User Stories:** 15  
 **Total Tasks:** 90+  
 **Estimated Duration:** 8 weeks (with buffer)  
-**Critical Path:** Epic 1.1 → Epic 1.2 → Documentation  
+**Critical Path:** Epic 1.1 → Epic 1.2 → Documentation
 
 ### Effort Distribution
+
 - **Extra Small (XS):** 1 story (1 day)
 - **Small (S):** 3 stories (5 days)
 - **Medium (M):** 8 stories (22 days)
@@ -635,6 +688,7 @@ Establish the basic handler system and developer tooling to enable local develop
 **Total Estimated Effort:** ~49 working days (realistic: 8 weeks with overhead)
 
 ### Priority Distribution
+
 - **P0 (Critical):** 14 stories
 - **P1 (High):** 1 story
 
@@ -643,6 +697,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ## 🎯 Success Criteria for M1
 
 ### MVP Requirements
+
 - [ ] Developer can run `npx gati create my-app`
 - [ ] Project scaffolding works
 - [ ] Local dev server starts in <5 seconds
@@ -651,6 +706,7 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Documentation covers all basic workflows
 
 ### Quality Gates
+
 - [ ] All TypeScript compiles without errors
 - [ ] Code coverage >80%
 - [ ] All CLI commands functional
@@ -661,13 +717,13 @@ Establish the basic handler system and developer tooling to enable local develop
 
 ## 🚧 Identified Risks
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Context management complexity | High | Medium | Start early, get reviews |
-| Module isolation challenges | High | Medium | Prototype different approaches |
-| CLI UX not intuitive | Medium | High | Early user testing |
-| Documentation incomplete | Medium | Medium | Dedicate full week to docs |
-| Timeline slippage | Medium | High | 2-week buffer included |
+| Risk                          | Impact | Probability | Mitigation                     |
+| ----------------------------- | ------ | ----------- | ------------------------------ |
+| Context management complexity | High   | Medium      | Start early, get reviews       |
+| Module isolation challenges   | High   | Medium      | Prototype different approaches |
+| CLI UX not intuitive          | Medium | High        | Early user testing             |
+| Documentation incomplete      | Medium | Medium      | Dedicate full week to docs     |
+| Timeline slippage             | Medium | High        | 2-week buffer included         |
 
 ---
 

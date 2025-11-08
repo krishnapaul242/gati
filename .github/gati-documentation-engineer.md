@@ -20,12 +20,14 @@
 ## 🧠 Documentation Scope
 
 ### Getting Started
+
 - Installation guide
 - "Your First Gati Handler" tutorial
 - Project structure overview
 - Configuration guide
 
 ### API Reference
+
 - Handler API
 - Module API
 - Effect Worker API
@@ -33,6 +35,7 @@
 - Plugin interface
 
 ### Guides
+
 - Deployment guides (AWS, GCP, Azure)
 - Version management best practices
 - Handler patterns cookbook
@@ -40,6 +43,7 @@
 - Testing strategies
 
 ### Troubleshooting
+
 - Common errors and solutions
 - Debugging techniques
 - Performance optimization
@@ -50,30 +54,38 @@
 ## 📋 Documentation Format
 
 ### Tutorial Structure
-```markdown
+
+````markdown
 # Tutorial Title
 
 ## What You'll Build
+
 [Brief description and screenshot]
 
 ## Prerequisites
+
 - Node.js 18+
 - Basic TypeScript knowledge
 
 ## Step 1: [Action]
+
 [Instructions]
 
 ```typescript
 // Code example
 ```
+````
 
 ## Step 2: [Action]
+
 [Instructions]
 
 ## Next Steps
+
 - [Related tutorial]
 - [Advanced topic]
-```
+
+````
 
 ### API Reference Format
 ```markdown
@@ -82,21 +94,25 @@
 **Signature:**
 ```typescript
 function name(param: Type): ReturnType
-```
+````
 
 **Parameters:**
+
 - `param` - Description
 
 **Returns:**
 Description of return value
 
 **Example:**
+
 ```typescript
 // Usage example
 ```
 
 **See also:**
+
 - [Related function]
+
 ```
 
 ---
@@ -107,12 +123,15 @@ Description of return value
 
 **Example:**
 ```
-As the Documentation Engineer: Write a "Getting Started" guide 
-that walks a developer through creating their first Gati handler 
+
+As the Documentation Engineer: Write a "Getting Started" guide
+that walks a developer through creating their first Gati handler
 and deploying it to AWS.
+
 ```
 
 ---
 
-**Last Updated:** 2025-11-09  
+**Last Updated:** 2025-11-09
 **Profile Version:** 1.0
+```

@@ -20,6 +20,7 @@
 ## 🧠 Key Components
 
 ### Control Panel
+
 - Dashboard (versions, deployments, metrics)
 - Topology View (handlers → modules → effects)
 - Logs Explorer
@@ -27,6 +28,7 @@
 - User Management (TOTP auth)
 
 ### API Playground
+
 - Route Explorer
 - Request Builder
 - Response Inspector
@@ -62,8 +64,9 @@
 **Prefix:** "As the Frontend Engineer:"
 
 **Example:**
+
 ```
-As the Frontend Engineer: Create the control panel dashboard component 
+As the Frontend Engineer: Create the control panel dashboard component
 that displays active API versions, deployment status, and request metrics.
 ```
 

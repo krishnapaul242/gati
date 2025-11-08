@@ -26,19 +26,29 @@ const handler: Handler = (req, res, gctx, lctx) => {
 };
 
 // ❌ DON'T: Use 'any'
-const handler = (req: any, res: any) => { /* ... */ };
+const handler = (req: any, res: any) => {
+  /* ... */
+};
 ```
 
 ### Naming Conventions
 
 ```typescript
 // Interfaces: PascalCase with descriptive names
-interface HandlerContext { /* ... */ }
-interface ModuleRegistry { /* ... */ }
+interface HandlerContext {
+  /* ... */
+}
+interface ModuleRegistry {
+  /* ... */
+}
 
 // Functions: camelCase, verb-first
-function executeHandler() { /* ... */ }
-function registerModule() { /* ... */ }
+function executeHandler() {
+  /* ... */
+}
+function registerModule() {
+  /* ... */
+}
 
 // Constants: UPPER_SNAKE_CASE
 const MAX_RETRIES = 3;
@@ -88,7 +98,9 @@ function createContext(req: Request): Context {
 }
 
 // ❌ AVOID: Classes unless necessary (e.g., errors, complex state)
-class RequestProcessor { /* ... */ }  // Only if truly needed
+class RequestProcessor {
+  /* ... */
+} // Only if truly needed
 ```
 
 ---
@@ -112,10 +124,10 @@ describe('HandlerEngine', () => {
     const res = createMockResponse();
     const gctx = createMockGlobalContext();
     const lctx = createMockLocalContext();
-    
+
     // Act
     await executeHandler(handler, req, res, gctx, lctx);
-    
+
     // Assert
     expect(handler).toHaveBeenCalledWith(req, res, gctx, lctx);
   });
@@ -258,28 +270,30 @@ function validateHandler(handler: unknown): handler is Handler {
 
 ### JSDoc Comments
 
-```typescript
+````typescript
 /**
  * Executes a handler function with the provided request context.
- * 
+ *
  * @param handler - The handler function to execute
  * @param req - HTTP request object
  * @param res - HTTP response object
  * @param gctx - Global context (shared across requests)
  * @param lctx - Local context (request-scoped)
  * @returns Promise that resolves when handler completes
- * 
+ *
  * @throws {HandlerError} If handler validation fails
  * @throws {TimeoutError} If execution exceeds timeout
- * 
+ *
  * @example
  * ```typescript
  * const handler: Handler = (req, res) => res.json({ ok: true });
  * await executeHandler(handler, req, res, gctx, lctx);
  * ```
  */
-export async function executeHandler(/* ... */) { /* ... */ }
-```
+export async function executeHandler(/* ... */) {
+  /* ... */
+}
+````
 
 ### Inline Comments
 
@@ -319,9 +333,9 @@ const comments = await fetchComments(userId);
 // ✅ DO: Clean up resources
 function createContext(): Context {
   const cleanupFns: (() => void)[] = [];
-  
+
   return {
-    cleanup: () => cleanupFns.forEach(fn => fn()),
+    cleanup: () => cleanupFns.forEach((fn) => fn()),
     onCleanup: (fn) => cleanupFns.push(fn),
   };
 }
@@ -385,6 +399,7 @@ catch (error) {
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -425,13 +440,14 @@ Fixes #45
   "typescript": "^5.x",
   "vitest": "^1.x",
   "zod": "^3.x",
-  "pino": "^8.x"  // Logging
+  "pino": "^8.x" // Logging
 }
 ```
 
 ### Adding New Dependencies
 
 Before adding a dependency:
+
 1. Check if functionality can be implemented in ~50 lines
 2. Verify package is actively maintained (updated in last 6 months)
 3. Check bundle size impact
@@ -462,14 +478,14 @@ When working on an issue:
 ```typescript
 export const getUserHandler: Handler = async (req, res, gctx, lctx) => {
   const userId = req.params.id;
-  
+
   // Business logic
   const user = await gctx.modules.db.users.findById(userId);
-  
+
   if (!user) {
     throw new HandlerError('User not found', 404);
   }
-  
+
   res.json({ user });
 };
 ```
@@ -485,9 +501,9 @@ export function registerModule(
   if (gctx.modules.has(name)) {
     throw new Error(`Module ${name} already registered`);
   }
-  
+
   gctx.modules.set(name, module);
-  
+
   // Initialize if needed
   if (module.init) {
     module.init(gctx);
@@ -500,6 +516,7 @@ export function registerModule(
 ## Questions & Clarifications
 
 If requirements are unclear:
+
 1. Check MILESTONES.md for context
 2. Review related issues
 3. Look at examples/ directory
