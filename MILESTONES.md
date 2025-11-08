@@ -8,30 +8,34 @@
 
 ## 📊 Milestone Overview
 
-| Milestone | Quarter | Status | Completion % | Priority |
-|-----------|---------|--------|--------------|----------|
-| M1: Foundation & Core Runtime | Q1 2025 | 🚧 In Progress | 15% | P0 |
-| M2: Cloud Infrastructure & Deployment | Q2 2025 | ⏳ Pending | 0% | P0 |
-| M3: API Versioning & Routing Engine | Q2 2025 | ⏳ Pending | 0% | P0 |
-| M4: Control Panel (Read-Only) | Q3 2025 | ⏳ Pending | 0% | P1 |
-| M5: Code Generation & SDK | Q3 2025 | ⏳ Pending | 0% | P0 |
-| M6: CDN & SSL Automation | Q4 2025 | ⏳ Pending | 0% | P1 |
-| M7: Effects System & API Playground | Q4 2025 | ⏳ Pending | 0% | P1 |
+| Milestone                             | Quarter | Status         | Completion % | Priority |
+| ------------------------------------- | ------- | -------------- | ------------ | -------- |
+| M1: Foundation & Core Runtime         | Q1 2025 | 🚧 In Progress | 15%          | P0       |
+| M2: Cloud Infrastructure & Deployment | Q2 2025 | ⏳ Pending     | 0%           | P0       |
+| M3: API Versioning & Routing Engine   | Q2 2025 | ⏳ Pending     | 0%           | P0       |
+| M4: Control Panel (Read-Only)         | Q3 2025 | ⏳ Pending     | 0%           | P1       |
+| M5: Code Generation & SDK             | Q3 2025 | ⏳ Pending     | 0%           | P0       |
+| M6: CDN & SSL Automation              | Q4 2025 | ⏳ Pending     | 0%           | P1       |
+| M7: Effects System & API Playground   | Q4 2025 | ⏳ Pending     | 0%           | P1       |
 
 **Legend:**
+
 - 🚧 In Progress | ⏳ Pending | ✅ Completed | 🔄 In Review | ❌ Blocked
 
 ---
 
 ## M1: Foundation & Core Runtime
+
 **Target:** Q1 2025 | **Status:** 🚧 In Progress | **Priority:** P0
 
 ### Objective
+
 Establish the basic handler system and developer tooling to enable local development.
 
 ### Deliverables
 
 #### 1.1 Handler & Module Runtime Engine
+
 - [ ] Handler execution pipeline implementation
   - [ ] Request/response objects (req, res)
   - [ ] Global context manager (gctx)
@@ -49,6 +53,7 @@ Establish the basic handler system and developer tooling to enable local develop
   - [ ] Shared state handling
 
 **Files to Create:**
+
 - `src/runtime/app-core.ts`
 - `src/runtime/route-manager.ts`
 - `src/runtime/handler-engine.ts`
@@ -60,6 +65,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 #### 1.2 CLI Foundation
+
 - [ ] `gati create` command
   - [ ] Project scaffolding templates
   - [ ] Interactive prompts
@@ -74,6 +80,7 @@ Establish the basic handler system and developer tooling to enable local develop
   - [ ] Bundle optimization
 
 **Files to Create:**
+
 - `src/cli/index.ts`
 - `src/cli/commands/create.ts`
 - `src/cli/commands/dev.ts`
@@ -85,6 +92,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 #### 1.3 Project Structure & Boilerplate
+
 - [ ] Monorepo setup
   - [ ] `/src` - Source code
   - [ ] `/packages` - Published packages
@@ -101,6 +109,7 @@ Establish the basic handler system and developer tooling to enable local develop
   - [ ] Configuration examples
 
 **Files to Create:**
+
 - `tsconfig.json`
 - `package.json`
 - `examples/hello-world/src/handlers/hello.ts`
@@ -111,6 +120,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 #### 1.4 Developer Documentation
+
 - [ ] Getting started guide
   - [ ] Installation instructions
   - [ ] Quick start tutorial
@@ -125,6 +135,7 @@ Establish the basic handler system and developer tooling to enable local develop
   - [ ] Testing strategies
 
 **Files to Create:**
+
 - `docs/getting-started.md`
 - `docs/handlers.md`
 - `docs/modules.md`
@@ -135,6 +146,7 @@ Establish the basic handler system and developer tooling to enable local develop
 ---
 
 ### Success Criteria
+
 - [ ] Developer can run `npx gati create my-app` successfully
 - [ ] Local dev server starts in <5 seconds
 - [ ] Handler execution works end-to-end
@@ -142,19 +154,23 @@ Establish the basic handler system and developer tooling to enable local develop
 - [ ] Documentation covers all basic workflows
 
 ### Blockers
+
 None currently identified.
 
 ---
 
 ## M2: Cloud Infrastructure & Deployment
+
 **Target:** Q2 2025 | **Status:** ⏳ Pending | **Priority:** P0
 
 ### Objective
+
 Enable production deployment with Kubernetes and AWS cloud provider.
 
 ### Deliverables
 
 #### 2.1 Kubernetes Deployment Engine
+
 - [ ] Container orchestration setup
   - [ ] Dockerfile generation
   - [ ] Kubernetes manifest templates
@@ -173,6 +189,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
   - [ ] Network policies
 
 **Files to Create:**
+
 - `src/runtime/deployment/kubernetes.ts`
 - `src/runtime/deployment/templates/deployment.yaml`
 - `src/runtime/deployment/templates/service.yaml`
@@ -183,6 +200,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
 ---
 
 #### 2.2 AWS Cloud Plugin
+
 - [ ] EKS deployment automation
   - [ ] Cluster provisioning
   - [ ] Node group configuration
@@ -201,6 +219,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
   - [ ] ConfigMap generation
 
 **Files to Create:**
+
 - `src/plugins/aws/index.ts`
 - `src/plugins/aws/eks.ts`
 - `src/plugins/aws/networking.ts`
@@ -212,6 +231,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
 ---
 
 #### 2.3 CLI Deployment Commands
+
 - [ ] `gati deploy [env]` command
   - [ ] Environment selection
   - [ ] Pre-deployment validation
@@ -227,6 +247,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
   - [ ] Version history
 
 **Files to Create:**
+
 - `src/cli/commands/deploy.ts`
 - `src/cli/config/environment.ts`
 - `src/cli/validation/deployment-validator.ts`
@@ -236,6 +257,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
 ---
 
 #### 2.4 Infrastructure Documentation
+
 - [ ] Deployment architecture guide
   - [ ] Architecture diagrams
   - [ ] Component responsibilities
@@ -250,6 +272,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
   - [ ] Support resources
 
 **Files to Create:**
+
 - `docs/deployment-architecture.md`
 - `docs/aws-setup.md`
 - `docs/troubleshooting.md`
@@ -259,6 +282,7 @@ Enable production deployment with Kubernetes and AWS cloud provider.
 ---
 
 ### Success Criteria
+
 - [ ] Application deploys to EKS successfully
 - [ ] Auto-scaling triggers correctly
 - [ ] Health checks pass consistently
@@ -266,19 +290,23 @@ Enable production deployment with Kubernetes and AWS cloud provider.
 - [ ] Rollback works in <2 minutes
 
 ### Blockers
+
 None currently identified.
 
 ---
 
 ## M3: API Versioning & Routing Engine
+
 **Target:** Q2 2025 | **Status:** ⏳ Pending | **Priority:** P0
 
 ### Objective
+
 Implement backward-compatible versioned APIs with timestamp routing.
 
 ### Deliverables
 
 #### 3.1 Version Diff Analyzer
+
 - [ ] Handler signature comparison
   - [ ] TypeScript AST parsing
   - [ ] Signature extraction
@@ -297,6 +325,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
   - [ ] Retrieval system
 
 **Files to Create:**
+
 - `src/codegen/analyzer.ts`
 - `src/codegen/version-diff.ts`
 - `src/codegen/semver-detector.ts`
@@ -307,6 +336,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
 ---
 
 #### 3.2 Timestamp-Based Routing
+
 - [ ] `X-API-Version` header parsing
   - [ ] Header validation
   - [ ] Timestamp format support (ISO 8601)
@@ -325,6 +355,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
   - [ ] Request routing logic
 
 **Files to Create:**
+
 - `src/runtime/version-router.ts`
 - `src/runtime/version-resolver.ts`
 - `src/runtime/handlers/versions.ts`
@@ -334,6 +365,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
 ---
 
 #### 3.3 Version Management System
+
 - [ ] Deployment history tracking
   - [ ] Deployment metadata storage
   - [ ] Version timeline
@@ -348,6 +380,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
   - [ ] Client notifications
 
 **Files to Create:**
+
 - `src/runtime/version-manager.ts`
 - `src/cli/commands/version.ts`
 - `src/runtime/deprecation.ts`
@@ -357,6 +390,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
 ---
 
 #### 3.4 Versioning Documentation
+
 - [ ] Versioning strategy guide
   - [ ] Semantic versioning explanation
   - [ ] Timestamp routing usage
@@ -371,6 +405,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
   - [ ] Testing approaches
 
 **Files to Create:**
+
 - `docs/versioning.md`
 - `docs/client-integration.md`
 - `docs/migration-guide.md`
@@ -380,6 +415,7 @@ Implement backward-compatible versioned APIs with timestamp routing.
 ---
 
 ### Success Criteria
+
 - [ ] Timestamp routing works with 99.9% accuracy
 - [ ] Version resolution <10ms
 - [ ] Backward compatibility maintained across versions
@@ -387,19 +423,23 @@ Implement backward-compatible versioned APIs with timestamp routing.
 - [ ] Documentation covers all use cases
 
 ### Blockers
+
 None currently identified.
 
 ---
 
 ## M4: Control Panel (Read-Only)
+
 **Target:** Q3 2025 | **Status:** ⏳ Pending | **Priority:** P1
 
 ### Objective
+
 Provide visibility into deployed applications with monitoring dashboard.
 
 ### Deliverables
 
 #### 4.1 Admin UI Foundation
+
 - [ ] Next.js + tRPC setup
   - [ ] Project scaffolding
   - [ ] tRPC router configuration
@@ -418,6 +458,7 @@ Provide visibility into deployed applications with monitoring dashboard.
   - [ ] Proxy setup
 
 **Files to Create:**
+
 - `src/control-panel/app/`
 - `src/control-panel/server/`
 - `src/control-panel/auth/`
@@ -428,6 +469,7 @@ Provide visibility into deployed applications with monitoring dashboard.
 ---
 
 #### 4.2 Monitoring & Observability
+
 - [ ] Deployment topology visualization
   - [ ] Service graph
   - [ ] Dependency mapping
@@ -446,6 +488,7 @@ Provide visibility into deployed applications with monitoring dashboard.
   - [ ] Alert visualization
 
 **Files to Create:**
+
 - `src/control-panel/components/topology.tsx`
 - `src/control-panel/components/logs.tsx`
 - `src/control-panel/components/metrics.tsx`
@@ -457,6 +500,7 @@ Provide visibility into deployed applications with monitoring dashboard.
 ---
 
 #### 4.3 Read-Only Operations
+
 - [ ] View deployments and versions
   - [ ] Deployment list
   - [ ] Version details
@@ -475,6 +519,7 @@ Provide visibility into deployed applications with monitoring dashboard.
   - [ ] Request rates
 
 **Files to Create:**
+
 - `src/control-panel/components/deployments.tsx`
 - `src/control-panel/components/config-viewer.tsx`
 - `src/control-panel/components/scaling.tsx`
@@ -484,6 +529,7 @@ Provide visibility into deployed applications with monitoring dashboard.
 ---
 
 #### 4.4 Control Panel Documentation
+
 - [ ] Admin UI user guide
   - [ ] Navigation guide
   - [ ] Feature overview
@@ -498,6 +544,7 @@ Provide visibility into deployed applications with monitoring dashboard.
   - [ ] Custom metrics
 
 **Files to Create:**
+
 - `docs/control-panel-guide.md`
 - `docs/auth-setup.md`
 - `docs/monitoring-integration.md`
@@ -507,6 +554,7 @@ Provide visibility into deployed applications with monitoring dashboard.
 ---
 
 ### Success Criteria
+
 - [ ] Control panel accessible at `/_control`
 - [ ] Authentication works with WebAuthn and TOTP
 - [ ] Logs visible with <1s latency
@@ -514,19 +562,23 @@ Provide visibility into deployed applications with monitoring dashboard.
 - [ ] 100% read-only (no mutations)
 
 ### Blockers
+
 None currently identified.
 
 ---
 
 ## M5: Code Generation & SDK
+
 **Target:** Q3 2025 | **Status:** ⏳ Pending | **Priority:** P0
 
 ### Objective
+
 Auto-generate typed client SDKs from handler signatures.
 
 ### Deliverables
 
 #### 5.1 Handler Analyzer
+
 - [ ] TypeScript AST parsing
   - [ ] Source code parsing
   - [ ] Type extraction
@@ -545,6 +597,7 @@ Auto-generate typed client SDKs from handler signatures.
   - [ ] Cross-handler references
 
 **Files to Create:**
+
 - `src/codegen/analyzer.ts`
 - `src/codegen/ast-parser.ts`
 - `src/codegen/type-extractor.ts`
@@ -555,6 +608,7 @@ Auto-generate typed client SDKs from handler signatures.
 ---
 
 #### 5.2 SDK Generator
+
 - [ ] `gati generate` CLI command
   - [ ] Command implementation
   - [ ] Options and flags
@@ -573,6 +627,7 @@ Auto-generate typed client SDKs from handler signatures.
   - [ ] Module types
 
 **Files to Create:**
+
 - `src/cli/commands/generate.ts`
 - `src/codegen/generator.ts`
 - `src/codegen/templates/client.ts.ejs`
@@ -583,6 +638,7 @@ Auto-generate typed client SDKs from handler signatures.
 ---
 
 #### 5.3 Publishable SDK Package
+
 - [ ] `.gati/generated/client.ts`
   - [ ] Client implementation
   - [ ] Type exports
@@ -601,6 +657,7 @@ Auto-generate typed client SDKs from handler signatures.
   - [ ] Automated publishing
 
 **Files to Create:**
+
 - `src/codegen/package-builder.ts`
 - `src/codegen/templates/package.json.ejs`
 - `src/codegen/templates/README.md.ejs`
@@ -610,6 +667,7 @@ Auto-generate typed client SDKs from handler signatures.
 ---
 
 #### 5.4 Codegen Documentation
+
 - [ ] SDK generation guide
   - [ ] Generation workflow
   - [ ] Configuration options
@@ -624,6 +682,7 @@ Auto-generate typed client SDKs from handler signatures.
   - [ ] Type safety guarantees
 
 **Files to Create:**
+
 - `docs/sdk-generation.md`
 - `docs/client-usage.md`
 - `docs/type-system.md`
@@ -633,6 +692,7 @@ Auto-generate typed client SDKs from handler signatures.
 ---
 
 ### Success Criteria
+
 - [ ] `gati generate` completes in <200ms per route
 - [ ] Generated SDK is fully typed
 - [ ] SDK package is publishable to NPM
@@ -640,19 +700,23 @@ Auto-generate typed client SDKs from handler signatures.
 - [ ] Version-aware requests work correctly
 
 ### Blockers
+
 None currently identified.
 
 ---
 
 ## M6: CDN & SSL Automation
+
 **Target:** Q4 2025 | **Status:** ⏳ Pending | **Priority:** P1
 
 ### Objective
+
 Production-ready edge infrastructure with global distribution.
 
 ### Deliverables
 
 #### 6.1 Multi-Cloud CDN Integration
+
 - [ ] CloudFront (AWS) setup
   - [ ] Distribution creation
   - [ ] Origin configuration
@@ -671,6 +735,7 @@ Production-ready edge infrastructure with global distribution.
   - [ ] Plugin lifecycle
 
 **Files to Create:**
+
 - `src/plugins/cdn/cloudfront.ts`
 - `src/plugins/cdn/cloud-cdn.ts`
 - `src/plugins/cdn/azure-frontdoor.ts`
@@ -682,6 +747,7 @@ Production-ready edge infrastructure with global distribution.
 ---
 
 #### 6.2 Automatic SSL Provisioning
+
 - [ ] ACM integration
   - [ ] Certificate request
   - [ ] DNS validation
@@ -700,6 +766,7 @@ Production-ready edge infrastructure with global distribution.
   - [ ] Domain validation
 
 **Files to Create:**
+
 - `src/plugins/ssl/acm.ts`
 - `src/plugins/ssl/letsencrypt.ts`
 - `src/plugins/ssl/renewal.ts`
@@ -710,6 +777,7 @@ Production-ready edge infrastructure with global distribution.
 ---
 
 #### 6.3 Global Distribution
+
 - [ ] Multi-region deployment
   - [ ] Region selection
   - [ ] Deployment orchestration
@@ -728,6 +796,7 @@ Production-ready edge infrastructure with global distribution.
   - [ ] TTL configuration
 
 **Files to Create:**
+
 - `src/runtime/deployment/multi-region.ts`
 - `src/runtime/deployment/geo-routing.ts`
 - `src/runtime/deployment/failover.ts`
@@ -738,6 +807,7 @@ Production-ready edge infrastructure with global distribution.
 ---
 
 #### 6.4 CDN Documentation
+
 - [ ] CDN configuration guide
   - [ ] Provider selection
   - [ ] Configuration options
@@ -752,6 +822,7 @@ Production-ready edge infrastructure with global distribution.
   - [ ] Edge function usage
 
 **Files to Create:**
+
 - `docs/cdn-configuration.md`
 - `docs/ssl-setup.md`
 - `docs/performance-optimization.md`
@@ -761,6 +832,7 @@ Production-ready edge infrastructure with global distribution.
 ---
 
 ### Success Criteria
+
 - [ ] CDN setup completes in <5 minutes
 - [ ] SSL certificates auto-provision
 - [ ] Regional failover <30s
@@ -768,19 +840,23 @@ Production-ready edge infrastructure with global distribution.
 - [ ] Global latency <100ms (p95)
 
 ### Blockers
+
 None currently identified.
 
 ---
 
 ## M7: Effects System & API Playground
+
 **Target:** Q4 2025 | **Status:** ⏳ Pending | **Priority:** P1
 
 ### Objective
+
 Async task processing and interactive API testing capabilities.
 
 ### Deliverables
 
 #### 7.1 Effect Worker System
+
 - [ ] Effect queue implementation
   - [ ] Queue interface
   - [ ] Message serialization
@@ -799,6 +875,7 @@ Async task processing and interactive API testing capabilities.
   - [ ] Manual retry
 
 **Files to Create:**
+
 - `src/runtime/effect-worker.ts`
 - `src/runtime/queue/queue-interface.ts`
 - `src/runtime/queue/worker-pool.ts`
@@ -809,6 +886,7 @@ Async task processing and interactive API testing capabilities.
 ---
 
 #### 7.2 Cloud Queue Integration
+
 - [ ] SQS (AWS) adapter
   - [ ] Queue creation
   - [ ] Message send/receive
@@ -827,6 +905,7 @@ Async task processing and interactive API testing capabilities.
   - [ ] Local dev queue
 
 **Files to Create:**
+
 - `src/plugins/queue/sqs.ts`
 - `src/plugins/queue/pubsub.ts`
 - `src/plugins/queue/azure-queue.ts`
@@ -838,6 +917,7 @@ Async task processing and interactive API testing capabilities.
 ---
 
 #### 7.3 API Playground
+
 - [ ] Route explorer UI
   - [ ] Route tree view
   - [ ] Route details
@@ -864,6 +944,7 @@ Async task processing and interactive API testing capabilities.
   - [ ] Collection export
 
 **Files to Create:**
+
 - `src/playground/app/`
 - `src/playground/components/route-explorer.tsx`
 - `src/playground/components/request-builder.tsx`
@@ -875,6 +956,7 @@ Async task processing and interactive API testing capabilities.
 ---
 
 #### 7.4 Testing Documentation
+
 - [ ] Effect system guide
   - [ ] Queue configuration
   - [ ] Worker setup
@@ -889,6 +971,7 @@ Async task processing and interactive API testing capabilities.
   - [ ] CI/CD integration
 
 **Files to Create:**
+
 - `docs/effects-system.md`
 - `docs/playground-guide.md`
 - `docs/integration-testing.md`
@@ -898,6 +981,7 @@ Async task processing and interactive API testing capabilities.
 ---
 
 ### Success Criteria
+
 - [ ] Effects queue and process asynchronously
 - [ ] Worker retries work correctly
 - [ ] Playground loads all routes
@@ -905,6 +989,7 @@ Async task processing and interactive API testing capabilities.
 - [ ] Export to tests functional
 
 ### Blockers
+
 None currently identified.
 
 ---
@@ -912,6 +997,7 @@ None currently identified.
 ## 🌐 Cross-Cutting Deliverables
 
 ### Community & Open Source
+
 **Timeline:** Ongoing | **Priority:** P1
 
 - [ ] `CONTRIBUTING.md` guide
@@ -923,6 +1009,7 @@ None currently identified.
 - [ ] Contributor recognition system
 
 **Files to Create:**
+
 - `CONTRIBUTING.md`
 - `.github/ISSUE_TEMPLATE/`
 - `.github/PULL_REQUEST_TEMPLATE.md`
@@ -931,6 +1018,7 @@ None currently identified.
 ---
 
 ### Additional Cloud Providers
+
 **Timeline:** Q2-Q4 | **Priority:** P2
 
 - [ ] `@gati/cloud-gcp` package (Q2-Q3)
@@ -947,6 +1035,7 @@ None currently identified.
   - [ ] Example provider
 
 **Files to Create:**
+
 - `src/plugins/gcp/`
 - `src/plugins/azure/`
 - `src/plugins/custom-template/`
@@ -956,6 +1045,7 @@ None currently identified.
 ---
 
 ### Quality Assurance
+
 **Timeline:** Ongoing | **Priority:** P0
 
 - [ ] E2E test suite
@@ -977,6 +1067,7 @@ None currently identified.
   - [ ] Penetration testing
 
 **Files to Create:**
+
 - `tests/e2e/`
 - `tests/integration/`
 - `tests/benchmarks/`
@@ -985,6 +1076,7 @@ None currently identified.
 ---
 
 ### Package Publishing
+
 **Timeline:** Per Milestone | **Priority:** P0
 
 - [ ] `@gati/core` - Main framework (M1)
@@ -996,6 +1088,7 @@ None currently identified.
 - [ ] `@gati/queue` - Queue adapters (M7)
 
 **Files to Create:**
+
 - `packages/@gati/core/package.json`
 - `packages/@gati/aws/package.json`
 - `packages/@gati/sdk/package.json`
@@ -1005,16 +1098,16 @@ None currently identified.
 
 ## 📈 Success Metrics & KPIs
 
-| Metric | Target | Measurement Point | Owner |
-|--------|--------|-------------------|-------|
-| Dev setup time | ≤5 min | M1 completion | Engineering |
-| No-downtime deploy | Every version | M2-M3 | DevOps |
-| Auto-generated types | <200ms per route | M5 | Engineering |
-| Regional failover | ≤30s | M6 | Infrastructure |
-| Logs/metrics coverage | 100% | M4 | Observability |
-| Test coverage | >80% | All milestones | QA |
-| Documentation coverage | 100% of features | All milestones | Tech Writing |
-| Community engagement | 100+ stars by Q4 | Ongoing | Community |
+| Metric                 | Target           | Measurement Point | Owner          |
+| ---------------------- | ---------------- | ----------------- | -------------- |
+| Dev setup time         | ≤5 min           | M1 completion     | Engineering    |
+| No-downtime deploy     | Every version    | M2-M3             | DevOps         |
+| Auto-generated types   | <200ms per route | M5                | Engineering    |
+| Regional failover      | ≤30s             | M6                | Infrastructure |
+| Logs/metrics coverage  | 100%             | M4                | Observability  |
+| Test coverage          | >80%             | All milestones    | QA             |
+| Documentation coverage | 100% of features | All milestones    | Tech Writing   |
+| Community engagement   | 100+ stars by Q4 | Ongoing           | Community      |
 
 ---
 
@@ -1022,28 +1115,28 @@ None currently identified.
 
 ### Technical Risks
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| K8s complexity | High | Medium | Start with simple deployment, iterate |
-| Version routing performance | High | Medium | Implement caching, benchmark early |
-| Multi-cloud abstraction leaks | Medium | High | Keep plugin interface simple |
-| SDK generation accuracy | High | Medium | Extensive testing with real handlers |
+| Risk                          | Impact | Probability | Mitigation                            |
+| ----------------------------- | ------ | ----------- | ------------------------------------- |
+| K8s complexity                | High   | Medium      | Start with simple deployment, iterate |
+| Version routing performance   | High   | Medium      | Implement caching, benchmark early    |
+| Multi-cloud abstraction leaks | Medium | High        | Keep plugin interface simple          |
+| SDK generation accuracy       | High   | Medium      | Extensive testing with real handlers  |
 
 ### Resource Risks
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Solo developer bandwidth | High | High | Community contributions, clear docs |
-| Cloud costs during testing | Medium | Medium | Use free tiers, local K8s (minikube) |
-| Third-party API changes | Low | Medium | Version lock dependencies |
+| Risk                       | Impact | Probability | Mitigation                           |
+| -------------------------- | ------ | ----------- | ------------------------------------ |
+| Solo developer bandwidth   | High   | High        | Community contributions, clear docs  |
+| Cloud costs during testing | Medium | Medium      | Use free tiers, local K8s (minikube) |
+| Third-party API changes    | Low    | Medium      | Version lock dependencies            |
 
 ---
 
 ## 📝 Change Log
 
-| Date | Milestone | Change | Author |
-|------|-----------|--------|--------|
-| 2025-11-09 | All | Initial milestone breakdown | Krishna Paul |
+| Date       | Milestone | Change                      | Author       |
+| ---------- | --------- | --------------------------- | ------------ |
+| 2025-11-09 | All       | Initial milestone breakdown | Krishna Paul |
 
 ---
 
@@ -1057,6 +1150,7 @@ None currently identified.
 ---
 
 **Note for AI Agents:**
+
 - This document uses checkboxes `[ ]` to track completion
 - Each deliverable has clear file paths for implementation
 - Dependencies are explicitly listed

@@ -50,9 +50,11 @@ Always update `MILESTONES.md` when:
 
 ```markdown
 Before:
+
 - [ ] Handler execution pipeline implementation
 
 After completing work:
+
 - [x] Handler execution pipeline implementation
   - [x] Request/response objects (req, res)
   - [x] Global context manager (gctx)
@@ -104,6 +106,7 @@ After completing work:
 **Milestone 1 is in progress (15% complete)**
 
 Highest priority deliverables:
+
 1. M1.1: Handler & Module Runtime Engine
 2. M1.2: CLI Foundation
 3. M1.3: Project Structure & Boilerplate
@@ -131,6 +134,7 @@ Only mark a task complete when:
 ### Updating Completion Percentages
 
 Calculate based on checkboxes:
+
 ```
 Completion % = (Completed checkboxes / Total checkboxes) × 100
 ```
@@ -158,7 +162,7 @@ export async function handler(req, res, gctx, lctx) {
 // Location: src/runtime/modules/example.ts
 export class ExampleModule {
   constructor(private db: Database) {}
-  
+
   async doSomething() {
     // Stateless, reusable logic
   }
@@ -198,6 +202,7 @@ M6 (CDN) + M7 (Effects)
 Within a milestone, some deliverables depend on others:
 
 Example from M1:
+
 - 1.4 (Documentation) depends on 1.1, 1.2, 1.3
 - Complete foundation before documentation
 
@@ -235,7 +240,7 @@ tests/
 ```typescript
 /**
  * Brief description of function
- * 
+ *
  * @param req - HTTP request object
  * @param res - HTTP response object
  * @returns Promise resolving to response
@@ -245,6 +250,7 @@ tests/
 ### Documentation Files
 
 Every major feature needs:
+
 - **User guide**: How to use it
 - **API reference**: Technical details
 - **Examples**: Code samples
@@ -268,6 +274,7 @@ Update `MILESTONES.md`:
 
 ```markdown
 ### Blockers
+
 - [2025-11-09] Cannot implement X because Y is not defined
 - Need clarification on Z before proceeding
 ```
@@ -279,9 +286,9 @@ Update `MILESTONES.md`:
 After completing significant work, update the change log in `MILESTONES.md`:
 
 ```markdown
-| Date | Milestone | Change | Author |
-|------|-----------|--------|--------|
-| 2025-11-09 | M1 | Completed handler runtime engine | AI Agent |
+| Date       | Milestone | Change                           | Author   |
+| ---------- | --------- | -------------------------------- | -------- |
+| 2025-11-09 | M1        | Completed handler runtime engine | AI Agent |
 ```
 
 ---
@@ -297,7 +304,7 @@ After completing significant work, update the change log in `MILESTONES.md`:
 ✅ Ask for clarification when requirements are ambiguous  
 ✅ Reference PRD for architectural decisions  
 ✅ Keep changes focused on one deliverable at a time  
-✅ Update completion percentages regularly  
+✅ Update completion percentages regularly
 
 ### DON'T:
 
@@ -308,13 +315,14 @@ After completing significant work, update the change log in `MILESTONES.md`:
 ❌ Work on multiple milestones simultaneously  
 ❌ Ignore dependencies  
 ❌ Assume implementation details not in docs  
-❌ Create features not in milestones  
+❌ Create features not in milestones
 
 ---
 
 ## 🎯 Quick Reference Commands
 
 ### Check Current Status
+
 ```bash
 # View milestone overview
 cat MILESTONES.md | grep "M1:"
@@ -324,12 +332,14 @@ cat MILESTONES.md | grep "Completion %"
 ```
 
 ### Find What to Work On
+
 ```bash
 # Find incomplete tasks in M1
 cat MILESTONES.md | grep -A 100 "M1:" | grep "- \[ \]"
 ```
 
 ### Update Task Status
+
 ```bash
 # Use your preferred editor to update MILESTONES.md
 # Change [ ] to [x] for completed tasks

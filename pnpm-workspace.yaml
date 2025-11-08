@@ -1,0 +1,12 @@
+# pnpm workspace configuration
+# https://pnpm.io/workspaces
+
+packages:
+  # Core framework packages
+  - 'packages/*'
+  
+  # Example applications
+  - 'examples/*'
+  
+  # Main source (if published as @gati/core)
+  - 'src'

@@ -1,0 +1,56 @@
+# Source files
+src/
+tests/
+examples/
+
+# Configuration files
+.github/
+.vscode/
+tsconfig.json
+tsconfig.build.json
+vitest.config.ts
+.eslintrc.js
+.prettierrc
+
+# Documentation (keep only essential)
+docs/
+*.md
+!README.md
+!LICENSE
+!CHANGELOG.md
+
+# Development files
+.env
+.env.*
+*.log
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Tests
+coverage/
+.nyc_output/
+*.test.ts
+*.spec.ts
+__tests__/
+
+# Build artifacts (keep dist/)
+node_modules/
+.pnpm-store/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
