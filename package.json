@@ -31,7 +31,11 @@
     "packages/*",
     "examples/*"
   ],
+  "bin": {
+    "gati": "./dist/cli/index.js"
+  },
   "scripts": {
+    "cli": "tsx src/cli/index.ts",
     "dev": "pnpm --filter @gati/core dev",
     "build": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch",
@@ -52,7 +56,10 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@types/chokidar": "^2.1.7",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.10.0",
+    "@types/prompts": "^2.4.9",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
     "@vitest/coverage-v8": "^1.0.0",
@@ -69,5 +76,14 @@
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.11.0"
+  "packageManager": "pnpm@8.11.0",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "chokidar": "^4.0.3",
+    "commander": "^14.0.2",
+    "dotenv": "^17.2.3",
+    "fs-extra": "^11.3.2",
+    "ora": "^9.0.0",
+    "prompts": "^2.4.2"
+  }
 }
