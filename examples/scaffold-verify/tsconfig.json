@@ -1,11 +1,13 @@
 {
-  "extends": "@gati-framework/core/tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@gati-framework/runtime": ["../../packages/runtime/src/index.ts"],
+      "@gati-framework/core": ["../../packages/core/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

@@ -48,7 +48,7 @@
       "@/*": ["./src/*"],
       "@gati-framework/core": ["./packages/core/src/index.ts"],
       "@gati/cli": ["./packages/cli/src/index.ts"],
-      "@gati/types": ["./src/runtime/types/index.ts"]
+      "@gati-framework/runtime": ["./packages/runtime/src/index.ts"]
     },
 
     // Advanced
@@ -56,6 +56,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "packages/core/src/**/*",
+    "packages/cli/src/**/*",
+    "packages/runtime/src/**/*"
+  ],
   "exclude": ["node_modules", "dist", "build"]
 }

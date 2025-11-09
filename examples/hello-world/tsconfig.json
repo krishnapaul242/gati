@@ -2,16 +2,18 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../../src/*"]
+      "@/*": ["src/*"],
+      "@gati-framework/runtime": ["../../packages/runtime/src/index.ts"],
+      "@gati-framework/core": ["../../packages/core/src/index.ts"]
     },
     "noPropertyAccessFromIndexSignature": false
   },
   "include": [
     "src/**/*",
-    "gati.config.ts",
-    "../../src/**/*"
+    "gati.config.ts"
   ],
   "exclude": [
     "node_modules",
