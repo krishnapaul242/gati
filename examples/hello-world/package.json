@@ -1,0 +1,30 @@
+{
+  "name": "@gati/hello-world-example",
+  "version": "1.0.0",
+  "description": "Hello World example application for Gati framework",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "gati dev",
+    "build": "gati build",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "gati",
+    "example",
+    "hello-world",
+    "typescript"
+  ],
+  "author": "Krishna Paul",
+  "license": "MIT",
+  "dependencies": {
+    "gati": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

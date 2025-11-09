@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../../src/*"]
+    },
+    "noPropertyAccessFromIndexSignature": false
+  },
+  "include": [
+    "src/**/*",
+    "gati.config.ts",
+    "../../src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
