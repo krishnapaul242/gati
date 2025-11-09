@@ -116,10 +116,10 @@ export default defineConfig({
         {
           text: 'CLI',
           items: [
-            { text: 'npx @gati-framework/cli create', link: '/api/cli-create' },
-            { text: 'npx @gati-framework/cli dev', link: '/api/cli-dev' },
-            { text: 'npx @gati-framework/cli build', link: '/api/cli-build' },
-            { text: 'npx @gati-framework/cli deploy', link: '/api/cli-deploy' }
+            { text: 'gatic create', link: '/api/cli-create' },
+            { text: 'gatic dev', link: '/api/cli-dev' },
+            { text: 'gatic build', link: '/api/cli-build' },
+            { text: 'gatic deploy', link: '/api/cli-deploy' }
           ]
         }
       ],

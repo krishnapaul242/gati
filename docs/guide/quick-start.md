@@ -20,11 +20,11 @@ A simple **Task API** with:
 ## Step 1: Create Project (30 seconds)
 
 ```bash
-# Run the Gati CLI via npx (recommended)
-npx @gati-framework/cli --help
+# Use the Gati CLI
+gatic --help
 
 # Create new project
-npx @gati-framework/cli create task-api
+gatic create task-api
 
 # Navigate to project
 cd task-api
@@ -266,7 +266,7 @@ export default {
 ```bash
 npm run dev
 # or
-npx @gati-framework/cli dev
+gatic dev
 ```
 
 You'll see:
@@ -361,7 +361,7 @@ export const handler: Handler = (req, res, gctx, lctx) => {
 ```bash
 npm run build
 # or
-npx @gati-framework/cli build
+gatic build
 ```
 
 Gati validates your project and compiles TypeScript:
@@ -444,7 +444,7 @@ export const handler: Handler = [requireAuth, async (req, res) => {
 ### Deploy to Production
 
 ```bash
-npx @gati-framework/cli deploy prod
+gatic deploy prod
 ```
 
 See the [Deployment Guide](/guide/kubernetes) for details.
