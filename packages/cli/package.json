@@ -1,11 +1,12 @@
 {
   "name": "@gati-framework/cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "CLI tool for Gati framework - create, develop, build and deploy cloud-native applications",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "gati": "./dist/index.js"
+    "gati": "./dist/index.js",        
+    "gatic": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
