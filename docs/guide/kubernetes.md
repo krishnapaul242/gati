@@ -14,13 +14,13 @@ Gati generates production-ready Kubernetes manifests automatically.
 
 ```bash
 # Generate manifests
-gati deploy dev --dry-run
+npx @gati-framework/cli deploy dev --dry-run
 
 # Deploy to local cluster
-gati deploy dev --local
+npx @gati-framework/cli deploy dev --local
 
 # Deploy to production
-gati deploy prod
+npx @gati-framework/cli deploy prod
 ```
 
 ## Generated Manifests

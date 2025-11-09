@@ -38,26 +38,20 @@ npm install -g pnpm
 
 ### Option 1: Using the CLI (Recommended)
 
-Install the Gati CLI globally:
+Use the CLI via npx (no global install required):
 
 ```bash
-pnpm install -g gati
-# or
-npm install -g gati
-```
-
-Create a new project:
-
-```bash
-gati create my-app
+npx @gati-framework/cli create my-app
 cd my-app
 ```
 
-The CLI will:
-- Create a new project directory
-- Set up the project structure
-- Install dependencies
-- Initialize a basic configuration
+Why npx?
+
+- Avoids collision with any other globally installed `gati` binary
+- Always uses the latest published version
+- No need to manage global upgrades
+
+> Note: A different open-source project currently publishes a global `gati` binary. To avoid any namespace collision we recommend using the scoped package via `npx @gati-framework/cli <command>` until we publish a distinct standalone binary name.
 
 ### Option 2: Clone the Hello World Example
 
@@ -74,7 +68,7 @@ Let's build your first Gati application in under 15 minutes!
 ### Step 1: Create a New Project
 
 ```bash
-gati create my-first-app
+npx @gati-framework/cli create my-first-app
 cd my-first-app
 pnpm install
 ```
@@ -83,7 +77,7 @@ pnpm install
 
 Your new project looks like this:
 
-```
+```text
 my-first-app/
 ├── src/
 │   ├── handlers/          # Request handlers
@@ -113,6 +107,7 @@ export const helloHandler: Handler = (req, res, gctx, lctx) => {
 ```
 
 This simple handler demonstrates the core handler signature:
+
 - `req` - HTTP request object
 - `res` - HTTP response object
 - `gctx` - Global context (shared across all requests)

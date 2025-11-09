@@ -67,8 +67,8 @@ export default {
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "gati dev",
-    "build": "gati build",
+  "dev": "npx @gati-framework/cli dev",
+  "build": "npx @gati-framework/cli build",
     "start": "node dist/index.js"
   },
   "dependencies": {

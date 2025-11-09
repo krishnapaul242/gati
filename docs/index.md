@@ -71,21 +71,21 @@ features:
 ## Quick Start
 
 ```bash
-# Install Gati CLI
-npm install -g @gati-framework/cli
+# Run the CLI (recommended)
+npx @gati-framework/cli --help  # show all commands
 
 # Create a new project
-gati create my-api
+npx @gati-framework/cli create my-api
 
 # Start development server (with hot reload)
 cd my-api
-gati dev
+npx @gati-framework/cli dev
 
 # Build for production
-gati build
+npx @gati-framework/cli build
 
 # Deploy to Kubernetes
-gati deploy prod
+npx @gati-framework/cli deploy prod
 ```
 
 ## Your First Handler
@@ -125,10 +125,10 @@ curl http://localhost:3000/hello?name=Gati
 
 | Task | Traditional | Gati |
 |------|------------|------|
-| **Setup** | Install Express, configure routes, add middleware, set up logging | `gati create my-api` |
-| **Deployment** | Write Dockerfile, K8s manifests, CI/CD pipeline, configure ingress | `gati deploy prod` |
+| **Setup** | Install Express, configure routes, add middleware, set up logging | `npx @gati-framework/cli create my-api` |
+| **Deployment** | Write Dockerfile, K8s manifests, CI/CD pipeline, configure ingress | `npx @gati-framework/cli deploy prod` |
 | **Versioning** | Manually create `/v1`, `/v2` routes, maintain backward compatibility | Automatic timestamp routing |
-| **SDK Generation** | Manually write client code or use OpenAPI generators | `gati generate` (fully typed) |
+| **SDK Generation** | Manually write client code or use OpenAPI generators | `npx @gati-framework/cli generate` (fully typed) |
 | **Monitoring** | Set up Prometheus, Grafana, logging pipelines | Built-in dashboard at `/_control` |
 
 ## Philosophy
