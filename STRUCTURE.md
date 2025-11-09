@@ -21,7 +21,7 @@ gati/
 │   └── hello-world/           (Coming in Issue #14)
 │
 ├── packages/            # Published npm packages
-│   ├── @gati/core/            (Future)
+│   ├── @gati-framework/core/  (Future)
 │   ├── @gati/aws/             (M2)
 │   ├── @gati/sdk/             (M5)
 │   └── ...
@@ -82,7 +82,7 @@ Main framework source code organized by functional area:
 
 Published npm packages that will be distributed:
 
-- `@gati/core`: Main framework package
+- `@gati-framework/core`: Main framework package
 - `@gati/aws`: AWS deployment plugin
 - `@gati/gcp`: GCP deployment plugin
 - `@gati/sdk`: Generated SDK client utilities

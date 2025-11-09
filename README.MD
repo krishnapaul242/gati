@@ -118,7 +118,7 @@ MIT License © 202X [Your Name]
 │   └── hello-world/
 │       └── src/
 ├── packages/
-│   ├── @gati/core/              # Main framework package
+│   ├── @gati-framework/core/    # Main framework package
 │   ├── @gati/aws/               # AWS plugin (published to npm)
 │   ├── @gati/sdk/               # Generated SDK client core
 │   └── ...

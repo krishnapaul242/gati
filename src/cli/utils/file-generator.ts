@@ -101,7 +101,7 @@ async function generateDefaultTemplate(
           lint: 'eslint . --ext .ts',
         },
         dependencies: {
-          '@gati/core': '^0.1.0',
+          '@gati-framework/core': '^0.1.0',
         },
         devDependencies: {
           '@types/node': '^20.10.0',
@@ -123,7 +123,7 @@ async function generateDefaultTemplate(
     join(projectPath, 'tsconfig.json'),
     JSON.stringify(
       {
-        extends: '@gati/core/tsconfig.base.json',
+        extends: '@gati-framework/core/tsconfig.base.json',
         compilerOptions: {
           outDir: './dist',
           rootDir: './src',
@@ -212,7 +212,7 @@ MIT
  * @description Simple hello world handler
  */
 
-import type { Handler } from '@gati/core';
+import type { Handler } from '@gati-framework/core';
 
 export const handler: Handler = (req, res) => {
   const name = req.query.name || 'World';
@@ -293,7 +293,7 @@ async function generateMinimalTemplate(
           typecheck: 'tsc --noEmit',
         },
         dependencies: {
-          '@gati/core': '^0.1.0',
+          '@gati-framework/core': '^0.1.0',
         },
         devDependencies: {
           '@types/node': '^20.10.0',
