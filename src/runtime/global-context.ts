@@ -7,6 +7,19 @@ import type {
   GlobalContext,
   GlobalContextOptions,
 } from './types/context';
+import type { ModuleLoader } from './module-loader';
+import { createModuleLoader } from './module-loader';
+
+/**
+ * Extended global context options with module loader
+ */
+export interface ExtendedGlobalContextOptions extends GlobalContextOptions {
+  /**
+   * Optional module loader instance
+   * If not provided, a new one will be created
+   */
+  moduleLoader?: ModuleLoader;
+}
 
 /**
  * Creates a global context instance
@@ -23,10 +36,12 @@ import type {
  * ```
  */
 export function createGlobalContext(
-  options: GlobalContextOptions = {}
+  options: ExtendedGlobalContextOptions = {}
 ): GlobalContext {
   const shutdownFns: Array<() => void | Promise<void>> = [];
   const shutdownSymbol = Symbol.for('gati:shutdown');
+  const moduleLoader = options.moduleLoader || createModuleLoader();
+  const moduleLoaderSymbol = Symbol.for('gati:moduleLoader');
 
   const gctx: GlobalContext = {
     modules: options.modules || {},
@@ -40,8 +55,10 @@ export function createGlobalContext(
     },
   };
 
-  // Store shutdown functions for later access
+  // Store shutdown functions and module loader for later access
   (gctx as unknown as Record<symbol, unknown>)[shutdownSymbol] = shutdownFns;
+  (gctx as unknown as Record<symbol, unknown>)[moduleLoaderSymbol] =
+    moduleLoader;
 
   return gctx;
 }
@@ -109,6 +126,16 @@ export async function shutdownGlobalContext(
   (gctx.lifecycle as { isShuttingDown: () => boolean }).isShuttingDown =
     () => isShuttingDown;
 
+  // Shutdown module loader first
+  const moduleLoaderSymbol = Symbol.for('gati:moduleLoader');
+  const moduleLoader = (gctx as unknown as Record<symbol, unknown>)[
+    moduleLoaderSymbol
+  ] as ModuleLoader | undefined;
+
+  if (moduleLoader) {
+    await moduleLoader.shutdownAll();
+  }
+
   // Get shutdown functions from symbol
   const shutdownSymbol = Symbol.for('gati:shutdown');
   const fns = (gctx as unknown as Record<symbol, unknown>)[shutdownSymbol] as
@@ -119,4 +146,29 @@ export async function shutdownGlobalContext(
     // Execute all shutdown hooks in parallel
     await Promise.all(fns.map((fn) => Promise.resolve(fn())));
   }
+}
+
+/**
+ * Get the module loader from global context
+ *
+ * @param gctx - Global context instance
+ * @returns ModuleLoader instance
+ *
+ * @example
+ * ```typescript
+ * const loader = getModuleLoader(gctx);
+ * await loader.register(myModule, gctx);
+ * ```
+ */
+export function getModuleLoader(gctx: GlobalContext): ModuleLoader {
+  const moduleLoaderSymbol = Symbol.for('gati:moduleLoader');
+  const moduleLoader = (gctx as unknown as Record<symbol, unknown>)[
+    moduleLoaderSymbol
+  ] as ModuleLoader | undefined;
+
+  if (!moduleLoader) {
+    throw new Error('Module loader not found in global context');
+  }
+
+  return moduleLoader;
 }
