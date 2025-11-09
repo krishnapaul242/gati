@@ -45,3 +45,17 @@ export type {
   MiddlewareOptions,
   MiddlewareEntry,
 } from './middleware';
+
+export type {
+  Module,
+  ModuleState,
+  ModuleMetadata,
+  ModuleLoaderConfig,
+} from './module';
+
+export {
+  ModuleError,
+  CircularDependencyError,
+  ModuleNotFoundError,
+  ModuleInitializationError,
+} from './module';
