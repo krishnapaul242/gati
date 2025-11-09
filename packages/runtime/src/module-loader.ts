@@ -15,6 +15,7 @@ import {
 } from './types/module';
 import type { ModuleRegistry } from './module-registry';
 import { createModuleRegistry } from './module-registry';
+import { logger } from './logger';
 
 /**
  * Module loader with dependency injection
@@ -241,7 +242,7 @@ export class ModuleLoader {
         await this.shutdown(name);
       } catch (error) {
         // Continue shutting down other modules even if one fails
-        console.error(`Failed to shutdown module ${name}:`, error);
+        logger.error({ module: name, error }, 'Failed to shutdown module');
       }
     }
   }
