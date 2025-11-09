@@ -56,6 +56,7 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@types/chokidar": "^2.1.7",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.10.0",
     "@types/prompts": "^2.4.9",
@@ -78,7 +79,9 @@
   "packageManager": "pnpm@8.11.0",
   "dependencies": {
     "chalk": "^5.6.2",
+    "chokidar": "^4.0.3",
     "commander": "^14.0.2",
+    "dotenv": "^17.2.3",
     "fs-extra": "^11.3.2",
     "ora": "^9.0.0",
     "prompts": "^2.4.2"
