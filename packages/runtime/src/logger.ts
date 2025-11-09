@@ -41,7 +41,7 @@ export interface LoggerOptions {
  * ```
  */
 export function createLogger(options: LoggerOptions = {}) {
-  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const isDevelopment = process.env['NODE_ENV'] !== 'production';
   const level = options.level || (isDevelopment ? 'debug' : 'info');
   const pretty = options.pretty ?? isDevelopment;
 

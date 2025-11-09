@@ -95,7 +95,7 @@ export function createCorsMiddleware(options: CorsOptions = {}): Middleware {
       if (requestOrigin && origin.includes(requestOrigin)) {
         allowedOrigin = requestOrigin;
       } else if (origin.length > 0) {
-        allowedOrigin = origin[0];
+        allowedOrigin = origin[0] ?? '*';
       }
     } else if (typeof origin === 'function' && requestOrigin) {
       // Dynamic validation
