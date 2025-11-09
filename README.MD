@@ -64,13 +64,38 @@ gati deploy prod
 
 See more in the [Product Roadmap](./Gati_PRD.md#7--technical-milestones).
 
+## CLI deployment flags
+
+The CLI supports an enhanced local Kubernetes deployment flow with health checks, port-forward, configurable rollout timeout, and image auto-tagging.
+
+Quick examples:
+
+- Dry run manifest generation:
+  - `gati deploy dev --dry-run`
+- Local deploy with health probe and auto-tag:
+  - `gati deploy dev --local --auto-tag --health-check-path /health --timeout 240`
+- Keep port-forward open after deploy:
+  - `gati deploy dev --local --port-forward`
+
+Flags overview (see the CLI README for full details):
+
+- `--local` — use a kind cluster locally
+- `--cluster-name <name>` — override kind cluster (default: gati-local)
+- `--skip-cluster` — skip cluster creation
+- `--health-check-path <path>` — run HTTP GET after rollout (e.g., /health)
+- `--timeout <seconds>` — rollout timeout (default 120)
+- `--port-forward` — keep a persistent kubectl port-forward session
+- `--auto-tag` — tag image with YYYYMMDD-HHMMSS-`gitsha`
+
+More at `packages/cli/README.md`.
+
 ## 📬 Community & Contributions
 
 Contributions are welcome as issues, ideas, or PRs:
 
-* 🐞 Found a bug? Open an issue!
-* 💡 Got a feature idea? Drop it in Discussions!
-* 📘 Want to code? See `CONTRIBUTING.md` (coming soon)
+- 🐞 Found a bug? Open an issue!
+- 💡 Got a feature idea? Drop it in Discussions!
+- 📘 Want to code? See `CONTRIBUTING.md` (coming soon)
 
 ```diff
 + This project is just getting started — jump in and help shape the future of scalable backend apps!

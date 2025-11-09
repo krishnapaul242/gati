@@ -11,9 +11,8 @@ import chalk from 'chalk';
 import prompts from 'prompts';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  generateCompleteManifests,
-} from '../deployment/kubernetes.js';
+import { generateCompleteManifests } from '../deployment/kubernetes.js';
+import { executeLocalDeploy } from '../deployment/local.js';
 import type { DeploymentEnvironment } from '../deployment/types.js';
 
 interface DeployOptions {
@@ -21,6 +20,14 @@ interface DeployOptions {
   dryRun?: boolean;
   skipBuild?: boolean;
   provider?: 'aws' | 'gcp' | 'azure' | 'kubernetes';
+  local?: boolean;
+  clusterName?: string;
+  skipCluster?: boolean;
+  verbose?: boolean;
+  healthCheckPath?: string;
+  portForward?: boolean;
+  timeout?: string;
+  autoTag?: boolean;
 }
 
 interface EnvironmentConfig {
@@ -208,47 +215,55 @@ async function deployCommand(environment: string, options: DeployOptions): Promi
       return;
     }
 
-    // Build Docker image (if not skipped)
-    if (!options.skipBuild) {
-      spinner.start('Building Docker image...');
-      // TODO: Implement Docker build
-      spinner.info(chalk.yellow('Docker build not yet implemented'));
-    }
+    // Local deployment flow (kind) if requested or provider == kubernetes
+    if (options.local || envConfig.provider === 'kubernetes') {
+      spinner.stop();
+      await executeLocalDeploy({
+        appName: config.name,
+        namespace: envConfig.namespace || `${config.name}-${targetEnv}`,
+        env: deployEnv,
+        workingDir: cwd,
+        clusterName: options.clusterName,
+        skipCluster: options.skipCluster,
+        dryRun: options.dryRun,
+        healthCheckPath: options.healthCheckPath,
+        portForward: options.portForward,
+        timeoutSeconds: options.timeout ? parseInt(options.timeout, 10) : undefined,
+        autoTag: options.autoTag,
+        replicas: envConfig.replicas,
+        verbose: options.verbose,
+        imageTag: `${config.name}:${config.version || 'latest'}`,
+        port: config.port || 3000,
+      });
+    } else {
+      // Build Docker image (if not skipped)
+      if (!options.skipBuild) {
+        spinner.start('Building Docker image...');
+        spinner.info(chalk.yellow('Docker build not yet implemented'));
+      }
 
-    // Deploy based on provider
-    spinner.start(`Deploying to ${envConfig.provider}...`);
-    
-    switch (envConfig.provider) {
-      case 'aws':
-        // TODO: Implement AWS EKS deployment
-        spinner.info(chalk.yellow('AWS EKS deployment not yet implemented'));
-        break;
-      
-      case 'gcp':
-        // TODO: Implement GCP GKE deployment
-        spinner.info(chalk.yellow('GCP GKE deployment not yet implemented'));
-        break;
-      
-      case 'azure':
-        // TODO: Implement Azure AKS deployment
-        spinner.info(chalk.yellow('Azure AKS deployment not yet implemented'));
-        break;
-      
-      case 'kubernetes':
-        // TODO: Implement kubectl deployment
-        spinner.info(chalk.yellow('Kubernetes deployment not yet implemented'));
-        break;
-      
-      default:
-        spinner.fail(chalk.red(`Unknown provider: ${envConfig.provider}`));
-        process.exit(1);
-    }
+      spinner.start(`Deploying to ${envConfig.provider}...`);
+      switch (envConfig.provider) {
+        case 'aws':
+          spinner.info(chalk.yellow('AWS EKS deployment not yet implemented'));
+          break;
+        case 'gcp':
+          spinner.info(chalk.yellow('GCP GKE deployment not yet implemented'));
+          break;
+        case 'azure':
+          spinner.info(chalk.yellow('Azure AKS deployment not yet implemented'));
+          break;
+        default:
+          spinner.fail(chalk.red(`Unknown provider: ${envConfig.provider}`));
+          process.exit(1);
+      }
 
-    console.log(chalk.green('\n✨ Deployment prepared successfully!'));
-    console.log(chalk.gray('\nNext steps:'));
-    console.log(chalk.gray('  1. Review generated manifests'));
-    console.log(chalk.gray('  2. Configure cloud provider credentials'));
-    console.log(chalk.gray('  3. Run deploy without --dry-run'));
+      console.log(chalk.green('\n✨ Deployment prepared successfully!'));
+      console.log(chalk.gray('\nNext steps:'));
+      console.log(chalk.gray('  1. Review generated manifests'));
+      console.log(chalk.gray('  2. Configure cloud provider credentials'));
+      console.log(chalk.gray('  3. Run deploy without --dry-run'));
+    }
 
   } catch (error) {
     spinner.fail(chalk.red('Deployment failed'));
@@ -271,5 +286,13 @@ export function registerDeployCommand(program: Command): void {
     .option('--dry-run', 'Generate manifests without deploying')
     .option('--skip-build', 'Skip Docker image build')
     .option('-p, --provider <provider>', 'Cloud provider (aws, gcp, azure, kubernetes)')
+    .option('--local', 'Force local (kind) deployment flow')
+    .option('--health-check-path <path>', 'Probe HTTP path after rollout (e.g., /health)')
+    .option('--port-forward', 'Port-forward service to local port with auto cleanup (non-test mode holds until Ctrl+C)')
+    .option('--timeout <seconds>', 'Rollout timeout in seconds (default: 120)')
+    .option('--auto-tag', 'Auto-tag image with git SHA + timestamp')
+    .option('--cluster-name <name>', 'Kind cluster name (default: gati-local)')
+    .option('--skip-cluster', 'Skip cluster creation step')
+    .option('-v, --verbose', 'Verbose output')
     .action(deployCommand);
 }

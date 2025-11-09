@@ -1,5 +1,17 @@
 # @gati-framework/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- feat(deploy): add advanced local deployment options
+  - `--health-check-path <path>`: run HTTP GET probe after rollout
+  - `--port-forward`: start persistent kubectl port-forward with cleanup
+  - `--timeout <seconds>`: configurable rollout timeout (default 120s)
+  - `--auto-tag`: image tag = `YYYYMMDD-HHMMSS-<gitsha>` (git SHA optional)
+- docs(cli): README updates with new flags, examples, troubleshooting
+- test(cli): advanced unit tests and an E2E-style deploy flow
+
 ## 0.2.1
 
 ### Patch Changes
