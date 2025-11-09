@@ -1,6 +1,6 @@
 {
   "name": "scaffold-verify",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Scaffold verification app",
   "scripts": {
@@ -10,6 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gati-framework/core": "^0.3.0"
+    "@gati-framework/core": "^0.4.0"
   }
 }

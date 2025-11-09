@@ -1,5 +1,14 @@
 # @gati-framework/core
 
+## 0.4.0
+
+### Minor Changes
+
+- 63649ee: Rename package scope from @gati/core to @gati-framework/core
+  - Changed npm package scope to @gati-framework organization
+  - Updated all internal imports and references
+  - Repository URL remains at krishnapaul242/gati
+
 ## 0.3.0
 
 ### Minor Changes
