@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: <%= name %>
+  namespace: <%= namespace %>
+  labels:
+    app: <%= name %>
+    managed-by: gati
+    <%_ if (typeof labels !== 'undefined' && labels) { _%>
+    <%_ for (const [key, value] of Object.entries(labels)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+    <%_ } _%>
+  <%_ if (typeof annotations !== 'undefined' && annotations) { _%>
+  annotations:
+    <%_ for (const [key, value] of Object.entries(annotations)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+  <%_ } _%>
+spec:
+  type: <%= type %>
+  selector:
+    <%_ for (const [key, value] of Object.entries(selector)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+  ports:
+  - name: http
+    port: <%= port %>
+    targetPort: <%= targetPort %>
+    protocol: TCP
+  sessionAffinity: None

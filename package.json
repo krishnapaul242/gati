@@ -31,12 +31,10 @@
     "packages/*",
     "examples/*"
   ],
-  "bin": {
-    "gati": "./dist/cli/index.js"
-  },
   "scripts": {
-    "cli": "tsx src/cli/index.ts",
-  "dev": "pnpm --filter @gati-framework/core dev",
+    "gati": "node packages/cli/dist/index.js",
+    "cli": "node packages/cli/dist/index.js",
+    "dev": "pnpm --filter @gati-framework/core dev",
     "build": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "release:version": "changeset version",

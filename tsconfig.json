@@ -46,8 +46,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-  "@gati-framework/core": ["./src/runtime/index.ts"],
-      "@gati/cli": ["./src/cli/index.ts"],
+      "@gati-framework/core": ["./packages/core/src/index.ts"],
+      "@gati/cli": ["./packages/cli/src/index.ts"],
       "@gati/types": ["./src/runtime/types/index.ts"]
     },
 

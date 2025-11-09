@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <%= name %>
+  namespace: <%= namespace %>
+  labels:
+    app: <%= name %>
+    version: v1
+    managed-by: gati
+    <%_ if (typeof labels !== 'undefined' && labels) { _%>
+    <%_ for (const [key, value] of Object.entries(labels)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+    <%_ } _%>
+  <%_ if (typeof annotations !== 'undefined' && annotations) { _%>
+  annotations:
+    <%_ for (const [key, value] of Object.entries(annotations)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+  <%_ } _%>
+spec:
+  replicas: <%= replicas %>
+  selector:
+    matchLabels:
+      app: <%= name %>
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: <%= name %>
+        version: v1
+        <%_ if (typeof labels !== 'undefined' && labels) { _%>
+        <%_ for (const [key, value] of Object.entries(labels)) { _%>
+        <%= key %>: <%= value %>
+        <%_ } _%>
+        <%_ } _%>
+      <%_ if (typeof annotations !== 'undefined' && annotations) { _%>
+      annotations:
+        <%_ for (const [key, value] of Object.entries(annotations)) { _%>
+        <%= key %>: <%= value %>
+        <%_ } _%>
+      <%_ } _%>
+    spec:
+      containers:
+      - name: <%= name %>
+        image: <%= image %>
+        imagePullPolicy: <%= imagePullPolicy %>
+        ports:
+        - containerPort: <%= containerPort %>
+          name: http
+          protocol: TCP
+        <%_ if (env && env.length > 0) { _%>
+        env:
+        <%_ for (const envVar of env) { _%>
+        - name: <%= envVar.name %>
+          <%_ if (envVar.value) { _%>
+          value: "<%= envVar.value %>"
+          <%_ } else if (envVar.valueFrom) { _%>
+          valueFrom:
+            <%_ if (envVar.valueFrom.configMapKeyRef) { _%>
+            configMapKeyRef:
+              name: <%= envVar.valueFrom.configMapKeyRef.name %>
+              key: <%= envVar.valueFrom.configMapKeyRef.key %>
+            <%_ } else if (envVar.valueFrom.secretKeyRef) { _%>
+            secretKeyRef:
+              name: <%= envVar.valueFrom.secretKeyRef.name %>
+              key: <%= envVar.valueFrom.secretKeyRef.key %>
+            <%_ } _%>
+          <%_ } _%>
+        <%_ } _%>
+        <%_ } _%>
+        <%_ if (livenessProbe) { _%>
+        livenessProbe:
+          httpGet:
+            path: <%= livenessProbe.path %>
+            port: <%= livenessProbe.port %>
+            scheme: HTTP
+          initialDelaySeconds: <%= livenessProbe.initialDelaySeconds %>
+          periodSeconds: <%= livenessProbe.periodSeconds %>
+          timeoutSeconds: <%= livenessProbe.timeoutSeconds %>
+          successThreshold: <%= livenessProbe.successThreshold %>
+          failureThreshold: <%= livenessProbe.failureThreshold %>
+        <%_ } _%>
+        <%_ if (readinessProbe) { _%>
+        readinessProbe:
+          httpGet:
+            path: <%= readinessProbe.path %>
+            port: <%= readinessProbe.port %>
+            scheme: HTTP
+          initialDelaySeconds: <%= readinessProbe.initialDelaySeconds %>
+          periodSeconds: <%= readinessProbe.periodSeconds %>
+          timeoutSeconds: <%= readinessProbe.timeoutSeconds %>
+          successThreshold: <%= readinessProbe.successThreshold %>
+          failureThreshold: <%= readinessProbe.failureThreshold %>
+        <%_ } _%>
+        resources:
+          limits:
+            cpu: <%= resources.limits.cpu %>
+            memory: <%= resources.limits.memory %>
+          requests:
+            cpu: <%= resources.requests.cpu %>
+            memory: <%= resources.requests.memory %>
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+        runAsNonRoot: true

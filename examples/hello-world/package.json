@@ -5,8 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "gati dev",
-    "build": "gati build",
+    "dev": "node ../../packages/cli/dist/index.js dev",
+    "build": "node ../../packages/cli/dist/index.js build",
     "start": "node dist/index.js"
   },
   "keywords": [
