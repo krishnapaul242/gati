@@ -36,6 +36,8 @@ Gati = "Backend without backend hassle".
 | ✅ Support multi-region | Integrated CDN + global deployment plugins |
 | ✅ Type-safe clients | Auto generate SDKs from handler signatures |
 | ✅ Built-in monitoring | Admin UI with logs, metrics, live topology |
+| ✅ **Polyglot extensibility** | **Support modules from NPM, Docker (Rust/Go/Python), local files** |
+| ✅ **Hot-loadable architecture** | **Zero-downtime module swapping and version updates** |
 
 ---
 
@@ -200,15 +202,24 @@ gati generate         # typed client
 
 ## 7. 🚧 Technical Milestones
 
-| Milestone | Scope                           |
-| --------- | ------------------------------- |
-| M1        | Handler/Module runtime with CLI |
-| M2        | Kubernetes deploy + AWS plugin  |
-| M3        | Version diff analyzer           |
-| M4        | Control Panel (limited) + Logs  |
-| M5        | SDK codegen + Playground        |
-| M6        | CDN + SSL automation            |
-| M7        | Effects + async jobs            |
+| Milestone | Scope                                     | Status      |
+| --------- | ----------------------------------------- | ----------- |
+| M1        | Handler/Module runtime with CLI           | ✅ Complete |
+| M2        | Kubernetes deploy + AWS plugin            | ⏳ Pending  |
+| M3        | Version diff analyzer                     | ⏳ Pending  |
+| M4        | Control Panel (limited) + Logs            | ⏳ Pending  |
+| M5        | SDK codegen + Playground                  | ⏳ Pending  |
+| M6        | CDN + SSL automation                      | ⏳ Pending  |
+| M7        | Effects + async jobs                      | ⏳ Pending  |
+| **M8**    | **Dynamic Module System & Extensibility** | ⏳ Pending  |
+
+**M8 Highlights:**
+
+- 🔌 Multi-source modules: NPM, Docker (Rust/Go/Python), local files
+- ♻️ Hot-reload with zero downtime
+- 🌐 Polyglot support via containerized modules
+- 📦 Module marketplace ecosystem
+- 🚀 Per-component autoscaling
 
 ---
 

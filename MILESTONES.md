@@ -8,15 +8,16 @@
 
 ## 📊 Milestone Overview
 
-| Milestone                             | Quarter | Status         | Completion % | Priority |
-| ------------------------------------- | ------- | -------------- | ------------ | -------- |
-| M1: Foundation & Core Runtime         | Q1 2025 | 🚧 In Progress | 15%          | P0       |
-| M2: Cloud Infrastructure & Deployment | Q2 2025 | ⏳ Pending     | 0%           | P0       |
-| M3: API Versioning & Routing Engine   | Q2 2025 | ⏳ Pending     | 0%           | P0       |
-| M4: Control Panel (Read-Only)         | Q3 2025 | ⏳ Pending     | 0%           | P1       |
-| M5: Code Generation & SDK             | Q3 2025 | ⏳ Pending     | 0%           | P0       |
-| M6: CDN & SSL Automation              | Q4 2025 | ⏳ Pending     | 0%           | P1       |
-| M7: Effects System & API Playground   | Q4 2025 | ⏳ Pending     | 0%           | P1       |
+| Milestone                                  | Quarter | Status         | Completion % | Priority |
+| ------------------------------------------ | ------- | -------------- | ------------ | -------- |
+| M1: Foundation & Core Runtime              | Q1 2025 | ✅ Complete    | 100%         | P0       |
+| M2: Cloud Infrastructure & Deployment      | Q2 2025 | ⏳ Pending     | 0%           | P0       |
+| M3: API Versioning & Routing Engine        | Q2 2025 | ⏳ Pending     | 0%           | P0       |
+| M4: Control Panel (Read-Only)              | Q3 2025 | ⏳ Pending     | 0%           | P1       |
+| M5: Code Generation & SDK                  | Q3 2025 | ⏳ Pending     | 0%           | P0       |
+| M6: CDN & SSL Automation                   | Q4 2025 | ⏳ Pending     | 0%           | P1       |
+| M7: Effects System & API Playground        | Q4 2025 | ⏳ Pending     | 0%           | P1       |
+| M8: Dynamic Module System & Extensibility  | Q1 2026 | ⏳ Pending     | 0%           | P0       |
 
 **Legend:**
 
@@ -994,6 +995,179 @@ None currently identified.
 
 ---
 
+## M8: Dynamic Module System & Extensibility
+
+**Target:** Q1 2026 | **Status:** ⏳ Pending | **Priority:** P0
+
+### Objective
+
+Enable polyglot, hot-loadable modules from multiple sources (NPM, Docker, local files) with unified interfaces for handlers, effects, and middleware.
+
+### Deliverables
+
+#### 8.1 Module Registry & Unified Interface
+
+- [ ] Core module interface design
+  - [ ] `GatiModule` interface definition
+  - [ ] Type system for inputs/outputs (Zod schemas)
+  - [ ] Module manifest specification
+  - [ ] Lifecycle hooks (init, run, dispose)
+- [ ] Module registry implementation
+  - [ ] In-memory registry
+  - [ ] Module ID management
+  - [ ] Version tracking
+  - [ ] Dependency resolution
+- [ ] Module metadata system
+  - [ ] Scaling hints (cpu, memory, concurrency)
+  - [ ] Resource requirements
+  - [ ] Module types (handler, effect, manager, middleware)
+  - [ ] Health check endpoints
+- [ ] Hot-reload infrastructure
+  - [ ] Module version swapping
+  - [ ] Zero-downtime updates
+  - [ ] State migration hooks
+  - [ ] Rollback capability
+
+**Files to Create:**
+
+- `src/runtime/module-registry.ts`
+- `src/runtime/types/gati-module.ts`
+- `src/runtime/types/module-manifest.ts`
+- `src/runtime/module-hotload.ts`
+
+**Dependencies:** M1.1 (Module Loader), M3.1 (Version System)
+
+---
+
+#### 8.2 Multi-Source Module Loaders
+
+- [ ] NPM module loader
+  - [ ] Registry resolution (npm, private registries)
+  - [ ] On-demand installation to `.gati/modules/`
+  - [ ] Version constraint validation
+  - [ ] Dynamic `import()` integration
+- [ ] Docker module loader
+  - [ ] Docker image resolution
+  - [ ] Container lifecycle management
+  - [ ] HTTP/gRPC communication adapters
+  - [ ] Context injection mechanism
+  - [ ] Health monitoring
+- [ ] Local file loader
+  - [ ] TypeScript/JavaScript file imports
+  - [ ] Auto-typing during dev
+  - [ ] File watcher integration
+  - [ ] Build-time optimization
+- [ ] Module resolver flow
+  - [ ] Config parsing (yaml/ts)
+  - [ ] Source type detection (docker/npm/local)
+  - [ ] Loader selection
+  - [ ] Unified module interface mapping
+
+**Files to Create:**
+
+- `src/runtime/loaders/npm-loader.ts`
+- `src/runtime/loaders/docker-loader.ts`
+- `src/runtime/loaders/local-loader.ts`
+- `src/runtime/loaders/resolver.ts`
+- `src/runtime/adapters/grpc-adapter.ts`
+
+**Dependencies:** 8.1, M2.1 (Kubernetes for Docker containers)
+
+---
+
+#### 8.3 Plugin System & Configuration
+
+- [ ] Plugin registry infrastructure
+  - [ ] Plugin discovery mechanism
+  - [ ] Plugin manifest validation
+  - [ ] Plugin versioning
+  - [ ] Plugin dependency graph
+- [ ] Configuration schema
+  - [ ] YAML/TypeScript config format
+  - [ ] Module source definitions
+  - [ ] Resource hints specification
+  - [ ] Route/handler bindings
+- [ ] Runtime registration CLI
+  - [ ] `gati register` command
+  - [ ] Docker module registration
+  - [ ] NPM module registration
+  - [ ] Production hot-registration
+- [ ] Module codegen integration
+  - [ ] Type generation for external modules
+  - [ ] Client SDK inclusion
+  - [ ] Context type updates
+  - [ ] Effect queue type safety
+
+**Files to Create:**
+
+- `src/plugins/plugin-registry.ts`
+- `src/cli/commands/register.ts`
+- `src/codegen/module-types.ts`
+- `gati.config.schema.json`
+
+**Dependencies:** 8.1, 8.2, M5.1 (Codegen)
+
+---
+
+#### 8.4 Polyglot & Extensibility Documentation
+
+- [ ] Module system architecture guide
+  - [ ] Architecture diagrams
+  - [ ] Module types and use cases
+  - [ ] Hot-reload mechanisms
+  - [ ] Distributed execution model
+- [ ] Creating modules guide
+  - [ ] NPM module template
+  - [ ] Docker module template (with Rust/Go examples)
+  - [ ] Local module patterns
+  - [ ] Testing strategies
+- [ ] Plugin development guide
+  - [ ] Plugin interface
+  - [ ] Custom loaders
+  - [ ] Registry integration
+  - [ ] Best practices
+- [ ] Configuration reference
+  - [ ] Module source configuration
+  - [ ] Resource hints
+  - [ ] Scaling policies
+  - [ ] Examples for all module types
+
+**Files to Create:**
+
+- `docs/module-system-architecture.md`
+- `docs/creating-modules.md`
+- `docs/plugin-development.md`
+- `docs/configuration-reference.md`
+- `examples/docker-module-rust/`
+- `examples/npm-module-effect/`
+
+**Dependencies:** 8.1, 8.2, 8.3
+
+---
+
+### Success Criteria
+
+- [ ] NPM modules load in <100ms
+- [ ] Docker modules deploy as sidecars automatically
+- [ ] Hot-reload completes in <5s with zero downtime
+- [ ] Modules from 3 languages (TS, Rust, Go) functional
+- [ ] Type safety maintained across all module sources
+- [ ] Module registry handles 1000+ modules efficiently
+
+### Key Features Enabled
+
+- ✅ **True Polyglot Support** - Rust, Python, Go, etc. via Docker
+- ✅ **Per-Component Autoscaling** - Independent handler/effect scaling
+- ✅ **Module Marketplace Ready** - NPM-like ecosystem for Gati modules
+- ✅ **Zero Downtime Swapping** - Replace modules without restart
+- ✅ **Lightweight Version Cleanup** - Automatic pruning of old sidecars
+
+### Blockers
+
+None currently identified.
+
+---
+
 ## 🌐 Cross-Cutting Deliverables
 
 ### Community & Open Source
@@ -1134,9 +1308,11 @@ None currently identified.
 
 ## 📝 Change Log
 
-| Date       | Milestone | Change                      | Author       |
-| ---------- | --------- | --------------------------- | ------------ |
-| 2025-11-09 | All       | Initial milestone breakdown | Krishna Paul |
+| Date       | Milestone | Change                                        | Author       |
+| ---------- | --------- | --------------------------------------------- | ------------ |
+| 2025-11-09 | All       | Initial milestone breakdown                   | Krishna Paul |
+| 2025-11-09 | M1        | Completed all 17 issues (100%)                | Krishna Paul |
+| 2025-11-09 | M8        | Added Dynamic Module System & Extensibility   | Krishna Paul |
 
 ---
 
