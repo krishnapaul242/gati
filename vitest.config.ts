@@ -29,8 +29,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-  '@gati-framework/core': resolve(__dirname, './packages/core/src/index.ts'),
-  '@gati/cli': resolve(__dirname, './packages/cli/src/index.ts'),
+      '@gati-framework/core': resolve(__dirname, './packages/core/src/index.ts'),
+      '@gati/cli': resolve(__dirname, './packages/cli/src'),
       '@gati/types': resolve(__dirname, './src/runtime/types/index.ts'),
     },
   },
