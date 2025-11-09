@@ -4,13 +4,8 @@
 **Status:** In Progress (80% Complete)  
 **Target:** MVP Launch Ready
 
----
 
-## 📊 MVP Definition
-
-The MVP includes the following capabilities:
-
-### **Requirement 1: Single Command Setup** ✅ 95%
+ ✅ `npx @gati-framework/cli create my-app` works (no global binary conflict)
 **User can scaffold a basic Gati application by a single command with prompts**
 
 - ✅ `npx @gati-framework/cli create my-app` works
@@ -28,17 +23,13 @@ The MVP includes the following capabilities:
 - ❌ **BLOCKER:** No `@gati-framework/runtime` package (#122)
 - ❌ **BLOCKER:** No actual deployment execution (#124)
 
-### **Requirement 3: Multi-Environment Support** ⚠️ 50%
+npx @gati-framework/cli deploy dev
 **Developer can run the app in dev, test, and prod modes**
 
 | Mode | Requirements | Status |
 |------|--------------|--------|
 | **Dev** | Hot reload, local system, minimal resources | ✅ 90% (dev server works, needs runtime) |
 | **Test** | Cloud deployment, minimal resources | ❌ 0% (no cloud deployment) |
-| **Prod** | Versioning, autoscaling, observability, cloud | ❌ 20% (config exists, no deployment) |
-
----
-
 ## 🚨 Critical Blockers (Must Complete for MVP)
 
 ### **Priority 0 (P0) - BLOCKERS**
@@ -54,15 +45,8 @@ The MVP includes the following capabilities:
 
 ### **Priority 1 (P1) - High Priority (Nice-to-Have)**
 
-| # | Issue | Title | Effort | Notes |
-|---|-------|-------|--------|-------|
-| 5 | [#125](https://github.com/krishnapaul242/gati/issues/125) | Create `create-gati-app` Wrapper | 1 day | Better UX, not blocking |
 
 ---
-
-## 📋 Detailed Implementation Plan
-
-### **Phase 1: Runtime Foundation** (Days 1-4)
 **Goal:** Package runtime so projects can execute
 
 **Issue #122: Extract @gati-framework/runtime Package**
@@ -77,7 +61,7 @@ The MVP includes the following capabilities:
 **Deliverables:**
 - ✅ `@gati-framework/runtime` npm package
 - ✅ `loadHandlers()` function for auto-discovery
-- ✅ README with usage examples
+npx @gati-framework/cli create my-app
 - ✅ Integration test
 
 **Acceptance:**
@@ -97,7 +81,7 @@ await app.listen();
 
 **Tasks:**
 1. Add `src/index.ts` template generation
-2. Update `package.json` template with runtime dependency
+npx @gati-framework/cli dev
 3. Add environment config to `gati.config.ts`
 4. Add `.dockerignore`
 5. Test scaffolded project runs immediately
@@ -105,7 +89,7 @@ await app.listen();
 **Template:**
 ```typescript
 // src/index.ts (auto-generated)
-import { createApp } from '@gati-framework/runtime';
+npx @gati-framework/cli build
 import { handler as helloHandler } from './handlers/hello.js';
 
 const app = createApp({
@@ -113,7 +97,7 @@ const app = createApp({
 });
 
 app.get('/hello', helloHandler);
-export { app };
+npx @gati-framework/cli deploy dev
 ```
 
 **Deliverables:**

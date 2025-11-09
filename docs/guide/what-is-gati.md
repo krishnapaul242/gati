@@ -42,10 +42,10 @@ Gati automatically provides:
 No Express routes, no middleware setup, no config files (unless you want them).
 
 ```bash
-gati create my-api  # Scaffolds a complete project
-gati dev           # Starts dev server with hot reload
-gati build         # Production build with validation
-gati deploy prod   # Deploys to Kubernetes
+npx @gati-framework/cli create my-api  # Scaffolds a complete project
+npx @gati-framework/cli dev           # Starts dev server with hot reload
+npx @gati-framework/cli build         # Production build with validation
+npx @gati-framework/cli deploy prod   # Deploys to Kubernetes
 ```
 
 ### 🧬 Built-in API Versioning
@@ -62,7 +62,7 @@ Gati routes the request to the handler code **as it existed on that date**. No b
 ### 🛠️ Auto-Generated SDKs
 
 ```bash
-gati generate  # Creates fully-typed TypeScript SDK
+npx @gati-framework/cli generate  # Creates fully-typed TypeScript SDK
 ```
 
 Your frontend team gets:

@@ -38,26 +38,18 @@ npm install -g pnpm
 
 ### Option 1: Using the CLI (Recommended)
 
-Install the Gati CLI globally:
+Use the CLI via npx (no global install required):
 
 ```bash
-pnpm install -g gati
-# or
-npm install -g gati
-```
-
-Create a new project:
-
-```bash
-gati create my-app
+npx @gati-framework/cli create my-app
 cd my-app
 ```
 
-The CLI will:
-- Create a new project directory
-- Set up the project structure
-- Install dependencies
-- Initialize a basic configuration
+Why npx?
+
+- Avoids collision with any other globally installed `gati` binary
+- Always uses the latest published version
+- No need to manage global upgrades
 
 ### Option 2: Clone the Hello World Example
 
@@ -74,7 +66,7 @@ Let's build your first Gati application in under 15 minutes!
 ### Step 1: Create a New Project
 
 ```bash
-gati create my-first-app
+npx @gati-framework/cli create my-first-app
 cd my-first-app
 pnpm install
 ```
@@ -83,7 +75,7 @@ pnpm install
 
 Your new project looks like this:
 
-```
+```text
 my-first-app/
 ├── src/
 │   ├── handlers/          # Request handlers
