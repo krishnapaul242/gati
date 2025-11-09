@@ -1,5 +1,11 @@
 # @gati-framework/core
 
+## 0.4.1
+
+### Patch Changes
+
+- docs: add comprehensive READMEs for CLI and Core packages so they render on npm
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @gati-framework/cli
 
+## 0.2.1
+
+### Patch Changes
+
+- docs: add comprehensive READMEs for CLI and Core packages so they render on npm
+- Updated dependencies
+  - @gati-framework/core@0.4.1
+
 ## 0.2.0
 
 ### Minor Changes
