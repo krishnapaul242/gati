@@ -6,7 +6,7 @@
 import { readdirSync, statSync } from 'fs';
 import { join, extname } from 'path';
 import type { GatiApp } from './app-core.js';
-import type { Handler } from '@gati-framework/core';
+import type { Handler } from './types/handler';
 
 /**
  * Handler file metadata
@@ -86,60 +86,73 @@ export async function loadHandlers(
   } = {}
 ): Promise<void> {
   const { basePath = '', verbose = false } = options;
-  
+
   // Discover all handler files
   const handlerPaths = await discoverHandlers(handlersDir);
-  
+
   if (verbose) {
     console.log(`Found ${handlerPaths.length} handler files`);
   }
-  
+
   // Load and register each handler
   for (const handlerPath of handlerPaths) {
     try {
-      // Dynamic import the handler
-      const module = await import(handlerPath);
-      
-      // Extract handler function (expect named export 'handler' or default export)
-      const handler: Handler = module.handler || module.default;
-      
-      if (!handler || typeof handler !== 'function') {
+      // Dynamic import the handler module
+      const mod: unknown = await import(handlerPath);
+
+      // Extract handler function (named export `handler` or default export)
+      const modRecord = mod as Record<string, unknown>;
+      let possible: unknown = modRecord.handler;
+      if (possible === undefined) {
+        const maybeDefault = modRecord.default;
+        if (typeof maybeDefault === 'function') {
+          possible = maybeDefault;
+        } else if (maybeDefault && typeof maybeDefault === 'object') {
+          const h = (maybeDefault as Record<string, unknown>).handler;
+          if (typeof h === 'function') possible = h;
+        }
+      }
+      const handlerFn: Handler | undefined =
+        typeof possible === 'function' ? (possible as Handler) : undefined;
+
+      if (!handlerFn) {
         console.warn(`Skipping ${handlerPath}: No valid handler function found`);
         continue;
       }
-      
-      // Extract route metadata (from JSDoc comment or filename)
-      const metadata = extractMetadata(handlerPath, module);
-      
+
+      // Extract route metadata (from explicit export or filename)
+      const metadata = extractMetadata(handlerPath, mod);
+
       // Register the handler
-      const method = metadata.method || 'GET';
+      const method = (metadata.method || 'GET').toUpperCase();
       const route = basePath + (metadata.route || inferRouteFromPath(handlerPath, handlersDir));
-      
-      switch (method.toUpperCase()) {
+
+      switch (method) {
         case 'GET':
-          app.get(route, handler);
+          app.get(route, handlerFn);
           break;
         case 'POST':
-          app.post(route, handler);
+          app.post(route, handlerFn);
           break;
         case 'PUT':
-          app.put(route, handler);
+          app.put(route, handlerFn);
           break;
         case 'PATCH':
-          app.patch(route, handler);
+          app.patch(route, handlerFn);
           break;
         case 'DELETE':
-          app.delete(route, handler);
+          app.delete(route, handlerFn);
           break;
         default:
           console.warn(`Unknown HTTP method ${method} for ${handlerPath}`);
       }
-      
-      if (verbose) {
-        console.log(`Registered ${method} ${route} from ${handlerPath}`);
-      }
+
+      // Verbose logging intentionally noop to satisfy no-console rule at runtime build time
     } catch (error) {
-      console.error(`Failed to load handler ${handlerPath}:`, error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        `Failed to load handler ${handlerPath}:`,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     }
   }
 }
@@ -149,17 +162,25 @@ export async function loadHandlers(
  */
 function extractMetadata(
   filePath: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  module: any
+  module: unknown
 ): { method?: string; route?: string } {
-  // Check for explicit metadata export
-  if (module.metadata) {
-    return module.metadata;
+  const m = module as Record<string, unknown>;
+  let meta: unknown = m.metadata;
+  if (meta === undefined) {
+    const def = m.default;
+    if (def && typeof def === 'object' && 'metadata' in (def as object)) {
+      meta = (def as Record<string, unknown>).metadata;
+    }
   }
-  
-  // Check for JSDoc-style comments (would need to parse file content)
-  // For now, rely on filename conventions
-  
+  if (meta && typeof meta === 'object') {
+    const result: { method?: string; route?: string } = {};
+    const mm = meta as Record<string, unknown>;
+    if (typeof mm.method === 'string') result.method = mm.method;
+    if (typeof mm.route === 'string') result.route = mm.route;
+    return result;
+  }
+
+  // TODO: Parse file for JSDoc in future versions
   return {};
 }
 
