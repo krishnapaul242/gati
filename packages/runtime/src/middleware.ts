@@ -11,6 +11,7 @@ import type {
   NextFunction,
 } from './types/middleware';
 import type { Request, Response, GlobalContext, LocalContext } from './types';
+import { logger } from './logger';
 
 // Re-export middleware types for external use
 export type { Middleware, ErrorMiddleware } from './types/middleware';
@@ -109,7 +110,7 @@ export class MiddlewareManager {
           return;
         }
       } catch (middlewareError) {
-        console.error('Error in error middleware:', middlewareError);
+        logger.error({ middlewareError }, 'Error in error middleware');
       }
     }
 
@@ -145,11 +146,47 @@ export class MiddlewareManager {
 
   /**
    * Match request path against middleware path pattern
+   * Supports:
+   * - Exact match: '/api/users'
+   * - Wildcard: '/api/*' matches '/api/anything'
+   * - Parameters: '/api/:version/users' matches '/api/v1/users'
    */
   private matchPath(requestPath: string, pattern: string): boolean {
-    // Simple exact match for now
-    // TODO: Support wildcards and regex patterns
-    return requestPath === pattern;
+    // Wildcard match - matches everything
+    if (pattern === '*') {
+      return true;
+    }
+
+    // Exact match
+    if (pattern === requestPath) {
+      return true;
+    }
+
+    // Prefix wildcard: /api/* matches /api/anything
+    if (pattern.endsWith('/*')) {
+      const base = pattern.slice(0, -2);
+      return requestPath.startsWith(base);
+    }
+
+    // Convert pattern to regex for parameter matching
+    const regex = this.patternToRegex(pattern);
+    return regex.test(requestPath);
+  }
+
+  /**
+   * Convert path pattern to regex
+   * Supports :param syntax and wildcards
+   */
+  private patternToRegex(pattern: string): RegExp {
+    const escaped = pattern
+      // Escape special regex chars except * and :
+      .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+      // Convert * to match anything
+      .replace(/\*/g, '.*')
+      // Convert :param to named capture group
+      .replace(/:(\w+)/g, '([^/]+)');
+    
+    return new RegExp(`^${escaped}$`);
   }
 
   /**

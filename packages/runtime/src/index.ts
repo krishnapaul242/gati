@@ -10,6 +10,14 @@ export type { AppConfig } from './app-core.js';
 // Handler loader utilities
 export { loadHandlers, discoverHandlers } from './loader.js';
 
+// Middleware utilities
+export { createCorsMiddleware } from './middleware/cors.js';
+export type { CorsOptions } from './middleware/cors.js';
+
+// Logger utilities
+export { createLogger, logger } from './logger.js';
+export type { LoggerOptions } from './logger.js';
+
 // Core types re-exported from @gati-framework/core
 export type {
   Handler,
