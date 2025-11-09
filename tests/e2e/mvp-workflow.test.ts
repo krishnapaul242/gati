@@ -106,7 +106,7 @@ describe('MVP Workflow Integration Test', () => {
 
       // Verify app creation
       expect(content).toContain('createApp');
-      expect(content).toContain('port: 3000');
+      expect(content).toContain('3000'); // Port can be from env or default
 
       // Verify handler loading
       expect(content).toContain('loadHandlers');
@@ -117,6 +117,10 @@ describe('MVP Workflow Integration Test', () => {
 
       // Verify error handling
       expect(content).toContain('.catch');
+
+      // Verify graceful shutdown
+      expect(content).toContain('SIGTERM');
+      expect(content).toContain('shutdown');
     });
 
     it('should generate a working handler example', async () => {
