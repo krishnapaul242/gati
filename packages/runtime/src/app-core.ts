@@ -14,6 +14,8 @@ import { createMiddlewareManager } from './middleware';
 import type { MiddlewareManager } from './middleware';
 import { executeHandler } from './handler-engine';
 import type { Handler, GlobalContext, Middleware, ErrorMiddleware } from './types';
+import { createLogger } from './logger';
+import type { LoggerOptions } from './logger';
 
 /**
  * Application configuration options
@@ -42,6 +44,11 @@ export interface AppConfig {
    * @default true
    */
   logging?: boolean;
+
+  /**
+   * Logger configuration
+   */
+  logger?: LoggerOptions;
 }
 
 /**
@@ -52,8 +59,10 @@ export class GatiApp {
   private router: RouteManager;
   private middleware: MiddlewareManager;
   private gctx: GlobalContext;
-  private config: Required<AppConfig>;
+  private config: Required<Omit<AppConfig, 'logger'>> & { logger?: LoggerOptions };
   private isShuttingDown = false;
+  private activeRequests = 0;
+  private logger: ReturnType<typeof createLogger>;
 
   constructor(config: AppConfig = {}) {
     this.config = {
@@ -61,7 +70,13 @@ export class GatiApp {
       host: config.host || 'localhost',
       timeout: config.timeout || 30000,
       logging: config.logging !== false,
+      logger: config.logger,
     };
+
+    this.logger = createLogger({
+      name: 'gati-app',
+      ...this.config.logger,
+    });
 
     this.gctx = createGlobalContext();
     this.router = createRouteManager();
@@ -142,8 +157,10 @@ export class GatiApp {
 
         this.server.listen(this.config.port, this.config.host, () => {
           if (this.config.logging) {
-            // eslint-disable-next-line no-console
-            console.log(`Gati server listening on http://${this.config.host}:${this.config.port}`);
+            this.logger.info(
+              { port: this.config.port, host: this.config.host },
+              'Gati server listening'
+            );
           }
           resolve();
         });
@@ -159,6 +176,7 @@ export class GatiApp {
 
   /**
    * Stop the HTTP server gracefully
+   * Waits for active requests to complete before shutting down
    */
   async close(): Promise<void> {
     if (!this.server) {
@@ -166,6 +184,22 @@ export class GatiApp {
     }
 
     this.isShuttingDown = true;
+
+    // Wait for active requests to complete (with timeout)
+    const maxWaitMs = 10000; // 10 seconds
+    const checkIntervalMs = 100; // Check every 100ms
+    const startTime = Date.now();
+
+    while (this.activeRequests > 0 && Date.now() - startTime < maxWaitMs) {
+      await new Promise(resolve => setTimeout(resolve, checkIntervalMs));
+    }
+
+    if (this.activeRequests > 0 && this.config.logging) {
+      this.logger.warn(
+        { activeRequests: this.activeRequests },
+        'Server shutting down with active requests still pending'
+      );
+    }
 
     return new Promise((resolve, reject) => {
       this.server?.close((error) => {
@@ -175,11 +209,78 @@ export class GatiApp {
           this.server = null;
           this.isShuttingDown = false;
           if (this.config.logging) {
-            // eslint-disable-next-line no-console
-            console.log('Gati server shut down successfully');
+            this.logger.info('Gati server shut down successfully');
           }
           resolve();
         }
+      });
+    });
+  }
+
+  /**
+   * Parse request body based on Content-Type
+   */
+  private async parseRequestBody(
+    req: IncomingMessage
+  ): Promise<{ body: unknown; rawBody: string | Buffer }> {
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      
+      req.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+
+      req.on('end', () => {
+        try {
+          const rawBody = Buffer.concat(chunks);
+          
+          // No body content
+          if (rawBody.length === 0) {
+            resolve({ body: undefined, rawBody: '' });
+            return;
+          }
+
+          const contentType = req.headers['content-type'] || '';
+          
+          // Parse JSON
+          if (contentType.includes('application/json')) {
+            const bodyString = rawBody.toString('utf-8');
+            try {
+              const parsed = JSON.parse(bodyString) as unknown;
+              resolve({ body: parsed, rawBody: bodyString });
+            } catch (error) {
+              // Invalid JSON, return as text
+              resolve({ body: undefined, rawBody: bodyString });
+            }
+            return;
+          }
+
+          // Parse URL-encoded form data
+          if (contentType.includes('application/x-www-form-urlencoded')) {
+            const bodyString = rawBody.toString('utf-8');
+            const params = new URLSearchParams(bodyString);
+            const parsed: Record<string, string> = {};
+            params.forEach((value, key) => {
+              parsed[key] = value;
+            });
+            resolve({ body: parsed, rawBody: bodyString });
+            return;
+          }
+
+          // Default: return as text or buffer
+          if (contentType.includes('text/')) {
+            const bodyString = rawBody.toString('utf-8');
+            resolve({ body: bodyString, rawBody: bodyString });
+          } else {
+            resolve({ body: rawBody, rawBody });
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      req.on('error', (error) => {
+        reject(error);
       });
     });
   }
@@ -198,47 +299,75 @@ export class GatiApp {
       return;
     }
 
-    // Create request and response objects
-    const req = createRequest({
-      raw: incomingMessage,
-      method: (incomingMessage.method || 'GET') as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS',
-      path: incomingMessage.url || '/',
-    });
-    const res = createResponse({ raw: serverResponse });
+    // Track active requests
+    this.activeRequests++;
 
-    // Create local context for this request
-    const lctx = createLocalContext();
+    // Set request timeout
+    const requestTimeout = setTimeout(() => {
+      if (!serverResponse.headersSent) {
+        serverResponse.statusCode = 408;
+        serverResponse.setHeader('Content-Type', 'application/json');
+        serverResponse.end(JSON.stringify({ 
+          error: 'Request Timeout',
+          message: 'Request exceeded configured timeout',
+        }));
+      }
+    }, this.config.timeout);
 
     try {
-      // Execute middleware chain and route handler
-      await this.middleware.execute(req, res, this.gctx, lctx, async () => {
-        // Find matching route
-        const match = this.router.match(req.method, req.path || '/');
+      // Parse request body
+      const { body, rawBody } = await this.parseRequestBody(incomingMessage);
 
-        if (!match) {
-          // No route found
-          res.status(404).json({
-            error: 'Not Found',
-            message: `Cannot ${req.method} ${req.path}`,
-          });
-          return;
-        }
-
-        // Attach path params to request
-        req.params = match.params;
-
-        // Execute the handler
-        await executeHandler(match.route.handler, req, res, this.gctx, lctx);
+      // Create request and response objects
+      const req = createRequest({
+        raw: incomingMessage,
+        method: (incomingMessage.method || 'GET') as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS',
+        path: incomingMessage.url || '/',
+        body,
+        rawBody,
       });
-    } catch (error) {
-      // This should be caught by middleware error handling
-      // But if it reaches here, send a generic error
-      if (!res.headersSent) {
-        res.status(500).json({
-          error: 'Internal Server Error',
-          message: error instanceof Error ? error.message : 'Unknown error',
+      const res = createResponse({ raw: serverResponse });
+
+      // Create local context for this request
+      const lctx = createLocalContext();
+
+      try {
+        // Execute middleware chain and route handler
+        await this.middleware.execute(req, res, this.gctx, lctx, async () => {
+          // Find matching route
+          const match = this.router.match(req.method, req.path || '/');
+
+          if (!match) {
+            // No route found
+            res.status(404).json({
+              error: 'Not Found',
+              message: `Cannot ${req.method} ${req.path}`,
+            });
+            return;
+          }
+
+          // Attach path params to request
+          req.params = match.params;
+
+          // Execute the handler
+          await executeHandler(match.route.handler, req, res, this.gctx, lctx);
         });
+      } catch (error) {
+        // This should be caught by middleware error handling
+        // But if it reaches here, send a generic error
+        if (!res.headersSent) {
+          res.status(500).json({
+            error: 'Internal Server Error',
+            message: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
       }
+    } finally {
+      // Clear request timeout
+      clearTimeout(requestTimeout);
+      
+      // Decrement active request counter
+      this.activeRequests--;
     }
   }
 
@@ -250,14 +379,18 @@ export class GatiApp {
       const start = Date.now();
       const requestId = lctx.requestId || 'unknown';
 
-      // eslint-disable-next-line no-console
-      console.log(`[${requestId}] ${req.method} ${req.path}`);
+      this.logger.info(
+        { requestId, method: req.method, path: req.path },
+        'Incoming request'
+      );
 
       await next();
 
       const duration = Date.now() - start;
-      // eslint-disable-next-line no-console
-      console.log(`[${requestId}] Completed in ${duration}ms`);
+      this.logger.info(
+        { requestId, method: req.method, path: req.path, duration },
+        'Request completed'
+      );
     };
   }
 
@@ -268,8 +401,10 @@ export class GatiApp {
     return (error, _req, res, _gctx, lctx) => {
       const requestId = lctx.requestId || 'unknown';
 
-      // eslint-disable-next-line no-console
-      console.error(`[${requestId}] Error:`, error);
+      this.logger.error(
+        { requestId, error: error.message, stack: error.stack },
+        'Request error'
+      );
 
       if (!res.headersSent) {
         res.status(500).json({
@@ -284,7 +419,7 @@ export class GatiApp {
   /**
    * Get the current configuration
    */
-  getConfig(): Readonly<Required<AppConfig>> {
+  getConfig(): Readonly<AppConfig> {
     return { ...this.config };
   }
 

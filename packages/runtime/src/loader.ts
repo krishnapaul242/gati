@@ -7,6 +7,7 @@ import { readdirSync, statSync } from 'fs';
 import { join, extname } from 'path';
 import type { GatiApp } from './app-core.js';
 import type { Handler } from './types/handler';
+import { logger } from './logger';
 
 /**
  * Handler file metadata
@@ -55,7 +56,10 @@ export async function discoverHandlers(dir: string): Promise<string[]> {
     }
   } catch (error) {
     // Directory doesn't exist or not accessible
-    console.warn(`Could not discover handlers in ${dir}:`, error instanceof Error ? error.message : 'Unknown error');
+    logger.warn(
+      { dir, error: error instanceof Error ? error.message : 'Unknown error' },
+      'Could not discover handlers'
+    );
   }
   
   return handlers;
@@ -91,7 +95,7 @@ export async function loadHandlers(
   const handlerPaths = await discoverHandlers(handlersDir);
 
   if (verbose) {
-    console.log(`Found ${handlerPaths.length} handler files`);
+    logger.info({ count: handlerPaths.length }, 'Found handler files');
   }
 
   // Load and register each handler
@@ -116,7 +120,7 @@ export async function loadHandlers(
         typeof possible === 'function' ? (possible as Handler) : undefined;
 
       if (!handlerFn) {
-        console.warn(`Skipping ${handlerPath}: No valid handler function found`);
+        logger.warn({ handlerPath }, 'No valid handler function found, skipping');
         continue;
       }
 
@@ -144,14 +148,14 @@ export async function loadHandlers(
           app.delete(route, handlerFn);
           break;
         default:
-          console.warn(`Unknown HTTP method ${method} for ${handlerPath}`);
+          logger.warn({ method, handlerPath }, 'Unknown HTTP method');
       }
 
       // Verbose logging intentionally noop to satisfy no-console rule at runtime build time
     } catch (error) {
-      console.error(
-        `Failed to load handler ${handlerPath}:`,
-        error instanceof Error ? error.message : 'Unknown error'
+      logger.error(
+        { handlerPath, error: error instanceof Error ? error.message : 'Unknown error' },
+        'Failed to load handler'
       );
     }
   }
