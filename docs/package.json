@@ -1,0 +1,21 @@
+{
+  "name": "@gati/docs",
+  "version": "1.0.0",
+  "description": "Gati Framework Documentation",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "deploy": "pnpm build && gh-pages -d .vitepress/dist"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1",
+    "vitepress": "^1.0.0",
+    "vue": "^3.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

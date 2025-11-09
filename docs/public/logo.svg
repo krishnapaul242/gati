@@ -1,0 +1,17 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#gradient)" opacity="0.1"/>
+  
+  <!-- Motion arrow design -->
+  <path d="M30 64 L70 64 L60 54 M70 64 L60 74" stroke="url(#gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M50 64 L90 64 L80 54 M90 64 L80 74" stroke="url(#gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <circle cx="98" cy="64" r="4" fill="url(#gradient)"/>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#646cff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#41d1ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
