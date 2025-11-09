@@ -102,13 +102,13 @@ export async function loadHandlers(
 
       // Extract handler function (named export `handler` or default export)
       const modRecord = mod as Record<string, unknown>;
-      let possible: unknown = modRecord.handler;
+      let possible: unknown = modRecord['handler'];
       if (possible === undefined) {
-        const maybeDefault = modRecord.default;
+        const maybeDefault = modRecord['default'];
         if (typeof maybeDefault === 'function') {
           possible = maybeDefault;
         } else if (maybeDefault && typeof maybeDefault === 'object') {
-          const h = (maybeDefault as Record<string, unknown>).handler;
+          const h = (maybeDefault as Record<string, unknown>)['handler'];
           if (typeof h === 'function') possible = h;
         }
       }
@@ -161,22 +161,22 @@ export async function loadHandlers(
  * Extract metadata from handler module
  */
 function extractMetadata(
-  filePath: string,
+  _filePath: string,
   module: unknown
 ): { method?: string; route?: string } {
   const m = module as Record<string, unknown>;
-  let meta: unknown = m.metadata;
+  let meta: unknown = m['metadata'];
   if (meta === undefined) {
-    const def = m.default;
+    const def = m['default'];
     if (def && typeof def === 'object' && 'metadata' in (def as object)) {
-      meta = (def as Record<string, unknown>).metadata;
+      meta = (def as Record<string, unknown>)['metadata'];
     }
   }
   if (meta && typeof meta === 'object') {
     const result: { method?: string; route?: string } = {};
     const mm = meta as Record<string, unknown>;
-    if (typeof mm.method === 'string') result.method = mm.method;
-    if (typeof mm.route === 'string') result.route = mm.route;
+    if (typeof mm['method'] === 'string') result.method = mm['method'];
+    if (typeof mm['route'] === 'string') result.route = mm['route'];
     return result;
   }
 
