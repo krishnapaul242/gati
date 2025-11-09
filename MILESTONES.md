@@ -1253,7 +1253,7 @@ None currently identified.
 
 **Timeline:** Per Milestone | **Priority:** P0
 
-- [ ] `@gati/core` - Main framework (M1)
+- [ ] `@gati-framework/core` - Main framework (M1)
 - [ ] `@gati/aws` - AWS plugin (M2)
 - [ ] `@gati/sdk` - SDK client core (M5)
 - [ ] `@gati/gcp` - GCP plugin (Q3)
@@ -1263,7 +1263,7 @@ None currently identified.
 
 **Files to Create:**
 
-- `packages/@gati/core/package.json`
+- `packages/@gati-framework/core/package.json`
 - `packages/@gati/aws/package.json`
 - `packages/@gati/sdk/package.json`
 - Publishing workflow in CI/CD

@@ -1,15 +1,15 @@
 {
   "name": "scaffold-verify",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Scaffold verification app",
   "scripts": {
-    "dev": "gati dev",
-    "build": "gati build",
+    "dev": "echo 'dev command requires @gati/cli; use tsx or node once available' && exit 0",
+    "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gati/core": "^0.2.0"
+    "@gati-framework/core": "^0.3.0"
   }
 }

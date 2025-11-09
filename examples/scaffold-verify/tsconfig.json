@@ -1,5 +1,5 @@
 {
-  "extends": "@gati/core/tsconfig.base.json",
+  "extends": "@gati-framework/core/tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",

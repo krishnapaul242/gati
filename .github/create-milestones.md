@@ -6,8 +6,8 @@ This guide helps you create GitHub Issues for each milestone in the Gati project
 
 ## Quick Links
 
-- [Create New Issue](https://github.com/krishnapaul242/gati/issues/new)
-- [View All Issues](https://github.com/krishnapaul242/gati/issues)
+- [Create New Issue](https://github.com/gati-framework/gati/issues/new)
+- [View All Issues](https://github.com/gati-framework/gati/issues)
 
 ---
 
@@ -97,7 +97,7 @@ None
 
 ## Related
 
-See [MILESTONES.md](https://github.com/krishnapaul242/gati/blob/main/MILESTONES.md) for full details
+See [MILESTONES.md](https://github.com/gati-framework/gati/blob/main/MILESTONES.md) for full details
 ```
 
 ---

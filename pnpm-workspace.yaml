@@ -8,5 +8,5 @@ packages:
   # Example applications
   - 'examples/*'
   
-  # Main source (if published as @gati/core)
+  # Main source (if published as @gati-framework/core)
   - 'src'

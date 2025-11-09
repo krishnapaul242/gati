@@ -100,8 +100,8 @@ importers:
 
   examples/scaffold-verify:
     dependencies:
-      '@gati/core':
-        specifier: ^0.1.0
+      '@gati-framework/core':
+        specifier: ^0.2.0
         version: link:../../packages/core
 
   packages/core:

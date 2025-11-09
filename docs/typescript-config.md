@@ -11,7 +11,7 @@ Main TypeScript configuration with strict type checking and path aliases.
 **Key Features:**
 
 - ✅ **Strict Mode:** Full type safety enabled
-- ✅ **Path Aliases:** `@/`, `@gati/core`, `@gati/cli`, `@gati/types`
+- ✅ **Path Aliases:** `@/`, `@gati-framework/core`, `@gati/cli`, `@gati/types`
 - ✅ **Modern ES2022:** Latest JavaScript features
 - ✅ **Source Maps:** For debugging
 - ✅ **Declaration Files:** `.d.ts` generation for types
@@ -32,7 +32,7 @@ Optimized configuration for production builds.
 
 ```typescript
 import { Handler } from '@/runtime/types/handler'; // Instead of ../../runtime/types/handler
-import { Something } from '@gati/core'; // Main runtime exports
+import { Something } from '@gati-framework/core'; // Main runtime exports
 import { Command } from '@gati/cli'; // CLI utilities
 import type { Context } from '@gati/types'; // Type-only imports
 ```
@@ -42,7 +42,7 @@ import type { Context } from '@gati/types'; // Type-only imports
 | Alias         | Resolves To                    | Usage                     |
 | ------------- | ------------------------------ | ------------------------- |
 | `@/*`         | `./src/*`                      | Any file in src directory |
-| `@gati/core`  | `./src/runtime/index.ts`       | Main runtime exports      |
+| `@gati-framework/core`  | `./src/runtime/index.ts`       | Main runtime exports      |
 | `@gati/cli`   | `./src/cli/index.ts`           | CLI exports               |
 | `@gati/types` | `./src/runtime/types/index.ts` | Type definitions          |
 

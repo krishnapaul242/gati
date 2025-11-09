@@ -3,7 +3,7 @@
  * @description Simple hello world handler
  */
 
-import type { Handler } from '@gati/core';
+import type { Handler } from '@gati-framework/core';
 
 export const handler: Handler = (req, res) => {
   const name = (req.query["name"] ?? 'World') as string;

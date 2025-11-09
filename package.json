@@ -36,9 +36,12 @@
   },
   "scripts": {
     "cli": "tsx src/cli/index.ts",
-    "dev": "pnpm --filter @gati/core dev",
+  "dev": "pnpm --filter @gati-framework/core dev",
     "build": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch",
+    "release:version": "changeset version",
+    "release:publish": "changeset publish",
+    "release": "pnpm -r build && pnpm exec changeset publish",
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:unit": "vitest run tests/unit",
