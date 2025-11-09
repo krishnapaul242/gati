@@ -1,0 +1,117 @@
+# Default values for Gati application
+# This is a YAML-formatted file.
+
+replicaCount: <%= replicaCount %>
+
+image:
+  repository: <%= image.repository %>
+  tag: "<%= image.tag %>"
+  pullPolicy: <%= image.pullPolicy %>
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1001
+  runAsUser: 1001
+  runAsNonRoot: true
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+
+service:
+  type: <%= service.type %>
+  port: <%= service.port %>
+  targetPort: <%= service.targetPort %>
+
+resources:
+  limits:
+    cpu: <%= resources.limits.cpu %>
+    memory: <%= resources.limits.memory %>
+  requests:
+    cpu: <%= resources.requests.cpu %>
+    memory: <%= resources.requests.memory %>
+
+<%_ if (autoscaling && autoscaling.enabled) { _%>
+autoscaling:
+  enabled: true
+  minReplicas: <%= autoscaling.minReplicas %>
+  maxReplicas: <%= autoscaling.maxReplicas %>
+  targetCPUUtilizationPercentage: <%= autoscaling.targetCPUUtilizationPercentage %>
+<%_ } else { _%>
+autoscaling:
+  enabled: false
+<%_ } _%>
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+env:
+<%_ for (const envVar of env) { _%>
+  - name: <%= envVar.name %>
+    <%_ if (envVar.value) { _%>
+    value: "<%= envVar.value %>"
+    <%_ } else if (envVar.valueFrom) { _%>
+    valueFrom:
+      <%_ if (envVar.valueFrom.configMapKeyRef) { _%>
+      configMapKeyRef:
+        name: <%= envVar.valueFrom.configMapKeyRef.name %>
+        key: <%= envVar.valueFrom.configMapKeyRef.key %>
+      <%_ } else if (envVar.valueFrom.secretKeyRef) { _%>
+      secretKeyRef:
+        name: <%= envVar.valueFrom.secretKeyRef.name %>
+        key: <%= envVar.valueFrom.secretKeyRef.key %>
+      <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
+
+<%_ if (typeof configMap !== 'undefined' && configMap) { _%>
+configMap:
+  <%_ for (const [key, value] of Object.entries(configMap)) { _%>
+  <%= key %>: "<%= value %>"
+  <%_ } _%>
+<%_ } _%>
+
+<%_ if (typeof secrets !== 'undefined' && secrets) { _%>
+secrets:
+  <%_ for (const [key, value] of Object.entries(secrets)) { _%>
+  <%= key %>: "<%= value %>"
+  <%_ } _%>
+<%_ } _%>
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
