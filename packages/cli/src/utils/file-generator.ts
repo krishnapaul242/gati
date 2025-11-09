@@ -101,7 +101,8 @@ async function generateDefaultTemplate(
           lint: 'eslint . --ext .ts',
         },
         dependencies: {
-          '@gati-framework/core': '^0.1.0',
+          '@gati-framework/core': '^0.4.1',
+          '@gati-framework/runtime': '^1.0.0',
         },
         devDependencies: {
           '@types/node': '^20.10.0',
@@ -204,7 +205,7 @@ MIT
 `
   );
 
-  // Example handler
+  // Example handler and entrypoint
   await writeFile(
     join(projectPath, 'src/handlers/hello.ts'),
     `/**
@@ -212,7 +213,7 @@ MIT
  * @description Simple hello world handler
  */
 
-import type { Handler } from '@gati-framework/core';
+import type { Handler } from '@gati-framework/runtime';
 
 export const handler: Handler = (req, res) => {
   const name = req.query.name || 'World';
@@ -222,6 +223,23 @@ export const handler: Handler = (req, res) => {
     timestamp: new Date().toISOString(),
   });
 };
+`
+  );
+
+  await writeFile(
+    join(projectPath, 'src/index.ts'),
+    `import { createApp, loadHandlers } from '@gati-framework/runtime';
+
+async function main() {
+  const app = createApp({ port: 3000, host: '0.0.0.0' });
+  await loadHandlers(app, './src/handlers', { basePath: '/api', verbose: true });
+  await app.listen();
+}
+
+main().catch((err) => {
+  console.error('Failed to start app', err);
+  process.exit(1);
+});
 `
   );
 
@@ -293,7 +311,8 @@ async function generateMinimalTemplate(
           typecheck: 'tsc --noEmit',
         },
         dependencies: {
-          '@gati-framework/core': '^0.1.0',
+          '@gati-framework/core': '^0.4.1',
+          '@gati-framework/runtime': '^1.0.0',
         },
         devDependencies: {
           '@types/node': '^20.10.0',
@@ -322,6 +341,8 @@ async function generateMinimalTemplate(
           esModuleInterop: true,
           skipLibCheck: true,
           forceConsistentCasingInFileNames: true,
+          baseUrl: '.',
+          paths: { '@/*': ['src/*'] },
         },
         include: ['src/**/*'],
         exclude: ['node_modules', 'dist'],
@@ -352,6 +373,39 @@ ${description}
 pnpm install
 pnpm dev
 \`\`\`
+
+## Runtime Entry
+
+This template expects a runtime entry at \`src/index.ts\`:
+
+\`\`\`ts
+import { createApp, loadHandlers } from '@gati-framework/runtime';
+
+async function main() {
+  const app = createApp({ port: 3000 });
+  await loadHandlers(app, './src/handlers');
+  await app.listen();
+}
+
+main();
+\`\`\`
+`
+  );
+
+  await writeFile(
+    join(projectPath, 'src/index.ts'),
+    `import { createApp, loadHandlers } from '@gati-framework/runtime';
+
+async function main() {
+  const app = createApp({ port: 3000 });
+  await loadHandlers(app, './src/handlers');
+  await app.listen();
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
 `
   );
 
