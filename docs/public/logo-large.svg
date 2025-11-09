@@ -1,0 +1,35 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with glow -->
+  <circle cx="128" cy="128" r="120" fill="url(#gradient)" opacity="0.1"/>
+  <circle cx="128" cy="128" r="110" fill="url(#gradient)" opacity="0.05"/>
+  
+  <!-- Main motion arrow design (larger) -->
+  <g transform="translate(48, 128)">
+    <!-- First arrow -->
+    <path d="M0 0 L80 0 L70 -15 M80 0 L70 15" 
+          stroke="url(#gradient)" 
+          stroke-width="10" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    
+    <!-- Second arrow (offset) -->
+    <path d="M30 0 L110 0 L100 -15 M110 0 L100 15" 
+          stroke="url(#gradient)" 
+          stroke-width="10" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          opacity="0.5"/>
+    
+    <!-- Dot at end -->
+    <circle cx="125" r="8" fill="url(#gradient)"/>
+  </g>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#646cff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#747bff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#41d1ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
