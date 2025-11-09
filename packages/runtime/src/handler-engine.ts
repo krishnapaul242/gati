@@ -119,7 +119,7 @@ function handleExecutionError(error: unknown, res: Response): void {
     return;
   }
 
-  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const isDevelopment = process.env['NODE_ENV'] !== 'production';
 
   // Handle HandlerError
   if (error instanceof HandlerError) {
