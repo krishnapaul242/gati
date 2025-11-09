@@ -3,7 +3,8 @@
  * @description Request object factory for Gati framework
  */
 
-import type { Request, RequestOptions } from './types/request';
+import { parse as parseUrl } from 'url';
+import type { Request, RequestOptions, QueryParams, HttpHeaders } from './types/request';
 
 /**
  * Create a Request object from RequestOptions
@@ -22,12 +23,34 @@ import type { Request, RequestOptions } from './types/request';
  * ```
  */
 export function createRequest(options: RequestOptions): Request {
+  // Parse query string if not provided
+  let query: QueryParams = options.query ?? {};
+  let path = options.path;
+  
+  if (!options.query && options.raw.url) {
+    const parsed = parseUrl(options.raw.url, true);
+    // Extract query parameters
+    const parsedQuery = parsed.query;
+    query = Object.entries(parsedQuery).reduce((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value as string | string[];
+      }
+      return acc;
+    }, {} as QueryParams);
+    
+    // Use pathname as path (without query string)
+    path = parsed.pathname || path;
+  }
+
+  // Extract headers from IncomingMessage if not provided
+  const headers: HttpHeaders = options.headers ?? (options.raw.headers as HttpHeaders);
+
   return {
     method: options.method,
-    path: options.path,
-    query: options.query ?? {},
+    path,
+    query,
     params: options.params ?? {},
-    headers: options.headers ?? {},
+    headers,
     body: options.body,
     rawBody: options.rawBody,
     raw: options.raw,

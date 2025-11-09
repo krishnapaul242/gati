@@ -12,6 +12,7 @@ import type {
   LocalContext,
 } from './types';
 import { HandlerError } from './types';
+import { logger } from './logger';
 
 /**
  * Default handler execution timeout (30 seconds)
@@ -113,27 +114,30 @@ async function executeWithTimeout<T>(
 function handleExecutionError(error: unknown, res: Response): void {
   // Don't send error response if response already sent
   if (res.isSent()) {
-    // Log error internally (TODO: integrate with logger)
-    console.error('Handler error after response sent:', error);
+    // Log error internally
+    logger.error({ error }, 'Handler error after response sent');
     return;
   }
+
+  const isDevelopment = process.env.NODE_ENV !== 'production';
 
   // Handle HandlerError
   if (error instanceof HandlerError) {
     res.status(error.statusCode).json({
       error: error.message,
-      ...(error.context ? { context: error.context } : {}),
+      ...(isDevelopment && error.context ? { context: error.context } : {}),
     });
     return;
   }
 
   // Handle generic errors
   if (error instanceof Error) {
-    // Don't expose internal error details in production
     res.status(500).json({
       error: 'Internal server error',
-      // TODO: Only include details in development mode
-      message: error.message,
+      ...(isDevelopment && { 
+        message: error.message,
+        stack: error.stack,
+      }),
     });
     return;
   }
