@@ -90,6 +90,10 @@ export function createResponse(options: ResponseOptions): Response {
       return sent;
     },
 
+    get headersSent(): boolean {
+      return raw.headersSent;
+    },
+
     raw,
   };
 

@@ -125,6 +125,11 @@ export interface Response {
    * Check if response has been sent
    */
   isSent: () => boolean;
+
+  /**
+   * Check if headers have been sent to the client
+   */
+  headersSent: boolean;
 }
 
 /**
