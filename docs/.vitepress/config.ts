@@ -6,6 +6,20 @@ export default defineConfig({
   description: 'Motion in Code - Build cloud-native, versioned APIs with TypeScript',
   base: '/gati/',
   
+  // Ignore dead links during development
+  ignoreDeadLinks: [
+    // Localhost URLs
+    /^http:\/\/localhost/,
+    // Guide pages to be created
+    /\/guide\/logging/,
+    /\/guide\/docker/,
+    /\/guide\/cors/,
+    /\/guide\/building/,
+    /\/guide\/environment/,
+    // Legacy architecture links
+    /\.\/architecture/,
+  ],
+  
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/gati/logo.svg' }],
     ['meta', { name: 'theme-color', content: '#646cff' }],
