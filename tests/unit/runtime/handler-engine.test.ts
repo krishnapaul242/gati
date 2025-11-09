@@ -59,6 +59,7 @@ describe('Handler Engine', () => {
         mock.sent = true;
       },
       isSent: (): boolean => mock.sent,
+      headersSent: false,
       raw: {} as ServerResponse,
     };
 

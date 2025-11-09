@@ -37,3 +37,11 @@ export type {
   RouteOptions,
   RouterConfig,
 } from './route';
+
+export type {
+  Middleware,
+  ErrorMiddleware,
+  NextFunction,
+  MiddlewareOptions,
+  MiddlewareEntry,
+} from './middleware';
