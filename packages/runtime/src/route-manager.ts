@@ -13,14 +13,9 @@ import { parseRoute, normalizePath, extractParams } from './route-parser';
  */
 export class RouteManager {
   private routes: Route[] = [];
-  private config: RouterConfig;
 
-  constructor(config: RouterConfig = {}) {
-    this.config = {
-      strict: false,
-      caseSensitive: false,
-      ...config,
-    };
+  constructor(_config: RouterConfig = {}) {
+    // Config will be used in future for strict mode and case sensitivity
   }
 
   /**
