@@ -36,20 +36,29 @@ npm install -g pnpm
 
 ## Installation
 
-### Option 1: Using the CLI (Recommended)
+### Create a New Project with GatiC
 
-Use the CLI via npx (no global install required):
+**GatiC** (Gati Command) is the official project scaffolding tool. Use it via `npx` to create new Gati applications:
 
 ```bash
-npx @gati-framework/cli create my-app
+npx gatic create my-app
 cd my-app
 ```
 
-Why npx?
+**What is GatiC?**
 
-- Avoids collision with any other globally installed `gati` binary
+- `gatic` - The project creation command (wrapper around `@gati-framework/cli`)
+- Used via `npx gatic create` - no global installation needed
 - Always uses the latest published version
-- No need to manage global upgrades
+- Creates a complete project with all dependencies
+
+**What is the difference between `gatic` and `gati`?**
+
+- **`gatic`** - Global command for creating new projects (`npx gatic create`)
+- **`gati`** - Local command installed in your project for development and deployment
+  - Use `gati dev` to start development server
+  - Use `gati build` to build for production
+  - Use `gati deploy` to deploy to Kubernetes
 
 ### Option 2: Clone the Hello World Example
 
@@ -61,83 +70,142 @@ pnpm install
 
 ## Quick Start
 
-Let's build your first Gati application in under 15 minutes!
+Let's build your first Gati application in under 5 minutes!
 
 ### Step 1: Create a New Project
 
 ```bash
-npx @gati-framework/cli create my-first-app
+npx gatic create my-first-app
 cd my-first-app
+```
+
+The scaffolder will prompt you for:
+- **Project description** - Brief description of your app
+- **Author** - Your name
+- **Template** - Choose between Default (with examples) or Minimal
+
+### Step 2: Install Dependencies
+
+Dependencies are automatically installed during creation. If you need to reinstall:
+
+```bash
 pnpm install
 ```
 
-### Step 2: Understand the Project Structure
-
-Your new project looks like this:
+### Step 3: Understand the Project Structure
 
 ```text
 my-first-app/
 ├── src/
+│   ├── index.ts           # Application entry point (NEW in v2.0.0)
 │   ├── handlers/          # Request handlers
-│   │   └── hello.ts       # Example handler
-│   └── modules/           # Reusable modules
-│       └── logger.ts      # Example module
+│   │   ├── hello.ts       # Example handler
+│   │   └── health.ts      # Health check endpoint (NEW)
+│   └── modules/           # Reusable modules (optional)
+├── deploy/
+│   └── kubernetes/        # Kubernetes manifests (NEW)
+│       ├── deployment.yaml
+│       └── service.yaml
+├── tests/
+│   ├── unit/              # Unit tests
+│   └── integration/       # Integration tests
 ├── gati.config.ts         # Application configuration
 ├── package.json           # Dependencies and scripts
 ├── tsconfig.json          # TypeScript configuration
-└── .env.example           # Environment variables template
+├── Dockerfile             # Production Docker image (NEW)
+├── docker-compose.yml     # Local Docker setup (NEW)
+├── .env.example           # Environment variables template
+├── .gitignore
+└── README.md              # Project documentation
 ```
 
-### Step 3: Examine Your First Handler
+**What's new in Runtime v2.0.0:**
+- ✅ `src/index.ts` - Explicit application entry point using `createApp()` and `loadHandlers()`
+- ✅ `src/handlers/health.ts` - Production-ready health check endpoint
+- ✅ Kubernetes manifests for deployment
+- ✅ Docker support out of the box
+- ✅ Comprehensive README with deployment instructions
+
+### Step 4: Examine Your First Handler
 
 Open `src/handlers/hello.ts`:
 
 ```typescript
-import type { Handler } from 'gati';
+/**
+ * @handler GET /hello
+ * @description Simple hello world handler
+ */
 
-export const helloHandler: Handler = (req, res, gctx, lctx) => {
+import type { Handler } from '@gati-framework/runtime';
+
+export const handler: Handler = (req, res) => {
+  const name = req.query.name || 'World';
+  
   res.json({
-    message: 'Hello, World!',
-    timestamp: lctx.timestamp,
-    requestId: lctx.requestId,
+    message: `Hello, ${name}!`,
+    timestamp: new Date().toISOString(),
   });
 };
 ```
 
 This simple handler demonstrates the core handler signature:
-- `req` - HTTP request object
-- `res` - HTTP response object
-- `gctx` - Global context (shared across all requests)
-- `lctx` - Local context (specific to this request)
+- `req` - HTTP request object (Express.js compatible)
+- `res` - HTTP response object (Express.js compatible)
+- Access query parameters via `req.query`
+- Send JSON responses via `res.json()`
 
-### Step 4: Configure Your Routes
+**Runtime v2.0.0 Changes:**
+- Handlers now use standard Express.js `req` and `res` objects
+- Global context (`gctx`) and local context (`lctx`) are available via `req.gatiContext`
+- Simpler API for common use cases
 
-Open `gati.config.ts`:
+### Step 5: Understand the Application Entry Point
+
+Open `src/index.ts`:
 
 ```typescript
-import { helloHandler } from './src/handlers/hello';
+import { createApp, loadHandlers } from '@gati-framework/runtime';
 
-export default {
-  server: {
-    port: 3000,
-    host: 'localhost',
-  },
+async function main() {
+  const app = createApp({ 
+    port: Number(process.env['PORT']) || 3000, 
+    host: process.env['HOST'] || '0.0.0.0' 
+  });
   
-  routes: [
-    {
-      method: 'GET',
-      path: '/hello',
-      handler: helloHandler,
-    },
-  ],
+  await loadHandlers(app, './src/handlers', { 
+    basePath: '/api', 
+    verbose: true 
+  });
   
-  modules: (gctx) => {
-    // Initialize modules here
-  },
-};
+  await app.listen();
+  
+  console.log(`Server running on ${app.getConfig().host}:${app.getConfig().port}`);
+
+  // Graceful shutdown
+  const shutdown = async (signal: string) => {
+    console.log(`${signal} received, shutting down gracefully...`);
+    await app.shutdown();
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+main().catch((err) => {
+  console.error('Failed to start app', err);
+  process.exit(1);
+});
 ```
 
-### Step 5: Start the Development Server
+**Key Features:**
+- `createApp()` - Initialize the Gati application
+- `loadHandlers()` - Auto-discover and register handlers from a directory
+- `app.listen()` - Start the HTTP server
+- `app.shutdown()` - Graceful shutdown with cleanup
+- Environment variable support for PORT and HOST
+
+### Step 6: Start the Development Server
 
 ```bash
 pnpm dev
@@ -146,24 +214,46 @@ pnpm dev
 You should see:
 
 ```
-Gati server listening on http://localhost:3000
+Server running on 0.0.0.0:3000
 ```
 
-### Step 6: Test Your API
+The dev server includes:
+- ✅ **Hot reload** - Changes automatically restart the server
+- ✅ **File watching** - Monitors `src/**/*.ts` for changes
+- ✅ **Environment loading** - Auto-loads `.env` files
+- ✅ **Error reporting** - Clear error messages in development
+
+### Step 7: Test Your API
 
 In another terminal:
 
 ```bash
-curl http://localhost:3000/hello
+# Test hello endpoint
+curl http://localhost:3000/api/hello
+
+# With query parameter
+curl http://localhost:3000/api/hello?name=Alice
+
+# Test health check
+curl http://localhost:3000/health
 ```
 
-Response:
+Response from `/api/hello`:
 
 ```json
 {
   "message": "Hello, World!",
-  "timestamp": 1699564800000,
-  "requestId": "req_abc123"
+  "timestamp": "2025-11-10T12:00:00.000Z"
+}
+```
+
+Response from `/health`:
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-11-10T12:00:00.000Z",
+  "uptime": 42.5
 }
 ```
 

@@ -1,34 +1,41 @@
 # @gati-framework/cli
 
-Command-line interface for the Gati framework — create, develop, build, and deploy cloud‑native TypeScript services.
+Command-line interface for the Gati framework — develop, build, and deploy cloud‑native TypeScript services.
 
-> The canonical command is now **`gatic`**. The legacy `gati` alias will be removed in a future minor (target: >=0.6.0). Update your scripts to use `gatic`.
+**Version:** 1.0.0
 
-## Features (v0.4.x)
+## Overview
 
-- Project scaffolding: `gatic create`
-- Local development with file watching: `gatic dev`
-- Type-safe production builds: `gatic build`
-- Kubernetes-ready deployment manifests: `gatic deploy`
-- ESM-first, Windows/macOS/Linux friendly
+The Gati CLI provides essential tools for working with Gati applications:
 
-## Install
+- **Development server** with hot reload (`gati dev`)
+- **Production builds** with TypeScript compilation (`gati build`)
+- **Kubernetes deployment** to local and cloud environments (`gati deploy`)
+- **Project creation** via the `gatic` wrapper command
 
-Global:
+## Installation
 
-```bash
-npm i -g gatic            # thin wrapper package
-# or install the scoped package directly
-npm i -g @gati-framework/cli
-```
+### For New Projects (Recommended)
 
-Per-project (recommended for CI):
+Use **GatiC** to create new projects:
 
 ```bash
-pnpm add -D @gati-framework/cli
+npx gatic create my-app
+cd my-app
+
+# The 'gati' command is now available
+gati --help
 ```
 
-Invoke with npx/pnpm:
+**What is GatiC?**
+- `gatic` - Project creation command (thin wrapper)
+- `gati` - Development and deployment tools (this package)
+- Use `npx gatic create` to scaffold new projects
+- Use `gati dev`, `gati build`, `gati deploy` within projects
+
+### Manual Installation
+
+Install in an existing project:
 
 ```bash
 npx gatic --help          # preferred
