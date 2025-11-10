@@ -71,44 +71,42 @@ features:
 ## Quick Start
 
 ```bash
-# Show commands
-gatic --help
+# Create a new project with GatiC
+npx gatic create my-api
 
-# Create a new project
-gatic create my-api
+# Navigate to your project
+cd my-api
 
 # Start development server (with hot reload)
-cd my-api
-gatic dev
+pnpm dev
 
 # Build for production
-gatic build
+pnpm build
 
 # Deploy to Kubernetes
-gatic deploy prod
+gati deploy dev --local
 ```
 
 ## Your First Handler
 
 ```typescript
 // src/handlers/hello.ts
-import type { Handler } from '@gati-framework/core';
+import type { Handler } from '@gati-framework/runtime';
 
-export const handler: Handler = (req, res, gctx, lctx) => {
+export const handler: Handler = (req, res) => {
   const name = req.query.name || 'World';
   
   res.json({
     message: `Hello, ${name}!`,
     timestamp: new Date().toISOString(),
-    requestId: lctx.requestId
   });
 };
 ```
 
 ```bash
 # Access your handler
-curl http://localhost:3000/hello?name=Gati
-# {"message":"Hello, Gati!","timestamp":"2025-11-10T...","requestId":"..."}
+curl http://localhost:3000/api/hello?name=Gati
+# {"message":"Hello, Gati!","timestamp":"2025-11-10T..."}
 ```
 
 ## Why Gati?
@@ -125,11 +123,11 @@ curl http://localhost:3000/hello?name=Gati
 
 | Task | Traditional | Gati |
 |------|------------|------|
-| **Setup** | Install Express, configure routes, add middleware, set up logging | `gatic create my-api` |
-| **Deployment** | Write Dockerfile, K8s manifests, CI/CD pipeline, configure ingress | `gatic deploy prod` |
-| **Versioning** | Manually create `/v1`, `/v2` routes, maintain backward compatibility | Automatic timestamp routing |
-| **SDK Generation** | Manually write client code or use OpenAPI generators | `gatic generate` (fully typed) |
-| **Monitoring** | Set up Prometheus, Grafana, logging pipelines | Built-in dashboard at `/_control` |
+| **Setup** | Install Express, configure routes, add middleware, set up logging | `npx gatic create my-api` |
+| **Deployment** | Write Dockerfile, K8s manifests, CI/CD pipeline, configure ingress | `gati deploy dev --local` |
+| **Versioning** | Manually create `/v1`, `/v2` routes, maintain backward compatibility | Automatic timestamp routing (planned) |
+| **SDK Generation** | Manually write client code or use OpenAPI generators | `gati generate` (planned) |
+| **Monitoring** | Set up Prometheus, Grafana, logging pipelines | Built-in dashboard at `/_control` (planned) |
 
 ## Philosophy
 
@@ -141,28 +139,30 @@ Gati follows three core principles:
 
 ## What's Included
 
-- 📦 **Runtime** (`@gati-framework/runtime`) — HTTP server, handler engine, middleware
-- 🛠️ **CLI** (`@gati-framework/cli`) — Project scaffolding, dev server, deployment
-- 📘 **Core Types** (`@gati-framework/core`) — TypeScript definitions, interfaces
-- ☁️ **Cloud Plugins** — AWS EKS, GCP GKE, Azure AKS adapters (coming soon)
-- 🎨 **Control Panel** — Web UI for monitoring and management (coming soon)
+- 📦 **Runtime** (`@gati-framework/runtime@2.0.0`) — HTTP server, handler engine, middleware
+- 🛠️ **CLI** (`@gati-framework/cli@1.0.0`) — Development server, build tools, deployment
+- 🎯 **GatiC** (`gatic@0.1.0`) — Project scaffolding command
+- 📘 **Core Types** (`@gati-framework/core@0.4.1`) — TypeScript definitions, interfaces
+- ☁️ **Cloud Plugins** — AWS EKS, GCP GKE, Azure AKS adapters (in progress)
+- 🎨 **Control Panel** — Web UI for monitoring and management (planned)
 
 ## Current Status
 
-🚀 **Beta** — Core runtime and CLI are production-ready (v1.3.0)
+🚀 **Production Ready** — Core runtime (v2.0.0) and CLI (v1.0.0) are stable
 
 | Feature | Status |
 |---------|--------|
-| Handler Execution | ✅ Stable |
-| Structured Logging | ✅ Stable |
+| Handler Execution | ✅ Stable (v2.0.0) |
+| Structured Logging | ✅ Stable (Pino) |
 | CORS Middleware | ✅ Stable |
 | Hot Reload (Dev) | ✅ Stable |
 | Docker Support | ✅ Stable |
 | Kubernetes Manifests | ✅ Stable |
-| Local K8s Deployment | 🚧 In Progress |
-| API Versioning | 📅 Planned Q2 2025 |
-| SDK Generation | 📅 Planned Q3 2025 |
-| Control Panel | 📅 Planned Q3 2025 |
+| Local K8s Deployment | ✅ Stable (kind) |
+| Cloud Deployment | 🚧 In Progress (M2) |
+| API Versioning | 📅 Planned (Q2 2025) |
+| SDK Generation | 📅 Planned (Q3 2025) |
+| Control Panel | 📅 Planned (Q3 2025) |
 
 ## Community
 

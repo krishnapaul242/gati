@@ -14,20 +14,45 @@ Gati is an upcoming open-source JavaScript/TypeScript framework focused on **dev
 - ⚙️ **Modular architecture** — Handlers, modules, and effects.
 - ☁️ **Multi-region deployment ready** — Auto CDN + failover support.
 
-## 🪜 Get Started (Coming Soon)
+## 🪜 Get Started
 
 ```bash
-npx gati create my-app
+# Create a new Gati application
+npx gatic create my-app
+
+# Navigate to your project
 cd my-app
-gati dev
-# Make changes ...
-gati generate
-gati deploy prod
-````
+
+# Start development server with hot reload
+pnpm dev
+
+# Deploy to local Kubernetes
+gati deploy dev --local
+
+# Build for production
+pnpm build
+```
+
+**What is GatiC?**
+
+`gatic` is the official Gati Command - a thin wrapper around `@gati-framework/cli` that provides the `npx gatic` command for project scaffolding. Once your project is created, you'll use the `gati` command (installed locally in your project) for development, deployment, and other operations.`
 
 ## 📚 Documentation
 
-🚧 Docs are in progress. Stay tuned! Meanwhile, see the high-level [PRD](./Gati_PRD.md) for architecture and goals.
+� **Full documentation is available at [docs/](./docs/)**
+
+**Quick Links:**
+- [Getting Started](./docs/getting-started.md) - Create your first Gati app
+- [Handler Guide](./docs/handlers.md) - Write API handlers
+- [Module Guide](./docs/modules.md) - Create reusable modules
+- [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) - Deploy to Kubernetes
+- [Architecture](./docs/architecture.md) - Understand Gati's design
+
+**Package Versions:**
+- `@gati-framework/core` - v0.4.1 (Types and base configuration)
+- `@gati-framework/runtime` - v2.0.0 (Runtime execution engine)
+- `@gati-framework/cli` - v1.0.0 (Development and deployment tools)
+- `gatic` - v0.1.0 (Project scaffolding command)
 
 ## 🧱 Project Structure (Monorepo)
 
@@ -52,15 +77,15 @@ gati deploy prod
 
 ## 🚀 Roadmap
 
-| Milestone                               | Status     | Target |
-| --------------------------------------- | ---------- | ------ |
-| M1 — Basic handler runtime + CLI        | 🚧 Started | Q1     |
-| M2 — Kubernetes deployment + AWS plugin | ⏳ Pending  | Q2     |
-| M3 — Versioned routing engine           | ⏳ Pending  | Q2     |
-| M4 — Control Panel (read-only)          | ⏳ Pending  | Q3     |
-| M5 — Codegen + SDK ship                 | ⏳ Pending  | Q3     |
-| M6 — CDN + SSL Support                  | ⏳ Pending  | Q4     |
-| M7 — API Playground                     | ⏳ Pending  | Q4     |
+| Milestone                               | Status        | Target |
+| --------------------------------------- | ------------- | ------ |
+| M1 — Basic handler runtime + CLI        | ✅ Complete   | Q1     |
+| M2 — Kubernetes deployment + AWS plugin | 🚧 In Progress| Q2     |
+| M3 — Versioned routing engine           | ⏳ Pending    | Q2     |
+| M4 — Control Panel (read-only)          | ⏳ Pending    | Q3     |
+| M5 — Codegen + SDK ship                 | ⏳ Pending    | Q3     |
+| M6 — CDN + SSL Support                  | ⏳ Pending    | Q4     |
+| M7 — API Playground                     | ⏳ Pending    | Q4     |
 
 See more in the [Product Roadmap](./Gati_PRD.md#7--technical-milestones).
 
