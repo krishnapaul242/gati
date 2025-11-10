@@ -1,5 +1,11 @@
 # @gati-framework/cli
 
+## 1.0.0
+
+### Major Changes
+
+- Updated file generator and fixed create command
+
 ## 0.3.0
 
 ### Minor Changes

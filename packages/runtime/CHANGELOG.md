@@ -1,5 +1,37 @@
 # @gati-framework/runtime
 
+## 2.0.0
+
+### Major Changes
+
+- Updated file generator and fixed create command
+- 1612aa4: # Initial Release of @gati-framework/runtime
+
+  **WHAT:** First major release (v1.0.0) of the runtime execution engine for Gati applications.
+
+  **WHY:** Extracted runtime from monorepo core to enable standalone deployments. Scaffolded projects can now use `@gati-framework/runtime` as a dependency to execute handlers.
+
+  **FEATURES:**
+  - ✅ GatiApp class for HTTP server management
+  - ✅ Automatic handler discovery from file system
+  - ✅ Convention-based routing (e.g., `/handlers/hello.ts` → `GET /hello`)
+  - ✅ Middleware pipeline support
+  - ✅ Global and local context management
+  - ✅ Module registry for dependency injection
+  - ✅ Full TypeScript support with type exports
+
+  **HOW TO USE:**
+
+  ```typescript
+  import { createApp, loadHandlers } from '@gati-framework/runtime';
+
+  const app = createApp({ port: 3000 });
+  await loadHandlers(app, './src/handlers');
+  await app.listen();
+  ```
+
+  **BREAKING CHANGES:** None (initial release)
+
 ## 1.3.0
 
 ### Minor Changes
@@ -92,13 +124,13 @@
   const customLogger = createLogger({
     name: 'my-app',
     level: 'debug',
-    pretty: false // Force JSON output
+    pretty: false, // Force JSON output
   });
 
   // Logging happens automatically in app-core
-  const app = createApp({ 
+  const app = createApp({
     port: 3000,
-    logger: { level: 'debug' } // Configure app logger
+    logger: { level: 'debug' }, // Configure app logger
   });
   ```
 
@@ -135,17 +167,19 @@
   ```typescript
   import { createApp, createCorsMiddleware } from '@gati-framework/runtime';
 
-  const app = createApp({ 
+  const app = createApp({
     port: 3000,
-    timeout: 30000 // 30 second request timeout
+    timeout: 30000, // 30 second request timeout
   });
 
   // Add CORS middleware
-  app.use(createCorsMiddleware({
-    origin: 'https://myapp.com',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-  }));
+  app.use(
+    createCorsMiddleware({
+      origin: 'https://myapp.com',
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    })
+  );
 
   await app.listen();
 
