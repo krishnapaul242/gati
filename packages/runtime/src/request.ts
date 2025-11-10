@@ -33,7 +33,7 @@ export function createRequest(options: RequestOptions): Request {
     const parsedQuery = parsed.query;
     query = Object.entries(parsedQuery).reduce((acc, [key, value]) => {
       if (value !== undefined) {
-        acc[key] = value as string | string[];
+        acc[key] = value;
       }
       return acc;
     }, {} as QueryParams);
