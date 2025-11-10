@@ -2,12 +2,14 @@
 
 Command-line interface for the Gati framework — create, develop, build, and deploy cloud‑native TypeScript services.
 
-## Features (v0.3.0)
+> The canonical command is now **`gatic`**. The legacy `gati` alias will be removed in a future minor (target: >=0.6.0). Update your scripts to use `gatic`.
 
-- Project scaffolding: `gati create`
-- Local development with file watching: `gati dev`
-- Type-safe production builds: `gati build`
-- Kubernetes-ready deployment manifests: `gati deploy`
+## Features (v0.4.x)
+
+- Project scaffolding: `gatic create`
+- Local development with file watching: `gatic dev`
+- Type-safe production builds: `gatic build`
+- Kubernetes-ready deployment manifests: `gatic deploy`
 - ESM-first, Windows/macOS/Linux friendly
 
 ## Install
@@ -15,9 +17,9 @@ Command-line interface for the Gati framework — create, develop, build, and de
 Global:
 
 ```bash
+npm i -g gatic            # thin wrapper package
+# or install the scoped package directly
 npm i -g @gati-framework/cli
-# or
-pnpm add -g @gati-framework/cli
 ```
 
 Per-project (recommended for CI):
@@ -29,9 +31,10 @@ pnpm add -D @gati-framework/cli
 Invoke with npx/pnpm:
 
 ```bash
+npx gatic --help          # preferred
+# legacy (will deprecate)
 npx gati --help
-# or
-pnpm exec gati --help
+pnpm exec gatic --help
 ```
 
 ## Usage
@@ -39,10 +42,11 @@ pnpm exec gati --help
 ### Create a new project
 
 ```bash
-gati create my-app
+gatic create my-app
 ```
 
 This scaffolds a minimal TypeScript project with:
+
 - `@gati-framework/core` types
 - `tsconfig` preconfigured
 - Example handler(s)
@@ -50,7 +54,7 @@ This scaffolds a minimal TypeScript project with:
 ### Develop (hot reload)
 
 ```bash
-gati dev
+gatic dev
 ```
 
 - Loads environment variables
@@ -59,7 +63,7 @@ gati dev
 ### Build for production
 
 ```bash
-gati build
+gatic build
 ```
 
 - Validates project structure
@@ -69,7 +73,7 @@ gati build
 ### Deploy (generate manifests & local cluster)
 
 ```bash
-gati deploy dev --dry-run
+gatic deploy dev --dry-run
 ```
 
 - Generates:
@@ -83,14 +87,14 @@ Options (new additions in 0.3.0 highlighted):
 - `-e, --env <environment>`: dev | staging | prod
 - `--dry-run`: preview only
 - `--skip-build`: skip Docker build step (future)
- - `-p, --provider <provider>`: kubernetes | aws | gcp | azure (kubernetes default; cloud providers are WIP)
- - `--local` (0.3.0): force local kind cluster deployment flow
- - `--cluster-name <name>` (0.3.0): override kind cluster name (default: `gati-local`)
- - `--skip-cluster` (0.3.0): assume cluster already exists, skip creation
- - `--health-check-path <path>` (0.3.0): run an HTTP GET probe after rollout (e.g. `/health`)
- - `--timeout <seconds>` (0.3.0): rollout timeout (default 120)
- - `--port-forward` (0.3.0): start a persistent `kubectl port-forward` session (Ctrl+C to stop)
- - `--auto-tag` (0.3.0): tag image with `YYYYMMDD-HHMMSS-<gitsha>` for reproducible builds
+- `-p, --provider <provider>`: kubernetes | aws | gcp | azure (kubernetes default; cloud providers are WIP)
+- `--local` (0.3.0): force local kind cluster deployment flow
+- `--cluster-name <name>` (0.3.0): override kind cluster name (default: `gati-local`)
+- `--skip-cluster` (0.3.0): assume cluster already exists, skip creation
+- `--health-check-path <path>` (0.3.0): run an HTTP GET probe after rollout (e.g. `/health`)
+- `--timeout <seconds>` (0.3.0): rollout timeout (default 120)
+- `--port-forward` (0.3.0): start a persistent `kubectl port-forward` session (Ctrl+C to stop)
+- `--auto-tag` (0.3.0): tag image with `YYYYMMDD-HHMMSS-<gitsha>` for reproducible builds
 - `-v, --verbose`: print helpful follow‑up commands
 
 ## Example
@@ -121,7 +125,7 @@ metadata:
 ### Local cluster deployment with health probe & auto-tag
 
 ```bash
-gati deploy dev --local --auto-tag --health-check-path /health --port-forward --timeout 240
+gatic deploy dev --local --auto-tag --health-check-path /health --port-forward --timeout 240
 ```
 
 Behaviors:
@@ -167,7 +171,7 @@ kubectl logs deployment/my-app -n <namespace>
 ## Contributing
 
 Issues and PRs are welcome at:
-https://github.com/krishnapaul242/gati
+<https://github.com/krishnapaul242/gati>
 
 ## License
 

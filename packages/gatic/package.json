@@ -1,0 +1,38 @@
+{
+  "name": "gatic",
+  "version": "0.1.0",
+  "description": "Thin executable wrapper that runs @gati-framework/cli, providing the 'gatic' npx command.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "gatic": "./bin/gatic.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "dependencies": {
+    "@gati-framework/cli": "^0.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "gatic",
+    "gati",
+    "cli",
+    "framework",
+    "cloud-native",
+    "kubernetes",
+    "deployment"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krishnapaul242/gati.git",
+    "directory": "packages/gatic"
+  },
+  "bugs": {
+    "url": "https://github.com/krishnapaul242/gati/issues"
+  },
+  "homepage": "https://github.com/krishnapaul242/gati#readme"
+}
