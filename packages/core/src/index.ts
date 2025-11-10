@@ -3,3 +3,6 @@ export type { AppConfig } from './types/app';
 
 // Re-export GatiApp type for CLI usage
 export type { GatiApp } from './types/app';
+
+// Cloud provider types and interfaces
+export * from './cloud-provider.js';
