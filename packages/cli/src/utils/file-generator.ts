@@ -104,7 +104,7 @@ async function generateDefaultTemplate(
         },
         dependencies: {
           '@gati-framework/core': '^0.4.1',
-          '@gati-framework/runtime': '^1.3.0',
+          '@gati-framework/runtime': '^2.0.0',
         },
         devDependencies: {
           '@types/node': '^20.10.0',
@@ -322,7 +322,7 @@ async function main() {
   // Graceful shutdown
   const shutdown = async (signal: string) => {
     console.log(\`\${signal} received, shutting down gracefully...\`);
-    await app.shutdown();
+    await app.close();
     process.exit(0);
   };
 
@@ -414,6 +414,15 @@ APP_VERSION=0.1.0
 # Logging
 LOG_LEVEL=info
 LOG_PRETTY=true
+`
+  );
+
+  // .npmrc - Disable workspace features for standalone project
+  await writeFile(
+    join(projectPath, '.npmrc'),
+    `# Standalone project - not part of a workspace
+workspace-root=false
+shamefully-hoist=false
 `
   );
 
@@ -682,7 +691,7 @@ async function generateMinimalTemplate(
         },
         dependencies: {
           '@gati-framework/core': '^0.4.1',
-          '@gati-framework/runtime': '^1.3.0',
+          '@gati-framework/runtime': '^2.0.0',
         },
         devDependencies: {
           '@types/node': '^20.10.0',
@@ -777,7 +786,7 @@ async function main() {
   // Graceful shutdown
   const shutdown = async (signal: string) => {
     console.log(\`\${signal} received, shutting down...\`);
-    await app.shutdown();
+    await app.close();
     process.exit(0);
   };
 
@@ -808,6 +817,15 @@ coverage/
     join(projectPath, '.env.example'),
     `PORT=3000
 NODE_ENV=development
+`
+  );
+
+  // .npmrc - Disable workspace features for standalone project
+  await writeFile(
+    join(projectPath, '.npmrc'),
+    `# Standalone project - not part of a workspace
+workspace-root=false
+shamefully-hoist=false
 `
   );
 
