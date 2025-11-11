@@ -91,6 +91,7 @@ async function generateDefaultTemplate(
       {
         name: projectName,
         version: '0.1.0',
+        type: 'module',
         description,
         author,
         license: 'MIT',
@@ -104,7 +105,7 @@ async function generateDefaultTemplate(
         },
         dependencies: {
           '@gati-framework/core': '^0.4.2',
-          '@gati-framework/runtime': '^2.0.0',
+          '@gati-framework/runtime': '^2.0.2',
         },
         devDependencies: {
           '@gati-framework/cli': '^1.0.1',
@@ -680,6 +681,7 @@ async function generateMinimalTemplate(
       {
         name: projectName,
         version: '0.1.0',
+        type: 'module',
         description,
         author,
         license: 'MIT',
@@ -692,7 +694,7 @@ async function generateMinimalTemplate(
         },
         dependencies: {
           '@gati-framework/core': '^0.4.2',
-          '@gati-framework/runtime': '^2.0.0',
+          '@gati-framework/runtime': '^2.0.2',
         },
         devDependencies: {
           '@gati-framework/cli': '^1.0.1',
@@ -881,3 +883,4 @@ export const handler: Handler = (req, res) => {
 `
   );
 }
+

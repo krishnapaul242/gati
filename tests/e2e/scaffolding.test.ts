@@ -165,8 +165,8 @@ describe('GatiC Scaffolding E2E Tests', () => {
       const pkgJsonPath = join(projectPath, 'package.json');
       const pkgJson = JSON.parse(await readFile(pkgJsonPath, 'utf-8')) as PackageJson;
 
-      expect(pkgJson.dependencies['@gati-framework/runtime']).toBe('^2.0.0');
-      expect(pkgJson.dependencies['@gati-framework/core']).toBe('^0.4.1');
+      expect(pkgJson.dependencies['@gati-framework/runtime']).toBe('^2.0.2');
+      expect(pkgJson.dependencies['@gati-framework/core']).toBe('^0.4.2');
     });
 
     it('should have required devDependencies', async () => {

@@ -6,8 +6,8 @@
 import { readdirSync, statSync } from 'fs';
 import { join, extname } from 'path';
 import type { GatiApp } from './app-core.js';
-import type { Handler } from './types/handler';
-import { logger } from './logger';
+import type { Handler } from './types/handler.js';
+import { logger } from './logger.js';
 
 /**
  * Handler file metadata

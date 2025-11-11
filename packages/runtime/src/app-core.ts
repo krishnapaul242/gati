@@ -5,17 +5,17 @@
 
 import { createServer } from 'http';
 import type { Server, IncomingMessage, ServerResponse } from 'http';
-import { createRequest } from './request';
-import { createResponse } from './response';
-import { createGlobalContext, createLocalContext } from './context-manager';
-import { createRouteManager } from './route-manager';
-import type { RouteManager } from './route-manager';
-import { createMiddlewareManager } from './middleware';
-import type { MiddlewareManager } from './middleware';
-import { executeHandler } from './handler-engine';
-import type { Handler, GlobalContext, Middleware, ErrorMiddleware } from './types';
-import { createLogger } from './logger';
-import type { LoggerOptions } from './logger';
+import { createRequest } from './request.js';
+import { createResponse } from './response.js';
+import { createGlobalContext, createLocalContext } from './context-manager.js';
+import { createRouteManager } from './route-manager.js';
+import type { RouteManager } from './route-manager.js';
+import { createMiddlewareManager } from './middleware.js';
+import type { MiddlewareManager } from './middleware.js';
+import { executeHandler } from './handler-engine.js';
+import type { Handler, GlobalContext, Middleware, ErrorMiddleware } from './types/index.js';
+import { createLogger } from './logger.js';
+import type { LoggerOptions } from './logger.js';
 
 /**
  * Application configuration options

@@ -3,9 +3,9 @@
  * @description Handler function signature for Gati framework
  */
 
-import type { Request } from './request';
-import type { Response } from './response';
-import type { GlobalContext, LocalContext } from './context';
+import type { Request } from './request.js';
+import type { Response } from './response.js';
+import type { GlobalContext, LocalContext } from './context.js';
 
 /**
  * Handler function signature

@@ -52,17 +52,22 @@ export function createLogger(options: LoggerOptions = {}) {
 
   // Pretty printing for development
   if (pretty) {
-    return pino({
-      ...config,
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'SYS:HH:MM:ss',
-          ignore: 'pid,hostname',
+    try {
+      return pino({
+        ...config,
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'SYS:HH:MM:ss',
+            ignore: 'pid,hostname',
+          },
         },
-      },
-    });
+      });
+    } catch {
+      // If pino-pretty is not available, fall back to regular logging
+      return pino(config);
+    }
   }
 
   // JSON logging for production

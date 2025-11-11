@@ -1,12 +1,12 @@
 /**
  * @module runtime/route-manager
- * @description Route registration and management for Gati framework
+ * @description Route registration and matching
  */
 
-import type { Route, RouteMatch, RouterConfig } from './types/route';
-import type { Handler } from './types/handler';
-import type { HttpMethod } from './types/request';
-import { parseRoute, normalizePath, extractParams } from './route-parser';
+import type { Route, RouteMatch, RouterConfig } from './types/route.js';
+import type { Handler } from './types/handler.js';
+import type { HttpMethod } from './types/request.js';
+import { parseRoute, normalizePath, extractParams } from './route-parser.js';
 
 /**
  * Route manager for registering and matching routes

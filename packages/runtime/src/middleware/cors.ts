@@ -3,7 +3,7 @@
  * @description CORS (Cross-Origin Resource Sharing) middleware for Gati framework
  */
 
-import type { Middleware } from '../types/middleware';
+import type { Middleware } from '../types/middleware.js';
 
 /**
  * CORS middleware configuration options

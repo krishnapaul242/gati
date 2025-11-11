@@ -9,12 +9,12 @@ import type {
   MiddlewareEntry,
   MiddlewareOptions,
   NextFunction,
-} from './types/middleware';
-import type { Request, Response, GlobalContext, LocalContext } from './types';
-import { logger } from './logger';
+} from './types/middleware.js';
+import type { Request, Response, GlobalContext, LocalContext } from './types/index.js';
+import { logger } from './logger.js';
 
 // Re-export middleware types for external use
-export type { Middleware, ErrorMiddleware } from './types/middleware';
+export type { Middleware, ErrorMiddleware } from './types/middleware.js';
 
 /**
  * Middleware manager for organizing and executing middleware chain
