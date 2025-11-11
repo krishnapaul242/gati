@@ -36,90 +36,60 @@ export default defineConfig({
     
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Guide', link: '/guide/getting-started' },
-      { text: 'API Reference', link: '/api/handler' },
-      { text: 'Examples', link: '/examples/hello-world' },
+      { text: 'Getting Started', link: '/onboarding/quick-start' },
+      { text: 'Guides', link: '/guides/handlers' },
+      { text: 'API', link: '/api-reference/handler' },
       {
-        text: 'v1.3.0',
+        text: 'More',
         items: [
-          { text: 'Changelog', link: 'https://github.com/krishnapaul242/gati/releases' },
-          { text: 'Contributing', link: '/contributing' }
+          { text: 'Examples', link: '/examples/hello-world' },
+          { text: 'Architecture', link: '/architecture/overview' },
+          { text: 'Changelog', link: '/changelog/' },
+          { text: 'Contributing', link: '/contributing/' }
         ]
       }
     ],
 
     sidebar: {
-      '/guide/': [
+      '/onboarding/': [
         {
-          text: 'Introduction',
+          text: 'Getting Started',
           items: [
-            { text: 'What is Gati?', link: '/guide/what-is-gati' },
-            { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Quick Start', link: '/guide/quick-start' }
+            { text: 'What is Gati?', link: '/onboarding/what-is-gati' },
+            { text: 'Quick Start', link: '/onboarding/quick-start' },
+            { text: 'Getting Started', link: '/onboarding/getting-started' },
+            { text: 'GatiC CLI', link: '/onboarding/gatic' }
           ]
-        },
+        }
+      ],
+      '/guides/': [
         {
           text: 'Core Concepts',
           items: [
-            { text: 'Handlers', link: '/guide/handlers' },
-            { text: 'Modules', link: '/guide/modules' },
-            { text: 'Context (gctx & lctx)', link: '/guide/context' },
-            { text: 'Middleware', link: '/guide/middleware' }
-          ]
-        },
-        {
-          text: 'Features',
-          items: [
-            { text: 'Request Handling', link: '/guide/request-handling' },
-            { text: 'Structured Logging', link: '/guide/logging' },
-            { text: 'Error Handling', link: '/guide/error-handling' },
-            { text: 'CORS', link: '/guide/cors' }
+            { text: 'Handlers', link: '/guides/handlers' },
+            { text: 'Modules', link: '/guides/modules' },
+            { text: 'Context', link: '/guides/context' },
+            { text: 'Middleware', link: '/guides/middleware' },
+            { text: 'Error Handling', link: '/guides/error-handling' }
           ]
         },
         {
           text: 'Deployment',
           items: [
-            { text: 'Building for Production', link: '/guide/building' },
-            { text: 'Docker', link: '/guide/docker' },
-            { text: 'Kubernetes', link: '/guide/kubernetes' },
-            { text: 'Environment Config', link: '/guide/environment' }
-          ]
-        },
-        {
-          text: 'Advanced',
-          items: [
-            { text: 'API Versioning', link: '/guide/versioning' },
-            { text: 'TypeScript Config', link: '/guide/typescript-config' },
-            { text: 'Architecture', link: '/guide/architecture' }
+            { text: 'Deployment Guide', link: '/guides/deployment' },
+            { text: 'Kubernetes', link: '/guides/kubernetes' },
+            { text: 'TypeScript Config', link: '/guides/typescript-config' }
           ]
         }
       ],
-      '/api/': [
+      '/api-reference/': [
         {
           text: 'API Reference',
           items: [
-            { text: 'Handler', link: '/api/handler' },
-            { text: 'Request', link: '/api/request' },
-            { text: 'Response', link: '/api/response' },
-            { text: 'Context', link: '/api/context' },
-            { text: 'Middleware', link: '/api/middleware' }
-          ]
-        },
-        {
-          text: 'Runtime',
-          items: [
-            { text: 'createApp', link: '/api/create-app' },
-            { text: 'GatiApp', link: '/api/gati-app' },
-            { text: 'Logger', link: '/api/logger' }
-          ]
-        },
-        {
-          text: 'CLI',
-          items: [
-            { text: 'gatic create', link: '/api/cli-create' },
-            { text: 'gatic dev', link: '/api/cli-dev' },
-            { text: 'gatic build', link: '/api/cli-build' },
-            { text: 'gatic deploy', link: '/api/cli-deploy' }
+            { text: 'Handler', link: '/api-reference/handler' },
+            { text: 'Request', link: '/api-reference/request' },
+            { text: 'Response', link: '/api-reference/response' },
+            { text: 'Context', link: '/api-reference/context' }
           ]
         }
       ],
@@ -127,11 +97,40 @@ export default defineConfig({
         {
           text: 'Examples',
           items: [
-            { text: 'Hello World', link: '/examples/hello-world' },
-            { text: 'REST API', link: '/examples/rest-api' },
-            { text: 'With Database', link: '/examples/database' },
-            { text: 'Authentication', link: '/examples/auth' },
-            { text: 'File Upload', link: '/examples/file-upload' }
+            { text: 'Hello World', link: '/examples/hello-world' }
+          ]
+        }
+      ],
+      '/architecture/': [
+        {
+          text: 'Architecture',
+          items: [
+            { text: 'Overview', link: '/architecture/overview' },
+            { text: 'Design Decisions', link: '/architecture/design-decisions' },
+            { text: 'Milestones', link: '/architecture/milestones' },
+            { text: 'Roadmap', link: '/architecture/roadmap' },
+            { text: 'MVP Roadmap', link: '/architecture/mvp-roadmap' }
+          ]
+        }
+      ],
+      '/changelog/': [
+        {
+          text: 'Changelog',
+          items: [
+            { text: 'Overview', link: '/changelog/' },
+            { text: 'Current State', link: '/changelog/current-state' },
+            { text: 'MVP Completion', link: '/changelog/mvp-completion' }
+          ]
+        }
+      ],
+      '/contributing/': [
+        {
+          text: 'Contributing',
+          items: [
+            { text: 'Contributing Guide', link: '/contributing/' },
+            { text: 'Agentic Development', link: '/contributing/agentic-development' },
+            { text: 'Release Guide', link: '/contributing/release-guide' },
+            { text: 'Codebase Structure', link: '/contributing/codebase-structure' }
           ]
         }
       ]
