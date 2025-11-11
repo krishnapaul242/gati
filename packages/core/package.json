@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/core",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Gati core runtime types and base config",
   "license": "MIT",
   "type": "module",
