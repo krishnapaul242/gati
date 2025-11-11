@@ -8,8 +8,8 @@ import {
   cleanupLocalContext,
   setState,
   getState,
-} from '../../../src/runtime/local-context';
-import type { LocalContext } from '../../../src/runtime/types/context';
+} from '@gati-framework/runtime/local-context';
+import type { LocalContext } from '@gati-framework/runtime/types/context';
 
 describe('LocalContext', () => {
   let lctx: LocalContext;

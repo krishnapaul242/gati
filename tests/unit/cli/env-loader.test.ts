@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { resolve } from 'path';
-import { loadEnv, loadDevEnv } from '../../../src/cli/utils/env-loader';
+import { loadEnv, loadDevEnv } from '@gati/cli/utils/env-loader';
 
 const TEST_DIR = resolve(__dirname, 'test-env-loader');
 

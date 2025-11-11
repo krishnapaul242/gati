@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 
 import { describe, it, expect, vi } from 'vitest';
-import { createResponse } from '@/runtime/response';
+import { createResponse } from '@gati-framework/runtime/response';
 import type { ServerResponse } from 'http';
 
 describe('Response', () => {

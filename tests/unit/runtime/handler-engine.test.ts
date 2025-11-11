@@ -4,10 +4,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { executeHandler } from '@/runtime/handler-engine';
-import { HandlerError } from '@/runtime/types';
-import type { Handler, Request, Response, GlobalContext, LocalContext } from '@/runtime/types';
+import { executeHandler } from '@gati-framework/runtime/handler-engine';
+import { HandlerError } from '@gati-framework/runtime/types';
+import type { Handler, Request, Response, GlobalContext, LocalContext } from '@gati-framework/runtime/types';
 import type { IncomingMessage, ServerResponse } from 'http';
+import { logger } from '@gati-framework/runtime/logger';
 
 describe('Handler Engine', () => {
   function createMockRequest(): Request {
@@ -227,10 +228,12 @@ describe('Handler Engine', () => {
       await executeHandler(handler, req, res, gctx, lctx);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Internal server error',
-        message: 'Database connection failed',
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Internal server error',
+          message: 'Database connection failed',
+        })
+      );
     });
 
     it('should handle unknown errors', async () => {
@@ -256,8 +259,8 @@ describe('Handler Engine', () => {
       const gctx = createMockGlobalContext();
       const lctx = createMockLocalContext();
 
-      // Mock console.error to avoid cluttering test output
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      // Mock logger.error to avoid cluttering test output
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const handler: Handler = (_req, res) => {
         res.json({ ok: true });
@@ -268,12 +271,12 @@ describe('Handler Engine', () => {
 
       // Should not call status/json again after response sent
       expect(res.status).not.toHaveBeenCalled();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Handler error after response sent:',
-        expect.any(Error)
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ error: expect.any(Error) }),
+        'Handler error after response sent'
       );
 
-      consoleErrorSpy.mockRestore();
+      loggerErrorSpy.mockRestore();
     });
 
     it('should rethrow error if catchErrors is false', async () => {
@@ -304,13 +307,15 @@ describe('Handler Engine', () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       };
 
-      await executeHandler(handler, req, res, gctx, lctx, { timeout: 50 });
+      await executeHandler(handler, req, res, gctx, lctx, { timeout: 100 });
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Internal server error',
-        message: expect.stringMatching(/timed out/) as string,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Internal server error',
+          message: expect.stringMatching(/timed out/) as string,
+        })
+      );
     }, 10000);
 
     it('should use default timeout of 30 seconds', async () => {

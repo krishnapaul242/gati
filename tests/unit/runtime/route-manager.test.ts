@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { createRouteManager, RouteManager } from '@/runtime/route-manager';
-import type { Handler } from '@/runtime/types';
+import { createRouteManager, RouteManager } from '@gati-framework/runtime/route-manager';
+import type { Handler } from '@gati-framework/runtime/types';
 
 describe('Route Manager', () => {
   function createMockHandler(name: string): Handler {

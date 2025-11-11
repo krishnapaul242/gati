@@ -4,14 +4,14 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createModuleLoader } from '@/runtime/module-loader';
-import { createGlobalContext } from '@/runtime/global-context';
+import { createModuleLoader } from '@gati-framework/runtime/module-loader';
+import { createGlobalContext } from '@gati-framework/runtime/global-context';
 import {
   ModuleError,
   CircularDependencyError,
   ModuleInitializationError,
-} from '@/runtime/types/module';
-import type { Module, GlobalContext } from '@/runtime/types';
+} from '@gati-framework/runtime/types/module';
+import type { Module, GlobalContext } from '@gati-framework/runtime/types';
 
 describe('ModuleLoader', () => {
   let gctx: GlobalContext;

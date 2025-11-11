@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   ContextManager,
   createContextManager,
-} from '../../../src/runtime/context-manager';
+} from '@gati-framework/runtime/context-manager';
 
 describe('ContextManager', () => {
   let manager: ContextManager;

@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { createApp, GatiApp } from '@/runtime/app-core';
-import type { Request, Response, Middleware } from '@/runtime/types';
+import { createApp, GatiApp } from '@gati-framework/runtime/app-core';
+import type { Request, Response, Middleware } from '@gati-framework/runtime/types';
 
 describe('App Core', () => {
   let app: GatiApp;
