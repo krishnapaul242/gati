@@ -3,7 +3,7 @@
  * @description Route pattern parsing and compilation for Gati framework
  */
 
-import type { RoutePattern } from './types/route';
+import type { RoutePattern } from './types/route.js';
 
 /**
  * Parse a route path pattern and compile it into a RoutePattern

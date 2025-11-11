@@ -1,6 +1,6 @@
 /**
  * @module runtime/handler-engine
- * @description Core handler execution engine for Gati framework
+ * @description Handler execution engine with error handling
  */
 
 import type {
@@ -10,9 +10,9 @@ import type {
   Response,
   GlobalContext,
   LocalContext,
-} from './types';
-import { HandlerError } from './types';
-import { logger } from './logger';
+} from './types/index.js';
+import { HandlerError } from './types/index.js';
+import { logger } from './logger.js';
 
 /**
  * Default handler execution timeout (30 seconds)

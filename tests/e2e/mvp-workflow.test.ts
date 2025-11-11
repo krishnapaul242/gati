@@ -113,7 +113,7 @@ describe('MVP Workflow Integration Test', () => {
 
       // Verify runtime dependency
       expect(pkg.dependencies).toHaveProperty('@gati-framework/runtime');
-      expect(pkg.dependencies['@gati-framework/runtime']).toMatch(/\^2\.0\.0/);
+      expect(pkg.dependencies['@gati-framework/runtime']).toMatch(/\^2\.0\.2/);
 
       // Verify core dependency
       expect(pkg.dependencies).toHaveProperty('@gati-framework/core');

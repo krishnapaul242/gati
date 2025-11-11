@@ -7,11 +7,11 @@ import type {
   Module,
   ModuleMetadata,
   ModuleState,
-} from './types/module';
+} from './types/module.js';
 import {
   ModuleError,
   ModuleNotFoundError,
-} from './types/module';
+} from './types/module.js';
 
 /**
  * Module registry for tracking loaded modules

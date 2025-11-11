@@ -1,10 +1,10 @@
 /**
  * @module runtime/types/route
- * @description Route and routing type definitions for Gati framework
+ * @description Route and router type definitions
  */
 
-import type { Handler } from './handler';
-import type { HttpMethod } from './request';
+import type { Handler } from './handler.js';
+import type { HttpMethod } from './request.js';
 
 /**
  * Route definition

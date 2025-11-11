@@ -3,19 +3,19 @@
  * @description Module loader with dependency injection and lifecycle management
  */
 
-import type { GlobalContext } from './types/context';
+import type { GlobalContext } from './types/context.js';
 import type {
   Module,
   ModuleLoaderConfig,
-} from './types/module';
+} from './types/module.js';
 import {
   ModuleError,
   ModuleInitializationError,
   CircularDependencyError,
-} from './types/module';
-import type { ModuleRegistry } from './module-registry';
-import { createModuleRegistry } from './module-registry';
-import { logger } from './logger';
+} from './types/module.js';
+import type { ModuleRegistry } from './module-registry.js';
+import { createModuleRegistry } from './module-registry.js';
+import { logger } from './logger.js';
 
 /**
  * Module loader with dependency injection

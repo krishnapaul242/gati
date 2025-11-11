@@ -4,14 +4,14 @@
  * Manages both global and local contexts with lifecycle hooks
  */
 
-import type { GlobalContext, LocalContext } from './types/context';
-import { createGlobalContext, shutdownGlobalContext } from './global-context';
-import { createLocalContext, cleanupLocalContext } from './local-context';
+import type { GlobalContext, LocalContext } from './types/context.js';
+import { createGlobalContext, shutdownGlobalContext } from './global-context.js';
+import { createLocalContext, cleanupLocalContext } from './local-context.js';
 
 export { createGlobalContext, createLocalContext };
 export { shutdownGlobalContext, cleanupLocalContext };
-export { registerModule, getModule } from './global-context';
-export { setState, getState } from './local-context';
+export { registerModule, getModule } from './global-context.js';
+export { setState, getState } from './local-context.js';
 
 /**
  * Context manager for handling global and local contexts
@@ -122,3 +122,4 @@ export class ContextManager {
 export function createContextManager(): ContextManager {
   return new ContextManager();
 }
+

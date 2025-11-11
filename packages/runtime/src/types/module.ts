@@ -3,7 +3,7 @@
  * @description Module type definitions for Gati framework
  */
 
-import type { GlobalContext } from './context';
+import type { GlobalContext } from './context.js';
 
 /**
  * Module lifecycle state

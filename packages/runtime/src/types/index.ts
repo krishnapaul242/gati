@@ -9,7 +9,7 @@ export type {
   LocalContext,
   GlobalContextOptions,
   LocalContextOptions,
-} from './context';
+} from './context.js';
 
 export type {
   HttpMethod,
@@ -18,17 +18,17 @@ export type {
   PathParams,
   Request,
   RequestOptions,
-} from './request';
+} from './request.js';
 
 export type {
   HttpStatusCode,
   HttpHeaders as ResponseHeaders,
   Response,
   ResponseOptions,
-} from './response';
+} from './response.js';
 
-export type { Handler, HandlerExecutionOptions } from './handler';
-export { HandlerError } from './handler';
+export type { Handler, HandlerExecutionOptions } from './handler.js';
+export { HandlerError } from './handler.js';
 
 export type {
   Route,
@@ -36,7 +36,7 @@ export type {
   RouteMatch,
   RouteOptions,
   RouterConfig,
-} from './route';
+} from './route.js';
 
 export type {
   Middleware,
@@ -44,18 +44,18 @@ export type {
   NextFunction,
   MiddlewareOptions,
   MiddlewareEntry,
-} from './middleware';
+} from './middleware.js';
 
 export type {
   Module,
   ModuleState,
   ModuleMetadata,
   ModuleLoaderConfig,
-} from './module';
+} from './module.js';
 
 export {
   ModuleError,
   CircularDependencyError,
   ModuleNotFoundError,
   ModuleInitializationError,
-} from './module';
+} from './module.js';

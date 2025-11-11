@@ -3,7 +3,7 @@
  * @description Local context manager for request-scoped data in Gati framework
  */
 
-import type { LocalContext, LocalContextOptions } from './types/context';
+import type { LocalContext, LocalContextOptions } from './types/context.js';
 
 /**
  * Generates a unique request ID

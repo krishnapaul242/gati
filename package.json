@@ -54,7 +54,9 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "rimraf dist build coverage .tsbuildinfo",
     "clean:all": "pnpm clean && rimraf node_modules .pnpm-store",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test:local": "powershell -ExecutionPolicy Bypass -File ./scripts/test-quick.ps1 -Mode tarball",
+    "test:local:symlink": "powershell -ExecutionPolicy Bypass -File ./scripts/test-quick.ps1 -Mode symlink"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",

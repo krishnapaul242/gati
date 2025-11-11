@@ -1,14 +1,14 @@
 /**
  * @module runtime/global-context
- * @description Global context manager for shared resources in Gati framework
+ * @description Global context implementation for cross-request shared state
  */
 
 import type {
   GlobalContext,
   GlobalContextOptions,
-} from './types/context';
-import type { ModuleLoader } from './module-loader';
-import { createModuleLoader } from './module-loader';
+} from './types/context.js';
+import type { ModuleLoader } from './module-loader.js';
+import { createModuleLoader } from './module-loader.js';
 
 /**
  * Extended global context options with module loader

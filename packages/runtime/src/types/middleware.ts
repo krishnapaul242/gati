@@ -1,11 +1,11 @@
 /**
  * @module runtime/types/middleware
- * @description Middleware type definitions for Gati framework
+ * @description Middleware type definitions
  */
 
-import type { Request } from './request';
-import type { Response } from './response';
-import type { GlobalContext, LocalContext } from './context';
+import type { Request } from './request.js';
+import type { Response } from './response.js';
+import type { GlobalContext, LocalContext } from './context.js';
 
 /**
  * Next function to call the next middleware in the chain
