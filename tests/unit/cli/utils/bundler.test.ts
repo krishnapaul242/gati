@@ -6,10 +6,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { resolve } from 'path';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { runTypeScriptCompiler, runTypeCheck } from '../../../../src/cli/utils/bundler';
+import { tmpdir } from 'os';
+import { runTypeScriptCompiler, runTypeCheck } from '@gati/cli/utils/bundler';
 
 describe('Bundler Utility', () => {
-  const testDir = resolve(process.cwd(), 'test-bundler-temp');
+  const testDir = resolve(tmpdir(), 'gati-test-bundler-' + Date.now());
 
   beforeEach(() => {
     // Create test directory

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { resolve } from 'path';
-import { createWatcher, stopWatcher } from '../../../../src/cli/utils/watcher';
+import { createWatcher, stopWatcher } from '@gati/cli/utils/watcher';
 import type { FSWatcher } from 'chokidar';
 
 describe('Watcher Utility', () => {

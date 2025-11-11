@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { resolve } from 'path';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
-import { validateProject } from '../../../../src/cli/utils/validator';
+import { validateProject } from '@gati/cli/utils/validator';
 
 describe('Validator Utility', () => {
   const testDir = resolve(process.cwd(), 'test-validator-temp');

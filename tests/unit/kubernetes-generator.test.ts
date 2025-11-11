@@ -8,7 +8,7 @@ import {
   validateManifest,
   getDefaultResources,
   getDefaultEnvironment,
-} from '@/runtime/deployment/kubernetes';
+} from '@gati-framework/runtime/deployment/kubernetes';
 
 describe('Kubernetes Deployment Generators', () => {
   it('generates a Dockerfile with defaults', () => {

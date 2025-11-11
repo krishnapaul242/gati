@@ -3,9 +3,7 @@
  * @description Request object factory for Gati framework
  */
 
-import type { IncomingMessage } from 'http';
 import { parse as parseUrl } from 'url';
-import { parse as parseQueryString } from 'querystring';
 import type { Request, RequestOptions, QueryParams, HttpHeaders } from './types/request.js';
 
 /**

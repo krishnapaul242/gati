@@ -3,7 +3,6 @@
  * @description Response object factory for Gati framework
  */
 
-import type { ServerResponse } from 'http';
 import type { Response, ResponseOptions, HttpHeaders } from './types/response.js';
 
 /**

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseRoute, normalizePath, extractParams, matchPath } from '@/runtime/route-parser';
+import { parseRoute, normalizePath, extractParams, matchPath } from '@gati-framework/runtime/route-parser';
 
 describe('Route Parser', () => {
   describe('normalizePath', () => {

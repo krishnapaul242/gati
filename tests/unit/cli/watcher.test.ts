@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, existsSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
-import { createWatcher, stopWatcher } from '../../../src/cli/utils/watcher';
+import { createWatcher, stopWatcher } from '@gati/cli/utils/watcher';
 
 const TEST_DIR = resolve(__dirname, 'test-watcher');
 

@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createModuleRegistry } from '@/runtime/module-registry';
-import { ModuleError, ModuleNotFoundError } from '@/runtime/types/module';
-import type { Module } from '@/runtime/types/module';
+import { createModuleRegistry } from '@gati-framework/runtime/module-registry';
+import { ModuleError, ModuleNotFoundError } from '@gati-framework/runtime/types/module';
+import type { Module } from '@gati-framework/runtime/types/module';
 
 describe('ModuleRegistry', () => {
   function createMockModule(name: string): Module {
