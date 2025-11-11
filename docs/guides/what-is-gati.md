@@ -227,9 +227,9 @@ See the [Roadmap](https://github.com/krishnapaul242/gati/blob/main/ROADMAP.MD) f
 
 Ready to try Gati?
 
-- 📖 [Getting Started Guide](/guide/getting-started) — Install and create your first project
-- 🚀 [Quick Start Tutorial](/guide/quick-start) — Build a REST API in 10 minutes
-- 📚 [Core Concepts](/guide/handlers) — Learn about Handlers, Modules, and Context
+- 📖 [Getting Started Guide](/onboarding/getting-started) — Install and create your first project
+- 🚀 [Quick Start Tutorial](/onboarding/quick-start) — Build a REST API in 10 minutes
+- 📚 [Core Concepts](/guides/handlers) — Learn about Handlers, Modules, and Context
 - 💡 [Examples](/examples/hello-world) — See real-world code
 
 ---

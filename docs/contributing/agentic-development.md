@@ -608,8 +608,8 @@ Track in `AGENTIC_METRICS.md`:
 - [GitHub Copilot Docs](https://docs.github.com/en/copilot)
 - [Copilot CLI Guide](https://cli.github.com/manual/gh_copilot)
 - [VS Code Copilot](https://code.visualstudio.com/docs/copilot/overview)
-- [Gati Milestones](./MILESTONES.md)
-- [Task Breakdown](./.github/m1-tasks-breakdown.md)
+- [Gati Milestones](../architecture/milestones.md)
+- [Task Breakdown](../architecture/milestones.md)
 
 ---
 

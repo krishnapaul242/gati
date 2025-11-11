@@ -12,7 +12,7 @@ Gati is a next-generation TypeScript/Node.js framework for building cloud-native
 - **[What is Gati?](./onboarding/what-is-gati.md)** - Introduction to the framework
 - **[Quick Start](./onboarding/quick-start.md)** - Get started in 5 minutes
 - **[Getting Started](./onboarding/getting-started.md)** - Comprehensive setup guide
-- **[GatiC CLI](./onboarding/gatic.md)** - Project scaffolding tool
+- **[GatiC CLI](./guides/gatic.md)** - Project scaffolding tool
 
 ### For Developers
 - **[Handlers Guide](./guides/handlers.md)** - Build API handlers
@@ -34,7 +34,6 @@ Gati is a next-generation TypeScript/Node.js framework for building cloud-native
 
 ### Examples
 - **[Hello World](./examples/hello-world.md)** - Basic example
-- **[Example Projects](../examples/)** - Full example applications
 
 ### Architecture & Design
 - **[Architecture Overview](./architecture/overview.md)** - System architecture
@@ -76,8 +75,7 @@ docs/
 ├── onboarding/                  # Getting started guides
 │   ├── what-is-gati.md
 │   ├── quick-start.md
-│   ├── getting-started.md
-│   └── gatic.md
+│   └── getting-started.md
 ├── guides/                      # Developer guides
 │   ├── handlers.md
 │   ├── modules.md
@@ -134,10 +132,10 @@ docs/
 → See [Contributing Guide](./contributing/README.md)
 
 #### **Use the CLI**
-→ Reference [GatiC CLI](./onboarding/gatic.md)
+→ Reference [GatiC CLI](./guides/gatic.md)
 
 #### **Look up API details**
-→ Browse [API Reference](./api-reference/)
+→ Browse [API Reference](./api-reference/handler.md)
 
 ---
 

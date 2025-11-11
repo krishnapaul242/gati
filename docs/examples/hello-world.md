@@ -256,10 +256,10 @@ export const handler: Handler = (req, res) => {
 
 ## Learn More
 
-- [Quick Start Guide](/guide/quick-start) - Build a REST API
-- [Handler API Reference](/api/handler) - Full handler documentation
-- [Request API](/api/request) - Access request data
-- [Response API](/api/response) - Send responses
+- [Quick Start Guide](/onboarding/quick-start) - Build a REST API
+- [Handler API Reference](/api-reference/handler) - Full handler documentation
+- [Request API](/api-reference/request) - Access request data
+- [Response API](/api-reference/response) - Send responses
 
 ## Source Code
 

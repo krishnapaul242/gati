@@ -447,7 +447,7 @@ export const handler: Handler = [requireAuth, async (req, res) => {
 gatic deploy prod
 ```
 
-See the [Deployment Guide](/guide/kubernetes) for details.
+See the [Deployment Guide](/guides/kubernetes) for details.
 
 ## Summary
 
@@ -463,11 +463,11 @@ In 10 minutes, you:
 
 ## Learn More
 
-- [Handlers Guide](/guide/handlers) — Deep dive into handler patterns
-- [Modules Guide](/guide/modules) — Organize business logic
-- [Context (gctx & lctx)](/guide/context) — Understand global and local context
-- [Error Handling](/guide/error-handling) — Production-ready error patterns
+- [Handlers Guide](/guides/handlers) — Deep dive into handler patterns
+- [Modules Guide](/ guides/modules) — Organize business logic
+- [Context (gctx & lctx)](/guides/context) — Understand global and local context
+- [Error Handling](/guides/error-handling) — Production-ready error patterns
 
 ---
 
-Ready to deploy? Check out the [Kubernetes Guide](/guide/kubernetes) 🚀
+Ready to deploy? Check out the [Kubernetes Guide](/guides/kubernetes) 🚀

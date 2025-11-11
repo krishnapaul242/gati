@@ -180,7 +180,7 @@ Ready to try Gati?
 1. **[Quick Start](./quick-start.md)** - Get up and running in 5 minutes
 2. **[Getting Started](./getting-started.md)** - Comprehensive setup guide
 3. **[Handlers Guide](../guides/handlers.md)** - Learn to write handlers
-4. **[Examples](../examples/)** - See real-world examples
+4. **[Examples](../examples/hello-world.md)** - See real-world examples
 
 ## Community
 

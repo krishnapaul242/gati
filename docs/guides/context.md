@@ -39,10 +39,10 @@ export const handler: Handler = (req, res, gctx, lctx) => {
 
 ## Examples
 
-See the [Context API Reference](/api/context) for detailed examples.
+See the [Context API Reference](/api-reference/context) for detailed examples.
 
 ## Related
 
-- [Context API](/api/context) - Full API reference
-- [Modules Guide](/guide/modules) - Creating modules
-- [Logging Guide](/guide/logging) - Structured logging
+- [Context API](/api-reference/context) - Full API reference
+- [Modules Guide](/ guides/modules) - Creating modules
+- [Logging Guide](../guides/error-handling.md) - Structured logging

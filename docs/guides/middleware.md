@@ -69,5 +69,5 @@ export const requireAuth = (req, res, next) => {
 
 ## Related
 
-- [Handler API](/api/handler) - Handler function signature
-- [CORS Guide](/guide/cors) - CORS configuration
+- [Handler API](/api-reference/handler) - Handler function signature
+- [CORS Guide](./middleware.md) - CORS configuration

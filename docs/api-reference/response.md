@@ -132,6 +132,6 @@ export const handler: Handler = (req, res) => {
 
 ## Related
 
-- [Handler API](/api/handler) - Handler function signature
-- [Request API](/api/request) - Accessing request data
-- [Context API](/api/context) - Global and local context
+- [Handler API](/api-reference/handler) - Handler function signature
+- [Request API](/api-reference/request) - Accessing request data
+- [Context API](/api-reference/context) - Global and local context
