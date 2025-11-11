@@ -695,6 +695,7 @@ async function generateMinimalTemplate(
           '@gati-framework/runtime': '^2.0.0',
         },
         devDependencies: {
+          '@gati-framework/cli': '^1.0.1',
           '@types/node': '^20.10.0',
           typescript: '^5.3.2',
         },
