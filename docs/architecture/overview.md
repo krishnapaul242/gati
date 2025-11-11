@@ -814,6 +814,6 @@ The framework follows functional programming principles where possible while mai
 ---
 
 **See Also:**
-- [Getting Started Guide](./getting-started.md)
-- [Handler Development Guide](./handlers.md)
-- [Module Creation Guide](./modules.md)
+- [Getting Started Guide](../onboarding/getting-started.md)
+- [Handler Development Guide](../guides/handlers.md)
+- [Module Creation Guide](../guides/modules.md)

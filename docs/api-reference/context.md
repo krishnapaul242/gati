@@ -151,6 +151,6 @@ export const handler: Handler = async (req, res, gctx, lctx) => {
 
 ## Related
 
-- [Handler API](/api/handler) - Handler function signature
-- [Request API](/api/request) - Accessing request data
-- [Response API](/api/response) - Sending responses
+- [Handler API](/api-reference/handler) - Handler function signature
+- [Request API](/api-reference/request) - Accessing request data
+- [Response API](/api-reference/response) - Sending responses

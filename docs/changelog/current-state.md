@@ -183,26 +183,26 @@ my-app/
 
 ### New/Updated Docs
 
-1. **[GatiC Guide](./docs/guide/gatic.md)** - NEW
+1. **[GatiC Guide](../guides/gatic.md)** - NEW
    - Introduction to GatiC
    - Installation and usage
    - Command options
    - Troubleshooting
    - Examples
 
-2. **[Getting Started](./docs/getting-started.md)** - UPDATED
+2. **[Getting Started](../onboarding/getting-started.md)** - UPDATED
    - Updated for Runtime v2.0.0
    - New handler examples
    - GatiC usage
    - Current project structure
 
-3. **[Main README](./README.MD)** - UPDATED
+3. **[Main README](./README.md)** - UPDATED
    - GatiC introduction
    - Updated Quick Start
    - Current package versions
    - M1 marked as complete
 
-4. **[Docs Index](./docs/index.md)** - UPDATED
+4. **[Docs Index](../index.md)** - UPDATED
    - Current status
    - Package versions
    - Updated examples
@@ -322,7 +322,7 @@ None currently identified in core functionality.
 
 ## Support & Resources
 
-- **Documentation:** [docs/](./docs/)
+- **Documentation:** [docs/](../)
 - **GitHub:** [github.com/krishnapaul242/gati](https://github.com/krishnapaul242/gati)
 - **Issues:** [github.com/krishnapaul242/gati/issues](https://github.com/krishnapaul242/gati/issues)
 - **Discussions:** [github.com/krishnapaul242/gati/discussions](https://github.com/krishnapaul242/gati/discussions)

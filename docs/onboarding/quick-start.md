@@ -280,7 +280,7 @@ Handlers are automatically mapped to routes based on their filename:
 ### Explore Examples
 
 - **[Hello World](../examples/hello-world.md)** - Basic example
-- **[REST API](../examples/)** - Full REST API example
+- **[REST API](../examples/hello-world.md)** - Full REST API example
 
 ### Join the Community
 

@@ -168,7 +168,7 @@ Gati follows three core principles:
 
 - 💬 [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions) — Ask questions, share ideas
 - 🐛 [Issue Tracker](https://github.com/krishnapaul242/gati/issues) — Report bugs, request features
-- 📖 [Contributing Guide](/contributing) — Help build Gati
+- 📖 [Contributing Guide](/contributing/README) — Help build Gati
 
 ## License
 
@@ -178,6 +178,6 @@ MIT © [Krishna Paul](https://github.com/krishnapaul242)
 
 <div class="tip custom-block" style="margin-top: 48px; text-align: center;">
 
-Ready to build something amazing? [Get Started →](/guide/getting-started)
+Ready to build something amazing? [Get Started →](/onboarding/getting-started)
 
 </div>

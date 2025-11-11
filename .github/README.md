@@ -1,320 +1,406 @@
-# 🎭 Gati Agent Profiles - Quick Reference
+# 🚀 Contributing to Gati
 
-This directory contains specialized agent profiles for GitHub Copilot to assist with different aspects of the Gati framework development.
-
----
-
-## 📋 Available Agents
-
-### 1. 🏗️ [Gati Architect](./gati-architect.md)
-
-**Use for:** System design, architecture decisions, technical planning
-
-**Specialties:**
-
-- Handler runtime architecture
-- Versioned routing system design
-- Kubernetes deployment topology
-- Database schema design
-- Plugin interface design
-
-**Invoke with:** `As the Architect:`
+Welcome to the Gati development community! This guide will help you get set up and start contributing to the framework.
 
 ---
 
-### 2. 💻 [Gati Implementation Engineer](./gati-implementation-engineer.md)
+## 📋 Table of Contents
 
-**Use for:** Writing production-ready code
-
-**Specialties:**
-
-- Runtime components (handler-engine, route-manager, module-loader)
-- CLI commands (dev, build, deploy, generate)
-- Cloud provider plugins (AWS, GCP, Azure)
-- Code analyzer and SDK generator
-
-**Invoke with:** `As the Implementation Engineer:`
+- [Prerequisites](#-prerequisites)
+- [Quick Setup](#-quick-setup)
+- [Project Structure](#-project-structure)
+- [Development Workflow](#-development-workflow)
+- [Running Tests](#-running-tests)
+- [Submitting Changes](#-submitting-changes)
+- [Code Standards](#-code-standards)
+- [Getting Help](#-getting-help)
 
 ---
 
-### 3. 🧪 [Gati Test Engineer](./gati-test-engineer.md)
+## � Prerequisites
 
-**Use for:** Testing strategy and implementation
+Before you begin, ensure you have the following installed:
 
-**Specialties:**
+- **Node.js** >= 20.0.0
+- **pnpm** >= 8.0.0 (recommended package manager)
+- **Docker Desktop** (for local Kubernetes testing)
+- **kind** (Kubernetes in Docker) - optional for K8s deployment testing
+- **Git** for version control
 
-- Unit and integration tests
-- E2E test scenarios
-- Version routing tests
-- Performance and load testing
-- Test fixtures and mocks
+### Install pnpm
 
-**Invoke with:** `As the Test Engineer:`
-
----
-
-### 4. 📝 [Gati Spec Writer](./gati-spec-writer.md)
-
-**Use for:** Technical documentation and specifications
-
-**Specialties:**
-
-- Feature specifications
-- API contracts and interfaces
-- Behavior scenarios (Given/When/Then)
-- Acceptance criteria
-- Edge case documentation
-
-**Invoke with:** `As the Spec Writer:`
-
----
-
-### 5. 🔍 [Gati Code Reviewer](./gati-code-reviewer.md)
-
-**Use for:** Code review and quality assurance
-
-**Specialties:**
-
-- Bug detection
-- Security vulnerabilities
-- Performance issues
-- TypeScript best practices
-- Code maintainability
-
-**Invoke with:** `As the Code Reviewer:`
-
----
-
-### 6. 🎨 [Gati DevOps Engineer](./gati-devops-engineer.md)
-
-**Use for:** Deployment and infrastructure
-
-**Specialties:**
-
-- Kubernetes manifests
-- Helm charts
-- CI/CD pipelines (GitHub Actions)
-- Multi-region deployment
-- Monitoring and observability
-
-**Invoke with:** `As the DevOps Engineer:`
-
----
-
-### 7. 🐛 [Gati Debugger](./gati-debugger.md)
-
-**Use for:** Troubleshooting and bug fixing
-
-**Specialties:**
-
-- Error analysis
-- Root cause identification
-- Performance debugging
-- Deployment failure investigation
-- Integration issue resolution
-
-**Invoke with:** `As the Debugger:`
-
----
-
-### 8. 📊 [Gati Product Manager](./gati-product-manager.md)
-
-**Use for:** Feature planning and prioritization
-
-**Specialties:**
-
-- Milestone breakdown
-- MVP definition
-- User stories
-- Feature prioritization
-- Dependency management
-
-**Invoke with:** `As the Product Manager:`
-
----
-
-### 9. 🎨 [Gati Frontend Engineer](./gati-frontend-engineer.md)
-
-**Use for:** Control Panel and Playground UI
-
-**Specialties:**
-
-- Next.js + TRPC implementation
-- Topology visualization
-- Dashboard creation
-- API Playground interface
-- TOTP authentication
-
-**Invoke with:** `As the Frontend Engineer:`
-
----
-
-### 10. 📚 [Gati Documentation Engineer](./gati-documentation-engineer.md)
-
-**Use for:** User-facing documentation
-
-**Specialties:**
-
-- Getting started guides
-- API reference
-- Tutorials and examples
-- Deployment guides
-- Troubleshooting documentation
-
-**Invoke with:** `As the Documentation Engineer:`
-
----
-
-## 🔄 Recommended Workflow
-
-### For a New Feature:
-
+```bash
+npm install -g pnpm
 ```
-1. Product Manager → Define scope and priority
-2. Architect → Design system approach
-3. Spec Writer → Create detailed specification
-4. Implementation Engineer → Build the code
-5. Test Engineer → Write comprehensive tests
-6. Code Reviewer → Review and suggest improvements
-7. Debugger → Fix any issues
-8. Documentation Engineer → Write user docs
-9. DevOps Engineer → Create deployment configs (if needed)
-10. Frontend Engineer → Build UI (if needed)
+
+### Install kind (optional)
+
+```bash
+# macOS
+brew install kind
+
+# Windows
+choco install kind
+
+# Linux
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
 ```
 
 ---
 
-## 🎯 Quick Selection Guide
+## � Quick Setup
 
-| Need to...          | Use Agent               |
-| ------------------- | ----------------------- |
-| Plan what to build  | Product Manager         |
-| Design how it works | Architect               |
-| Write requirements  | Spec Writer             |
-| Build the feature   | Implementation Engineer |
-| Test it             | Test Engineer           |
-| Review code quality | Code Reviewer           |
-| Fix a bug           | Debugger                |
-| Deploy it           | DevOps Engineer         |
-| Build UI            | Frontend Engineer       |
-| Document it         | Documentation Engineer  |
+### 1. Fork and Clone
+
+```bash
+# Fork the repository on GitHub, then clone your fork
+git clone https://github.com/YOUR-USERNAME/gati.git
+cd gati
+
+# Add upstream remote
+git remote add upstream https://github.com/krishnapaul242/gati.git
+```
+
+### 2. Install Dependencies
+
+```bash
+# Install all dependencies for the monorepo
+pnpm install
+```
+
+### 3. Build All Packages
+
+```bash
+# Build all packages in the monorepo
+pnpm build
+```
+
+### 4. Run Tests
+
+```bash
+# Run all tests to ensure everything works
+pnpm test
+```
+
+### 5. Start Development
+
+```bash
+# Start development mode with hot reload
+pnpm dev
+```
+
+**✅ You're ready to contribute!**
 
 ---
 
-## 💡 Usage Tips
-
-### 1. **Be Specific**
+## � Project Structure
 
 ```
-❌ "As the Architect: Design something"
-✅ "As the Architect: Design the API versioning resolution algorithm"
+gati/
+├── .github/              # GitHub configurations and workflows
+├── docs/                 # Documentation (VitePress)
+├── examples/             # Example applications
+│   └── hello-world/      # Basic example project
+├── packages/             # Published npm packages
+│   ├── cli/              # @gati-framework/cli
+│   ├── core/             # @gati-framework/core
+│   ├── gatic/            # gatic (scaffolding tool)
+│   └── runtime/          # @gati-framework/runtime
+├── src/                  # Shared source code
+│   ├── cli/              # CLI implementation
+│   └── runtime/          # Runtime engine implementation
+├── tests/                # Test suites
+│   ├── e2e/              # End-to-end tests
+│   └── unit/             # Unit tests
+├── scripts/              # Build and utility scripts
+├── pnpm-workspace.yaml   # pnpm workspace configuration
+└── package.json          # Root package.json
 ```
 
-### 2. **Provide Context**
+### Key Directories
 
-```
-✅ "As the Implementation Engineer: Implement handler-engine.ts
-    according to specs/runtime/handler-engine.md"
+- **`packages/runtime/`** - Core runtime engine (handler execution, routing, context)
+- **`packages/cli/`** - Development and deployment CLI
+- **`packages/core/`** - Shared types and utilities
+- **`packages/gatic/`** - Project scaffolding tool
+- **`docs/`** - VitePress documentation site
+- **`examples/`** - Example applications for testing
+
+---
+
+## � Development Workflow
+
+### 1. Create a Branch
+
+```bash
+# Always create a new branch for your work
+git checkout -b feature/your-feature-name
+
+# Or for bug fixes
+git checkout -b fix/issue-description
 ```
 
-### 3. **Chain Agents**
+### 2. Make Changes
 
-```
-✅ "As the Architect: Design the module loader.
-    Then, as the Spec Writer: Document it.
-    Finally, as the Implementation Engineer: Implement it."
+```bash
+# Work on your changes in the appropriate package
+cd packages/runtime  # or cli, core, etc.
+
+# Make your changes...
 ```
 
-### 4. **Reference Existing Work**
+### 3. Build and Test
 
+```bash
+# Build your changes
+pnpm build
+
+# Run tests
+pnpm test
+
+# Run linting
+pnpm lint
 ```
-✅ "As the Code Reviewer: Review src/runtime/handler-engine.ts
-    for memory leaks and security issues"
+
+### 4. Test Your Changes Locally
+
+```bash
+# Test the CLI locally
+cd examples/hello-world
+pnpm dev
+
+# Or test deployment
+gati deploy dev --local
+```
+
+### 5. Commit Your Changes
+
+```bash
+# Stage your changes
+git add .
+
+# Commit with a descriptive message (see commit conventions below)
+git commit -m "feat(runtime): add support for middleware chaining"
 ```
 
 ---
 
-## 📂 Project Context
+## 🧪 Running Tests
 
-These agents are tailored for the **Gati Framework** project:
+### Run All Tests
 
-- **PRD:** [ROADMAP.MD](../ROADMAP.MD)
-- **Overview:** [README.MD](../README.MD)
-- **Specs:** `/specs` directory (to be created)
-- **Docs:** `/docs` directory (to be created)
-
----
-
-## 🚀 Getting Started
-
-1. **Choose the right agent** based on your task
-2. **Prefix your request** with `As the [Agent Name]:`
-3. **Provide context** (specs, files, requirements)
-4. **Be specific** about what you need
-
----
-
-## 📝 Example Interactions
-
-### Example 1: New Feature
-
-```
-User: As the Product Manager: Break down "Handler Runtime"
-      into deliverable tasks
-
-[Review tasks]
-
-User: As the Spec Writer: Create detailed spec for handler-engine
-
-[Review spec]
-
-User: As the Implementation Engineer: Implement handler-engine.ts
-      according to the spec
-
-[Test code]
-
-User: As the Test Engineer: Create test suite for handler-engine
-
-[Review tests]
-
-User: As the Code Reviewer: Review the implementation
+```bash
+pnpm test
 ```
 
-### Example 2: Bug Fix
+### Run Tests for Specific Package
 
-```
-User: As the Debugger: Handler throws "modules is undefined".
-      Stack trace: [paste]. Help fix this.
-
-[Get diagnosis and fix]
-
-User: As the Test Engineer: Add regression test for this bug
-
-[Get test]
-
-User: As the Documentation Engineer: Add this to troubleshooting guide
+```bash
+cd packages/runtime
+pnpm test
 ```
 
-### Example 3: Deployment
+### Run E2E Tests
 
+```bash
+pnpm test:e2e
 ```
-User: As the DevOps Engineer: Create K8s manifests for Gati runtime
 
-[Review manifests]
+### Run Tests with Coverage
 
-User: As the DevOps Engineer: Create GitHub Action for deployment
+```bash
+pnpm test:coverage
+```
 
-[Review workflow]
+### Run Tests in Watch Mode
 
-User: As the Documentation Engineer: Document deployment process
+```bash
+pnpm test:watch
 ```
 
 ---
 
-**Last Updated:** 2025-11-09  
-**Created:** 2025-11-09  
-**Version:** 1.0
+## 📤 Submitting Changes
+
+### 1. Push Your Branch
+
+```bash
+git push origin feature/your-feature-name
+```
+
+### 2. Create a Pull Request
+
+1. Go to your fork on GitHub
+2. Click "Pull Request" → "New Pull Request"
+3. Select your branch
+4. Fill in the PR template with:
+   - **Description**: What does this PR do?
+   - **Related Issue**: Link to any related issues
+   - **Testing**: How did you test this?
+   - **Screenshots**: If applicable
+
+### 3. Wait for Review
+
+- Maintainers will review your PR
+- Address any feedback or requested changes
+- Once approved, your PR will be merged!
 
 ---
 
-**Ready to build Gati!** 🚀
+## � Code Standards
+
+### Commit Message Convention
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <subject>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting)
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
+
+**Examples:**
+```bash
+feat(runtime): add middleware support
+fix(cli): resolve deployment timeout issue
+docs(guides): update handler documentation
+test(runtime): add context manager tests
+```
+
+### TypeScript Standards
+
+- Use **strict TypeScript** mode
+- Avoid `any` types - use proper typing
+- Follow functional programming patterns when possible
+- Document complex functions with JSDoc
+- Use descriptive variable names
+
+### Code Style
+
+- Use **Prettier** for formatting (runs automatically)
+- Use **ESLint** for linting
+- Run `pnpm lint` before committing
+- Keep functions small and focused
+- Write self-documenting code
+
+### Testing Requirements
+
+- Write tests for all new features
+- Maintain test coverage above 80%
+- Include edge cases and error scenarios
+- Use descriptive test names
+
+---
+
+## 🆘 Getting Help
+
+### Documentation
+
+- 📖 [Full Documentation](https://krishnapaul242.github.io/gati/)
+- 📘 [Contributing Guide](../docs/contributing/README.md)
+- 🏗️ [Architecture Overview](../docs/architecture/overview.md)
+- 📋 [Milestones](../docs/architecture/milestones.md)
+
+### Community
+
+- � [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions) - Ask questions, share ideas
+- 🐛 [GitHub Issues](https://github.com/krishnapaul242/gati/issues) - Report bugs, request features
+- 📧 Contact: Krishna Paul ([@krishnapaul242](https://github.com/krishnapaul242))
+
+### Common Issues
+
+**Build Failures:**
+```bash
+# Clean and rebuild
+pnpm clean
+pnpm install
+pnpm build
+```
+
+**Test Failures:**
+```bash
+# Update snapshots if needed
+pnpm test -- -u
+
+# Run in verbose mode
+pnpm test -- --verbose
+```
+
+**Docker/Kubernetes Issues:**
+```bash
+# Reset kind cluster
+kind delete cluster --name gati-local
+kind create cluster --name gati-local
+```
+
+---
+
+## 🎯 What to Work On
+
+### Good First Issues
+
+Look for issues labeled [`good first issue`](https://github.com/krishnapaul242/gati/labels/good%20first%20issue) - these are perfect for new contributors!
+
+### Areas Needing Help
+
+- 📝 **Documentation**: Improve guides, fix typos, add examples
+- 🧪 **Testing**: Increase test coverage, add E2E tests
+- 🐛 **Bug Fixes**: Check the [issues](https://github.com/krishnapaul242/gati/issues) page
+- ✨ **Features**: See the [roadmap](../docs/architecture/roadmap.md) for planned features
+
+---
+
+## 📊 Development Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm install` | Install all dependencies |
+| `pnpm build` | Build all packages |
+| `pnpm dev` | Start development mode |
+| `pnpm test` | Run all tests |
+| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm test:coverage` | Run tests with coverage |
+| `pnpm lint` | Lint all code |
+| `pnpm format` | Format code with Prettier |
+| `pnpm clean` | Clean build artifacts |
+
+---
+
+## 🙏 Code of Conduct
+
+We are committed to providing a welcoming and inclusive environment. Please:
+
+- ✅ Be respectful and constructive
+- ✅ Welcome newcomers and help them learn
+- ✅ Focus on what is best for the community
+- ❌ Don't engage in harassment or discrimination
+- ❌ Don't spam or self-promote excessively
+
+---
+
+## 📄 License
+
+By contributing to Gati, you agree that your contributions will be licensed under the MIT License.
+
+---
+
+**Thank you for contributing to Gati!** 🎉
+
+Your contributions help make cloud-native development faster and more accessible for everyone.
+
+---
+
+**Questions?** Open a [discussion](https://github.com/krishnapaul242/gati/discussions) or reach out to the maintainers!

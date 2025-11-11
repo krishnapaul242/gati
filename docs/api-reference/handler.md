@@ -27,7 +27,7 @@ The incoming HTTP request object. Provides access to:
 - `req.body` - Parsed request body
 - `req.cookies` - Request cookies
 
-See [Request API](/api/request) for details.
+See [Request API](/api-reference/request) for details.
 
 ### `res: Response`
 
@@ -38,7 +38,7 @@ The HTTP response object. Used to send responses:
 - `res.send(data)` - Send response
 - `res.header(name, value)` - Set response header
 
-See [Response API](/api/response) for details.
+See [Response API](/api-reference/response) for details.
 
 ### `gctx?: GlobalContext`
 
@@ -49,7 +49,7 @@ Contains:
 - `gctx.config` - Application configuration
 - `gctx.logger` - Application-wide logger
 
-See [Context API](/api/context) for details.
+See [Context API](/api-reference/context) for details.
 
 ### `lctx?: LocalContext`
 
@@ -60,7 +60,7 @@ Contains:
 - `lctx.logger` - Request-scoped logger
 - `lctx.startTime` - Request start timestamp
 
-See [Context API](/api/context) for details.
+See [Context API](/api-reference/context) for details.
 
 ## Examples
 
@@ -327,7 +327,7 @@ export const handler: Handler = async (req, res, gctx) => {
 
 ## Related
 
-- [Request API](/api/request) - Access request data
-- [Response API](/api/response) - Send responses
-- [Context API](/api/context) - Global and local context
-- [Middleware Guide](/guide/middleware) - Composing handlers
+- [Request API](/api-reference/request) - Access request data
+- [Response API](/api-reference/response) - Send responses
+- [Context API](/api-reference/context) - Global and local context
+- [Middleware Guide](/guides/middleware) - Composing handlers

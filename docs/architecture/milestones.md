@@ -1318,10 +1318,10 @@ None currently identified.
 
 ## 🔗 Related Documents
 
-- [README.md](./README.MD) - Project overview
-- [ROADMAP.md](./ROADMAP.MD) - High-level roadmap
-- [Gati_PRD.md](./Gati_PRD.md) - Product requirements
-- [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guide (TBD)
+- [Roadmap](./roadmap.md) - High-level roadmap
+- [Architecture Overview](./overview.md) - Architecture details
+- [Contributing Guide](../contributing/README.md) - Contribution guide
+- [Documentation Index](../README.md) - Documentation home
 
 ---
 

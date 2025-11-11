@@ -57,6 +57,6 @@ export default {
 
 ## Related
 
-- [Docker Guide](/guide/docker) - Containerization
-- [Environment Config](/guide/environment) - Configuration management
-- [Building](/guide/building) - Production builds
+- [Docker Guide](./deployment.md) - Containerization
+- [Environment Config](./deployment.md) - Configuration management
+- [Building](./deployment.md) - Production builds

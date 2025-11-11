@@ -156,8 +156,8 @@ pnpm lint
 Each file/directory references the GitHub issue where it will be implemented:
 
 - See inline comments for issue numbers
-- Check [MILESTONES.md](../MILESTONES.md) for detailed breakdown
-- Check [M1_PRIORITY_REVIEW.md](./.github/M1_PRIORITY_REVIEW.md) for priorities
+- Check [MILESTONES.md](../architecture/milestones.md) for detailed breakdown
+- Check [M1_PRIORITY_REVIEW.md](../architecture/milestones.md) for priorities
 
 ## Next Steps
 

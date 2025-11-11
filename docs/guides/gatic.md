@@ -408,7 +408,7 @@ After creating your project with GatiC:
 - [Getting Started](./getting-started.md)
 - [Quick Start](./quick-start.md)
 - [What is Gati](./what-is-gati.md)
-- [CLI Reference](../cli-reference.md)
+- [GatiC Guide](./gatic.md)
 
 ---
 

@@ -273,7 +273,7 @@ handler(req, res, gctx, lctx)
 
 - **Purpose**: Process requests and generate responses
 - **Example**: `getUserHandler`, `createPostHandler`
-- **Learn more**: [Handler Development Guide](./handlers.md)
+- **Learn more**: [Handler Development Guide](../guides/handlers.md)
 
 ### Modules (`src/modules/`)
 
@@ -290,7 +290,7 @@ export function initLogger(gctx: GlobalContext): Logger {
 
 - **Purpose**: Shared functionality (database, cache, logger)
 - **Pattern**: Initialized once, shared across requests
-- **Learn more**: [Module Creation Guide](./modules.md)
+- **Learn more**: [Module Creation Guide](../guides/modules.md)
 
 ### Configuration (`gati.config.ts`)
 
@@ -558,21 +558,21 @@ const dbUrl = process.env.DATABASE_URL;
 Now that you have a basic Gati application running, explore these topics:
 
 ### Learn Handler Development
-- [Handler Development Guide](./handlers.md)
+- [Handler Development Guide](../guides/handlers.md)
 - Path parameters and query strings
 - Request body validation
 - Error handling patterns
 - Response formatting
 
 ### Create Modules
-- [Module Creation Guide](./modules.md)
+- [Module Creation Guide](../guides/modules.md)
 - Module lifecycle
 - Dependency injection
 - Testing strategies
 - Best practices
 
 ### Understand Architecture
-- [Architecture Documentation](./architecture.md)
+- [Architecture Documentation](../architecture/overview.md)
 - Component relationships
 - Request flow
 - Design decisions
@@ -701,8 +701,8 @@ routes: [
 
 ---
 
-**Next:** [Handler Development Guide](./handlers.md) →
+**Next:** [Handler Development Guide](../guides/handlers.md) →
 
 **See Also:**
-- [Module Creation Guide](./modules.md)
-- [Architecture Documentation](./architecture.md)
+- [Module Creation Guide](../guides/modules.md)
+- [Architecture Documentation](../architecture/overview.md)

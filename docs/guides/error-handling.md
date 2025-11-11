@@ -67,5 +67,5 @@ export const handler: Handler = (req, res) => {
 
 ## Related
 
-- [Handler API](/api/handler) - Handler patterns
-- [Logging Guide](/guide/logging) - Error logging
+- [Handler API](/api-reference/handler) - Handler patterns
+- [Logging Guide](../guides/error-handling.md) - Error logging
