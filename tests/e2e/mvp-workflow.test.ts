@@ -18,6 +18,35 @@ import { join } from 'path';
 import { constants } from 'fs';
 import { generateProject } from '../../packages/cli/src/utils/file-generator.js';
 
+/**
+ * Type definitions for test assertions
+ */
+interface PackageJson {
+  name: string;
+  version: string;
+  description?: string;
+  author?: string;
+  license?: string;
+  scripts: Record<string, string>;
+  dependencies: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  engines?: {
+    node?: string;
+  };
+}
+
+interface TsConfig {
+  extends?: string;
+  compilerOptions?: {
+    outDir?: string;
+    rootDir?: string;
+    [key: string]: unknown;
+  };
+  include?: string[];
+  exclude?: string[];
+  [key: string]: unknown;
+}
+
 describe('MVP Workflow Integration Test', () => {
   let tmpProjectDir: string;
   let projectPath: string;
@@ -75,7 +104,7 @@ describe('MVP Workflow Integration Test', () => {
     it('should generate package.json with correct dependencies', async () => {
       const packageJsonPath = join(projectPath, 'package.json');
       const content = await readFile(packageJsonPath, 'utf-8');
-      const pkg = JSON.parse(content);
+      const pkg = JSON.parse(content) as PackageJson;
 
       // Verify project metadata
       expect(pkg.name).toBe('test-mvp-app');
@@ -84,7 +113,7 @@ describe('MVP Workflow Integration Test', () => {
 
       // Verify runtime dependency
       expect(pkg.dependencies).toHaveProperty('@gati-framework/runtime');
-      expect(pkg.dependencies['@gati-framework/runtime']).toMatch(/\^1\.0\.0/);
+      expect(pkg.dependencies['@gati-framework/runtime']).toMatch(/\^2\.0\.0/);
 
       // Verify core dependency
       expect(pkg.dependencies).toHaveProperty('@gati-framework/core');
@@ -93,8 +122,8 @@ describe('MVP Workflow Integration Test', () => {
       expect(pkg.scripts).toHaveProperty('dev');
       expect(pkg.scripts).toHaveProperty('build');
       expect(pkg.scripts).toHaveProperty('start');
-      expect(pkg.scripts.dev).toBe('gati dev');
-      expect(pkg.scripts.build).toBe('gati build');
+      expect(pkg.scripts['dev']).toBe('gati dev');
+      expect(pkg.scripts['build']).toBe('gati build');
     });
 
     it('should generate src/index.ts with proper runtime imports', async () => {
@@ -140,14 +169,14 @@ describe('MVP Workflow Integration Test', () => {
     it('should generate tsconfig.json extending core config', async () => {
       const tsconfigPath = join(projectPath, 'tsconfig.json');
       const content = await readFile(tsconfigPath, 'utf-8');
-      const tsconfig = JSON.parse(content);
+      const tsconfig = JSON.parse(content) as TsConfig;
 
       // Verify extends core config
       expect(tsconfig.extends).toBe('@gati-framework/core/tsconfig.base.json');
 
       // Verify output directory
-      expect(tsconfig.compilerOptions.outDir).toBe('./dist');
-      expect(tsconfig.compilerOptions.rootDir).toBe('./src');
+      expect(tsconfig.compilerOptions?.outDir).toBe('./dist');
+      expect(tsconfig.compilerOptions?.rootDir).toBe('./src');
     });
 
     it('should generate gati.config.ts', async () => {
@@ -199,9 +228,9 @@ describe('MVP Workflow Integration Test', () => {
       const content = await readFile(tsconfigPath, 'utf-8');
       
       // Should parse without errors
-      expect(() => JSON.parse(content)).not.toThrow();
+      expect(() => JSON.parse(content) as TsConfig).not.toThrow();
       
-      const tsconfig = JSON.parse(content);
+      const tsconfig = JSON.parse(content) as TsConfig;
       
       // Verify module settings
       expect(tsconfig.compilerOptions).toBeDefined();
@@ -212,7 +241,7 @@ describe('MVP Workflow Integration Test', () => {
     it('should have all npm scripts defined', async () => {
       const packageJsonPath = join(projectPath, 'package.json');
       const content = await readFile(packageJsonPath, 'utf-8');
-      const pkg = JSON.parse(content);
+      const pkg = JSON.parse(content) as PackageJson;
 
       const requiredScripts = ['dev', 'build', 'start', 'test', 'typecheck'];
       
@@ -224,7 +253,7 @@ describe('MVP Workflow Integration Test', () => {
   });
 
   describe('MVP Success Criteria Validation', () => {
-    it('✅ Criterion 1: Single command setup works', async () => {
+    it('✅ Criterion 1: Single command setup works', () => {
       // This entire test suite validates that gati create works
       expect(true).toBe(true);
     });
@@ -242,9 +271,9 @@ describe('MVP Workflow Integration Test', () => {
     it('✅ Criterion 3: Project has build script configured', async () => {
       const packageJsonPath = join(projectPath, 'package.json');
       const content = await readFile(packageJsonPath, 'utf-8');
-      const pkg = JSON.parse(content);
+      const pkg = JSON.parse(content) as PackageJson;
       
-      expect(pkg.scripts.build).toBe('gati build');
+      expect(pkg.scripts['build']).toBe('gati build');
     });
 
     it('✅ Criterion 4: Project structure supports deployment', async () => {
