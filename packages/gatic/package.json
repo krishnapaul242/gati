@@ -1,6 +1,6 @@
 {
   "name": "gatic",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Thin executable wrapper that runs @gati-framework/cli, providing the 'gatic' npx command.",
   "license": "MIT",
   "type": "module",
