@@ -3,6 +3,9 @@
  * @description Type definitions for global and local context in Gati framework
  */
 
+// Note: This interface is compatible with @gati-framework/core types
+// but includes additional runtime-specific properties
+
 /**
  * Module registry for dependency injection
  */
@@ -17,7 +20,7 @@ export interface ModuleRegistry {
 export interface GlobalContext {
   /**
    * Server start timestamp (milliseconds since epoch)
-   * Matches @gati-framework/core GlobalContext
+   * From @gati-framework/core GlobalContext
    */
   startedAt: number;
 
@@ -59,11 +62,13 @@ export interface GlobalContext {
 export interface LocalContext {
   /**
    * Unique identifier for this request
+   * From @gati-framework/core LocalContext
    */
   requestId: string;
 
   /**
    * Request timestamp (milliseconds since epoch)
+   * From @gati-framework/core LocalContext
    */
   timestamp: number;
 

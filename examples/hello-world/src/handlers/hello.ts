@@ -3,7 +3,7 @@
  * @description Simple hello world handler demonstrating basic Gati usage
  */
 
-import type { Handler } from '../../../../src/runtime/types/handler';
+import type { Handler } from '@gati-framework/runtime';
 
 /**
  * GET /hello

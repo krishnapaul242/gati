@@ -3,10 +3,10 @@
  * @description Gati configuration for Hello World example
  */
 
-import type { GlobalContext } from '../../src/runtime/types/context';
-import { helloHandler, helloNameHandler } from './src/handlers/hello';
-import { getUserHandler, listUsersHandler } from './src/handlers/user';
-import { initLogger } from './src/modules/logger';
+import type { GlobalContext } from '@gati-framework/runtime';
+import { helloHandler, helloNameHandler } from './src/handlers/hello.js';
+import { getUserHandler, listUsersHandler } from './src/handlers/user.js';
+import { initLogger } from './src/modules/logger.js';
 
 /**
  * Gati application configuration

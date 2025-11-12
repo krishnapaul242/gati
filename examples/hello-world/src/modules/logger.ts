@@ -3,7 +3,7 @@
  * @description Simple logging module demonstrating module pattern and dependency injection
  */
 
-import type { GlobalContext } from '../../../../src/runtime/types/context';
+import type { GlobalContext } from '@gati-framework/runtime';
 
 /**
  * Logger module interface

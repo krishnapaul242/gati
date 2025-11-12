@@ -4,7 +4,7 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
 
     // Emit
     "declaration": true,
@@ -43,9 +43,7 @@
     // Path Aliases
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@gati-framework/runtime": ["../../packages/runtime/src/index.ts"],
-      "@gati-framework/core": ["../../packages/core/src/index.ts"]
+      "@/*": ["src/*"]
     },
 
     // Advanced

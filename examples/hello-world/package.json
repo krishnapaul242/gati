@@ -18,7 +18,7 @@
   "author": "Krishna Paul",
   "license": "MIT",
   "dependencies": {
-    "gati": "file:../.."
+    "@gati-framework/runtime": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

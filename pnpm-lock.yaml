@@ -87,9 +87,9 @@ importers:
 
   examples/hello-world:
     dependencies:
-      gati:
-        specifier: file:../..
-        version: 'file:'
+      '@gati-framework/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
     devDependencies:
       '@types/node':
         specifier: ^20.11.0
@@ -3596,19 +3596,4 @@ packages:
   /yoctocolors@2.1.2:
     resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
     engines: {node: '>=18'}
-    dev: false
-
-  'file:':
-    resolution: {directory: '', type: directory}
-    name: '@gati/monorepo'
-    engines: {node: '>=18.0.0', pnpm: '>=8.0.0'}
-    hasBin: true
-    dependencies:
-      chalk: 5.6.2
-      chokidar: 4.0.3
-      commander: 14.0.2
-      dotenv: 17.2.3
-      fs-extra: 11.3.2
-      ora: 9.0.0
-      prompts: 2.4.2
     dev: false
