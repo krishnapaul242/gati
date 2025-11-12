@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { MockInstance } from 'vitest';
 import type { ClientRequest } from 'http';
 
 let execCalls: string[] = [];
@@ -126,7 +127,7 @@ describe('health check failure handling', () => {
     process.env['VITEST'] = '1';
     execCalls = [];
     spawnCalls = [];
-  logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {}) as unknown as MockInstance<unknown[], unknown>;
   });
 
   afterEach(() => {

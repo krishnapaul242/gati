@@ -9,6 +9,66 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./app-core": {
+      "types": "./dist/app-core.d.ts",
+      "import": "./dist/app-core.js"
+    },
+    "./handler-engine": {
+      "types": "./dist/handler-engine.d.ts",
+      "import": "./dist/handler-engine.js"
+    },
+    "./route-manager": {
+      "types": "./dist/route-manager.d.ts",
+      "import": "./dist/route-manager.js"
+    },
+    "./route-parser": {
+      "types": "./dist/route-parser.d.ts",
+      "import": "./dist/route-parser.js"
+    },
+    "./module-registry": {
+      "types": "./dist/module-registry.d.ts",
+      "import": "./dist/module-registry.js"
+    },
+    "./module-loader": {
+      "types": "./dist/module-loader.d.ts",
+      "import": "./dist/module-loader.js"
+    },
+    "./global-context": {
+      "types": "./dist/global-context.d.ts",
+      "import": "./dist/global-context.js"
+    },
+    "./local-context": {
+      "types": "./dist/local-context.d.ts",
+      "import": "./dist/local-context.js"
+    },
+    "./context-manager": {
+      "types": "./dist/context-manager.d.ts",
+      "import": "./dist/context-manager.js"
+    },
+    "./request": {
+      "types": "./dist/request.d.ts",
+      "import": "./dist/request.js"
+    },
+    "./response": {
+      "types": "./dist/response.d.ts",
+      "import": "./dist/response.js"
+    },
+    "./logger": {
+      "types": "./dist/logger.d.ts",
+      "import": "./dist/logger.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    },
+    "./types/module": {
+      "types": "./dist/types/module.d.ts",
+      "import": "./dist/types/module.js"
+    },
+    "./types/context": {
+      "types": "./dist/types/context.d.ts",
+      "import": "./dist/types/context.js"
     }
   },
   "files": [

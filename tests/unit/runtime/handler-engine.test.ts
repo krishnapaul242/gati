@@ -82,6 +82,7 @@ describe('Handler Engine', () => {
       modules: {},
       config: {},
       state: {},
+      startedAt: Date.now(),
       lifecycle: {
         onShutdown: vi.fn(),
         isShuttingDown: () => false,
