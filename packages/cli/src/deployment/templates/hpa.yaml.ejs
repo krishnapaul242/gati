@@ -1,0 +1,62 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: <%= name %>
+  namespace: <%= namespace %>
+  labels:
+    app: <%= name %>
+    managed-by: gati
+    <%_ if (typeof labels !== 'undefined' && labels) { _%>
+    <%_ for (const [key, value] of Object.entries(labels)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+    <%_ } _%>
+  <%_ if (typeof annotations !== 'undefined' && annotations) { _%>
+  annotations:
+    <%_ for (const [key, value] of Object.entries(annotations)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+  <%_ } _%>
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: <%= targetDeployment %>
+  minReplicas: <%= minReplicas %>
+  maxReplicas: <%= maxReplicas %>
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: <%= targetCPUUtilizationPercentage %>
+  <%_ if (typeof targetMemoryUtilizationPercentage !== 'undefined' && targetMemoryUtilizationPercentage) { _%>
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: <%= targetMemoryUtilizationPercentage %>
+  <%_ } _%>
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 15
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 60
+      selectPolicy: Max

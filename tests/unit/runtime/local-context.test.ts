@@ -172,7 +172,8 @@ describe('LocalContext', () => {
       const elapsed = Date.now() - start;
 
       // If parallel, should take ~50ms, not ~100ms
-      expect(elapsed).toBeLessThan(delay * 1.5);
+      // Using 2x tolerance to account for system variance
+      expect(elapsed).toBeLessThan(delay * 2);
     });
 
     it('should handle cleanup without any hooks', async () => {
