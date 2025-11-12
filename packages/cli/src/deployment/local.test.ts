@@ -84,6 +84,7 @@ describe('local deployment', () => {
         // Call callback if provided, otherwise return promise
         if (callback) {
           callback(err, { stdout, stderr });
+          return undefined;
         } else {
           if (err) {
             return Promise.reject(err);

@@ -10,6 +10,36 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./dist/index.js": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./utils/watcher": {
+      "types": "./dist/utils/watcher.d.ts",
+      "import": "./dist/utils/watcher.js"
+    },
+    "./utils/env-loader": {
+      "types": "./dist/utils/env-loader.d.ts",
+      "import": "./dist/utils/env-loader.js"
+    },
+    "./utils/bundler": {
+      "types": "./dist/utils/bundler.d.ts",
+      "import": "./dist/utils/bundler.js"
+    },
+    "./utils/validator": {
+      "types": "./dist/utils/validator.d.ts",
+      "import": "./dist/utils/validator.js"
+    },
+    "./utils/file-generator": {
+      "types": "./dist/utils/file-generator.d.ts",
+      "import": "./dist/utils/file-generator.js"
+    }
+  },
   "files": [
     "dist",
     "README.md"
@@ -23,6 +53,7 @@
   },
   "dependencies": {
     "@gati-framework/core": "^0.4.1",
+    "@gati-framework/runtime": "workspace:*",
     "chalk": "^5.6.2",
     "chokidar": "^4.0.3",
     "commander": "^14.0.2",

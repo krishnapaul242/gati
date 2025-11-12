@@ -47,7 +47,9 @@
     "paths": {
       "@gati-framework/core": ["./packages/core/src/index.ts"],
       "@gati/cli": ["./packages/cli/src/index.ts"],
-      "@gati-framework/runtime": ["./packages/runtime/src/index.ts"]
+      "@gati/cli/*": ["./packages/cli/src/*"],
+      "@gati-framework/runtime": ["./packages/runtime/src/index.ts"],
+      "@gati-framework/runtime/*": ["./packages/runtime/src/*"]
     },
 
     // Advanced
