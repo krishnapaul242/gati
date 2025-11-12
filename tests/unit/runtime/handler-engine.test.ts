@@ -79,10 +79,15 @@ describe('Handler Engine', () => {
 
   function createMockGlobalContext(): GlobalContext {
     return {
+      instance: {
+        id: 'test-instance',
+        region: 'us-east-1',
+        zone: 'us-east-1a',
+        startedAt: Date.now(),
+      },
       modules: {},
+      services: {},
       config: {},
-      state: {},
-      startedAt: Date.now(),
       lifecycle: {
         onShutdown: vi.fn(),
         isShuttingDown: () => false,
@@ -93,7 +98,24 @@ describe('Handler Engine', () => {
   function createMockLocalContext(): LocalContext {
     return {
       requestId: 'req_123',
-      timestamp: Date.now(),
+      traceId: 'trace_456',
+      clientId: 'client_789',
+      refs: {
+        sessionId: 'session_abc',
+        userId: 'user_def',
+      },
+      client: {
+        ip: '127.0.0.1',
+        userAgent: 'test-agent',
+        region: 'us-east-1',
+      },
+      meta: {
+        timestamp: Date.now(),
+        instanceId: 'instance_123',
+        region: 'us-east-1',
+        method: 'GET',
+        path: '/test',
+      },
       state: {},
       lifecycle: {
         onCleanup: vi.fn(),

@@ -100,7 +100,7 @@ export function initLogger(gctx: GlobalContext): Logger {
   logger.log('Logger module initialized');
 
   // Register cleanup handler
-  gctx.lifecycle.onShutdown(() => {
+  gctx.lifecycle.onShutdown('logger-cleanup', () => {
     logger.log('Logger module shutting down');
   });
 

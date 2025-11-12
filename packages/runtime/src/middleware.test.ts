@@ -34,10 +34,15 @@ describe('MiddlewareManager', () => {
     } as unknown as Response;
 
     mockGctx = {
+      instance: {
+        id: 'test-instance',
+        region: 'us-east-1',
+        zone: 'us-east-1a',
+        startedAt: Date.now(),
+      },
       modules: {},
-      startedAt: Date.now(),
+      services: {},
       config: {},
-      state: {},
       lifecycle: {
         onShutdown: vi.fn(),
         isShuttingDown: vi.fn(() => false),
@@ -46,7 +51,24 @@ describe('MiddlewareManager', () => {
 
     mockLctx = {
       requestId: 'test-123',
-      timestamp: Date.now(),
+      traceId: 'trace-456',
+      clientId: 'client-789',
+      refs: {
+        sessionId: 'session-abc',
+        userId: 'user-def',
+      },
+      client: {
+        ip: '127.0.0.1',
+        userAgent: 'test-agent',
+        region: 'us-east-1',
+      },
+      meta: {
+        timestamp: Date.now(),
+        instanceId: 'instance-123',
+        region: 'us-east-1',
+        method: 'GET',
+        path: '/test',
+      },
       state: {},
       lifecycle: {
         onCleanup: vi.fn(),
