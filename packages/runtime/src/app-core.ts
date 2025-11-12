@@ -429,6 +429,13 @@ export class GatiApp {
   isRunning(): boolean {
     return this.server !== null && !this.isShuttingDown;
   }
+
+  /**
+   * Get global context (for module initialization)
+   */
+  getGlobalContext(): GlobalContext {
+    return this.gctx;
+  }
 }
 
 /**

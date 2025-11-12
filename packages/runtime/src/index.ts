@@ -20,12 +20,22 @@ export type { LoggerOptions } from './logger.js';
 
 // Core types re-exported from @gati-framework/core
 export type {
-  Handler,
   Request,
   Response,
+} from '@gati-framework/core';
+
+// Runtime-specific types (extended from core)
+export type {
+  Handler,
+} from './types/handler.js';
+export type {
   GlobalContext,
   LocalContext,
-} from '@gati-framework/core';
+} from './types/context.js';
+
+// Runtime-specific exports
+export { HandlerError } from './types/handler.js';
+export type { HandlerExecutionOptions } from './types/handler.js';
 
 // Runtime-specific types
 export type { Middleware, ErrorMiddleware } from './middleware.js';

@@ -3,8 +3,8 @@
  * @description User handler demonstrating path parameters and module usage
  */
 
-import type { Handler } from '../../../../src/runtime/types/handler';
-import { HandlerError } from '../../../../src/runtime/types/handler';
+import type { Handler } from '@gati-framework/runtime';
+import { HandlerError } from '@gati-framework/runtime';
 
 // Mock user data for demonstration
 const users = [

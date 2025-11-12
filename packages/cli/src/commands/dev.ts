@@ -30,12 +30,20 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
     // Load environment variables
     loadDevEnv(cwd, true);
 
-    // Check if gati.config.ts exists
-    const configPath = resolve(cwd, 'gati.config.ts');
+    // Check if gati.config.js exists (compiled from .ts)
+    const configPath = resolve(cwd, 'gati.config.js');
+    const configTsPath = resolve(cwd, 'gati.config.ts');
+    
     if (!existsSync(configPath)) {
-      spinner.fail(chalk.red('✖ No gati.config.ts found in current directory'));
-      // eslint-disable-next-line no-console
-      console.log(chalk.yellow('\n💡 Run `gati create` to create a new project'));
+      if (existsSync(configTsPath)) {
+        spinner.fail(chalk.red('✖ gati.config.ts found but not compiled'));
+        // eslint-disable-next-line no-console
+        console.log(chalk.yellow('\n💡 Run `npm run build` or `tsc` to compile your config'));
+      } else {
+        spinner.fail(chalk.red('✖ No gati.config.ts found in current directory'));
+        // eslint-disable-next-line no-console
+        console.log(chalk.yellow('\n💡 Run `gati create` to create a new project'));
+      }
       process.exit(1);
     }
 
@@ -50,17 +58,60 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
     let app: GatiApp | null = null;
     const loadApp = async (): Promise<GatiApp> => {
       try {
-        // Clear require cache for hot reload
-        const modulePath = resolve(cwd, 'dist/index.js');
-        if (require.cache[modulePath]) {
-          delete require.cache[modulePath];
-        }
-
-        // Import the app
+        // Import the config and create app
+        const configPath = resolve(cwd, 'dist', 'gati.config.js');
+        
+        // Convert to file:// URL for Windows compatibility
+        const configUrl = new URL(`file://${configPath.replace(/\\/g, '/')}`).href;
+        
+        // Use dynamic import with cache busting for hot reload
+        const cacheBuster = `?t=${Date.now()}`;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const module = await import(modulePath);
+        const configModule = await import(configUrl + cacheBuster);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        return (module.app || module.default) as GatiApp;
+        const config = configModule.default || configModule;
+        
+        // Create app from config
+        const { createApp } = await import('@gati-framework/runtime');
+        const gatiApp = createApp({
+          port: config.server?.port || 3000,
+          host: config.server?.host || 'localhost',
+        });
+        
+        // Initialize modules if provided
+        if (config.modules && typeof config.modules === 'function') {
+          // Get global context and initialize modules
+          const gctx = gatiApp.getGlobalContext();
+          config.modules(gctx);
+        }
+        
+        // Register routes
+        if (config.routes && Array.isArray(config.routes)) {
+          for (const route of config.routes) {
+            const method = route.method?.toLowerCase();
+            if (method && route.path && route.handler) {
+              switch (method) {
+                case 'get':
+                  gatiApp.get(route.path, route.handler);
+                  break;
+                case 'post':
+                  gatiApp.post(route.path, route.handler);
+                  break;
+                case 'put':
+                  gatiApp.put(route.path, route.handler);
+                  break;
+                case 'patch':
+                  gatiApp.patch(route.path, route.handler);
+                  break;
+                case 'delete':
+                  gatiApp.delete(route.path, route.handler);
+                  break;
+              }
+            }
+          }
+        }
+        
+        return gatiApp;
       } catch (error) {
         throw new Error(`Failed to load app: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
