@@ -41,3 +41,12 @@ export type { HandlerExecutionOptions } from './types/handler.js';
 export type { Middleware, ErrorMiddleware } from './middleware.js';
 export type { RouteManager } from './route-manager.js';
 export type { MiddlewareManager } from './middleware.js';
+
+// Lifecycle management
+export { LifecycleManager, RequestLifecycleManager } from './lifecycle-manager.js';
+export { LifecyclePriority, RequestPhase } from './types/context.js';
+export type { LifecycleHook, HealthStatus, LifecycleCoordinator } from './types/context.js';
+
+// Coordinators
+export { ConsulCoordinator } from './coordinators/consul-coordinator.js';
+export type { ConsulConfig } from './coordinators/consul-coordinator.js';

@@ -18,7 +18,25 @@ import { createLogger } from './logger.js';
 import type { LoggerOptions } from './logger.js';
 
 /**
- * Application configuration options
+ * Generate instance ID for distributed deployment
+ */
+function generateInstanceId(): string {
+  return process.env['INSTANCE_ID'] || 
+         process.env['HOSTNAME'] || 
+         `instance_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * Generate trace ID for distributed tracing
+ */
+function generateTraceId(): string {
+  return `trace_${Date.now()}_${Math.random().toString(36).slice(2, 16)}`;
+}
+
+
+
+/**
+ * Application configuration options for scalable deployment
  */
 export interface AppConfig {
   /**
@@ -49,6 +67,57 @@ export interface AppConfig {
    * Logger configuration
    */
   logger?: LoggerOptions;
+
+  /**
+   * Clustering configuration
+   */
+  cluster?: {
+    enabled: boolean;
+    workers?: number;
+  };
+
+  /**
+   * Performance optimization settings
+   */
+  performance?: {
+    keepAliveTimeout: number;
+    maxConnections: number;
+    compression: boolean;
+    bodyLimit: string;
+  };
+
+  /**
+   * Distributed tracing configuration
+   */
+  tracing?: {
+    enabled: boolean;
+    serviceName: string;
+    endpoint?: string;
+  };
+
+  /**
+   * External service configurations
+   */
+  services?: {
+    redis?: {
+      url: string;
+      poolSize: number;
+    };
+    database?: {
+      url: string;
+      poolMin: number;
+      poolMax: number;
+    };
+  };
+
+  /**
+   * Instance metadata for distributed deployment
+   */
+  instance?: {
+    id: string;
+    region: string;
+    zone: string;
+  };
 }
 
 /**
@@ -59,7 +128,14 @@ export class GatiApp {
   private router: RouteManager;
   private middleware: MiddlewareManager;
   private gctx: GlobalContext;
-  private config: Required<Omit<AppConfig, 'logger'>> & { logger?: LoggerOptions };
+  private config: Required<Omit<AppConfig, 'logger' | 'cluster' | 'performance' | 'tracing' | 'services' | 'instance'>> & { 
+    logger?: LoggerOptions;
+    cluster?: AppConfig['cluster'];
+    performance?: AppConfig['performance'];
+    tracing?: AppConfig['tracing'];
+    services?: AppConfig['services'];
+    instance?: AppConfig['instance'];
+  };
   private isShuttingDown = false;
   private activeRequests = 0;
   private logger: ReturnType<typeof createLogger>;
@@ -71,6 +147,11 @@ export class GatiApp {
       timeout: config.timeout || 30000,
       logging: config.logging !== false,
       logger: config.logger,
+      cluster: config.cluster,
+      performance: config.performance,
+      tracing: config.tracing,
+      services: config.services,
+      instance: config.instance,
     };
 
     this.logger = createLogger({
@@ -78,7 +159,17 @@ export class GatiApp {
       ...this.config.logger,
     });
 
-    this.gctx = createGlobalContext();
+    // Create global context with instance metadata
+    this.gctx = createGlobalContext({
+      instance: {
+        id: this.config.instance?.id || generateInstanceId(),
+        region: this.config.instance?.region || process.env['AWS_REGION'] || 'local',
+        zone: this.config.instance?.zone || process.env['AWS_AVAILABILITY_ZONE'] || 'local-a',
+      },
+      config: this.config,
+      services: {}, // Will be populated by modules
+    });
+    
     this.router = createRouteManager();
     this.middleware = createMiddlewareManager();
 
@@ -314,6 +405,8 @@ export class GatiApp {
       }
     }, this.config.timeout);
 
+    let lctx: any = null;
+    
     try {
       // Parse request body
       const { body, rawBody } = await this.parseRequestBody(incomingMessage);
@@ -328,8 +421,53 @@ export class GatiApp {
       });
       const res = createResponse({ raw: serverResponse });
 
-      // Create local context for this request
-      const lctx = createLocalContext();
+      // Extract distributed tracing headers
+      const traceId = (incomingMessage.headers['x-trace-id'] as string) || generateTraceId();
+      const parentSpanId = incomingMessage.headers['x-parent-span-id'] as string;
+      
+      // Generate client ID and metadata
+      const clientIp = incomingMessage.socket.remoteAddress || 'unknown';
+      const userAgent = incomingMessage.headers['user-agent'] || 'unknown';
+      const clientIdentifier = `${clientIp}:${userAgent}`;
+      
+      // Create a consistent client ID using a simple hash
+      let hash = 0;
+      for (let i = 0; i < clientIdentifier.length; i++) {
+        const char = clientIdentifier.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+      }
+      const clientId = `client_${Math.abs(hash).toString(36)}`;
+      
+      // Extract external references from headers/cookies
+      const sessionId = incomingMessage.headers['x-session-id'] as string || 
+                       this.extractSessionFromCookie(incomingMessage.headers.cookie);
+      const userId = incomingMessage.headers['x-user-id'] as string;
+      const tenantId = incomingMessage.headers['x-tenant-id'] as string;
+
+      // Create lightweight local context for this request
+      lctx = createLocalContext({ 
+        traceId,
+        parentSpanId,
+        clientId,
+        refs: {
+          sessionId,
+          userId,
+          tenantId,
+        },
+        client: {
+          ip: clientIp,
+          userAgent,
+          region: this.gctx.instance.region,
+        },
+        meta: {
+          timestamp: Date.now(),
+          instanceId: this.gctx.instance.id,
+          region: this.gctx.instance.region,
+          method: req.method,
+          path: req.path || '/',
+        },
+      });
 
       try {
         // Execute middleware chain and route handler
@@ -363,6 +501,15 @@ export class GatiApp {
         }
       }
     } finally {
+      // Execute request cleanup hooks
+      if (lctx) {
+        try {
+          await lctx.lifecycle.executeCleanup();
+        } catch (cleanupError) {
+          console.error('Request cleanup failed:', cleanupError);
+        }
+      }
+      
       // Clear request timeout
       clearTimeout(requestTimeout);
       
@@ -435,6 +582,22 @@ export class GatiApp {
    */
   getGlobalContext(): GlobalContext {
     return this.gctx;
+  }
+
+  /**
+   * Extract session ID from cookie header
+   */
+  private extractSessionFromCookie(cookieHeader?: string): string | undefined {
+    if (!cookieHeader) return undefined;
+    
+    const cookies = cookieHeader.split(';');
+    for (const cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'sessionId' || name === 'session_id') {
+        return value;
+      }
+    }
+    return undefined;
   }
 }
 

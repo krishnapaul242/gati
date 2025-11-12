@@ -4,6 +4,7 @@
  */
 
 import type { Handler } from '@gati-framework/runtime';
+import { RequestPhase } from '@gati-framework/runtime';
 
 /**
  * GET /hello
@@ -15,15 +16,31 @@ import type { Handler } from '@gati-framework/runtime';
  * # {"message":"Hello, World!","timestamp":1699564800000}
  * ```
  */
-export const helloHandler: Handler = (_req, res, _gctx, lctx) => {
-  // Access request timestamp from local context
-  const timestamp = lctx.timestamp;
+export const helloHandler: Handler = async (_req, res, _gctx, lctx) => {
+  // Register request cleanup
+  lctx.lifecycle.onCleanup('hello-cleanup', async () => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log(`🧹 Cleaning up hello request ${lctx.requestId}`);
+  });
 
-  // Send JSON response
+  // Track request phases
+  lctx.lifecycle.setPhase(RequestPhase.PROCESSING);
+  
+  // Simulate some processing
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  lctx.lifecycle.setPhase(RequestPhase.COMPLETED);
+
+  // Send JSON response with distributed context info
   res.json({
     message: 'Hello, World!',
-    timestamp,
     requestId: lctx.requestId,
+    traceId: lctx.traceId,
+    clientId: lctx.clientId,
+    refs: lctx.refs,
+    client: lctx.client,
+    meta: lctx.meta,
+    duration: Date.now() - lctx.meta.startTime,
   });
 };
 
@@ -37,14 +54,33 @@ export const helloHandler: Handler = (_req, res, _gctx, lctx) => {
  * # {"message":"Hello, Alice!","timestamp":1699564800000}
  * ```
  */
-export const helloNameHandler: Handler = (req, res, _gctx, lctx) => {
+export const helloNameHandler: Handler = async (req, res, _gctx, lctx) => {
   // Extract path parameter
   const name = req.params['name'] as string;
+
+  // Register phase change handler
+  lctx.lifecycle.onPhaseChange((phase, previousPhase) => {
+    console.log(`📋 Request ${lctx.requestId}: ${previousPhase} → ${phase}`);
+  });
+
+  // Progress through phases
+  lctx.lifecycle.setPhase(RequestPhase.VALIDATED);
+  lctx.lifecycle.setPhase(RequestPhase.PROCESSING);
+  
+  // Simulate processing
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  lctx.lifecycle.setPhase(RequestPhase.COMPLETED);
 
   // Send personalized greeting
   res.json({
     message: `Hello, ${name}!`,
-    timestamp: lctx.timestamp,
     requestId: lctx.requestId,
+    traceId: lctx.traceId,
+    clientId: lctx.clientId,
+    refs: lctx.refs,
+    client: lctx.client,
+    meta: lctx.meta,
+    duration: Date.now() - lctx.meta.startTime,
   });
 };

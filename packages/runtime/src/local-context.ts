@@ -4,6 +4,8 @@
  */
 
 import type { LocalContext, LocalContextOptions } from './types/context.js';
+import { RequestPhase } from './types/context.js';
+import { RequestLifecycleManager } from './lifecycle-manager.js';
 
 /**
  * Generates a unique request ID
@@ -12,6 +14,26 @@ import type { LocalContext, LocalContextOptions } from './types/context.js';
  */
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+}
+
+/**
+ * Generates a unique client ID
+ *
+ * @returns Unique client ID
+ */
+function generateClientId(): string {
+  return `client_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+}
+
+
+
+/**
+ * Generates a unique trace ID for distributed tracing
+ *
+ * @returns Unique trace ID
+ */
+function generateTraceId(): string {
+  return `trace_${Date.now()}_${Math.random().toString(36).slice(2, 16)}`;
 }
 
 /**
@@ -31,23 +53,56 @@ function generateRequestId(): string {
 export function createLocalContext(
   options: LocalContextOptions = {}
 ): LocalContext {
-  const cleanupFns: Array<() => void | Promise<void>> = [];
-  const cleanupSymbol = Symbol.for('gati:cleanup');
+  const requestLifecycle = new RequestLifecycleManager();
+  const lifecycleSymbol = Symbol.for('gati:requestLifecycle');
 
   const lctx: LocalContext = {
     requestId: options.requestId || generateRequestId(),
-    timestamp: Date.now(),
+    traceId: options.traceId || generateTraceId(),
+    parentSpanId: options.parentSpanId,
+    clientId: options.clientId || generateClientId(),
+    refs: options.refs || {},
+    client: options.client || {
+      ip: 'unknown',
+      userAgent: 'unknown',
+      region: 'unknown',
+    },
+    meta: {
+      timestamp: Date.now(),
+      instanceId: 'unknown',
+      region: 'unknown',
+      method: 'GET',
+      path: '/',
+      phase: RequestPhase.RECEIVED,
+      startTime: Date.now(),
+      ...options.meta,
+    },
     state: options.state || {},
     lifecycle: {
-      onCleanup: (fn) => {
-        cleanupFns.push(fn);
+      onCleanup: (name: string, fn: () => void | Promise<void>) => {
+        requestLifecycle.onCleanup(name, fn);
       },
-      isCleaningUp: () => false, // Will be updated by cleanupLocalContext
+      onTimeout: (fn: () => void | Promise<void>) => {
+        requestLifecycle.onTimeout(fn);
+      },
+      onError: (fn: (error: Error) => void | Promise<void>) => {
+        requestLifecycle.onError(fn);
+      },
+      onPhaseChange: (fn: (phase: RequestPhase, previousPhase: RequestPhase) => void) => {
+        requestLifecycle.onPhaseChange(fn);
+      },
+      setPhase: (phase: RequestPhase) => {
+        requestLifecycle.setPhase(phase);
+        lctx.meta.phase = phase;
+      },
+      executeCleanup: () => requestLifecycle.executeCleanup(),
+      isCleaningUp: () => requestLifecycle.isCleaningUp(),
+      isTimedOut: () => requestLifecycle.isTimedOut(),
     },
   };
 
-  // Store cleanup functions for later access
-  (lctx as unknown as Record<symbol, unknown>)[cleanupSymbol] = cleanupFns;
+  // Store request lifecycle manager for later access
+  (lctx as unknown as Record<symbol, unknown>)[lifecycleSymbol] = requestLifecycle;
 
   return lctx;
 }
@@ -66,21 +121,8 @@ export function createLocalContext(
 export async function cleanupLocalContext(
   lctx: LocalContext
 ): Promise<void> {
-  // Mark as cleaning up
-  const isCleaningUp = true;
-  (lctx.lifecycle as { isCleaningUp: () => boolean }).isCleaningUp =
-    () => isCleaningUp;
-
-  // Get cleanup functions from symbol
-  const cleanupSymbol = Symbol.for('gati:cleanup');
-  const fns = (lctx as unknown as Record<symbol, unknown>)[cleanupSymbol] as
-    | Array<() => void | Promise<void>>
-    | undefined;
-
-  if (fns && fns.length > 0) {
-    // Execute all cleanup hooks in parallel
-    await Promise.all(fns.map((fn) => Promise.resolve(fn())));
-  }
+  // Execute cleanup through lifecycle manager
+  await lctx.lifecycle.executeCleanup();
 
   // Clear state to prevent memory leaks
   lctx.state = {};

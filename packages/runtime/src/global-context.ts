@@ -7,11 +7,13 @@ import type {
   GlobalContext,
   GlobalContextOptions,
 } from './types/context.js';
+import { LifecyclePriority } from './types/context.js';
 import type { ModuleLoader } from './module-loader.js';
 import { createModuleLoader } from './module-loader.js';
+import { LifecycleManager } from './lifecycle-manager.js';
 
 /**
- * Extended global context options with module loader
+ * Extended global context options with module loader and coordinator
  */
 export interface ExtendedGlobalContextOptions extends GlobalContextOptions {
   /**
@@ -19,6 +21,11 @@ export interface ExtendedGlobalContextOptions extends GlobalContextOptions {
    * If not provided, a new one will be created
    */
   moduleLoader?: ModuleLoader;
+
+  /**
+   * Optional lifecycle coordinator for distributed systems
+   */
+  coordinator?: import('./types/context.js').LifecycleCoordinator;
 }
 
 /**
@@ -38,28 +45,54 @@ export interface ExtendedGlobalContextOptions extends GlobalContextOptions {
 export function createGlobalContext(
   options: ExtendedGlobalContextOptions = {}
 ): GlobalContext {
-  const shutdownFns: Array<() => void | Promise<void>> = [];
-  const shutdownSymbol = Symbol.for('gati:shutdown');
   const moduleLoader = options.moduleLoader || createModuleLoader();
+  const lifecycleManager = new LifecycleManager(options.coordinator);
   const moduleLoaderSymbol = Symbol.for('gati:moduleLoader');
+  const lifecycleSymbol = Symbol.for('gati:lifecycle');
 
   const gctx: GlobalContext = {
-    startedAt: Date.now(),
+    instance: {
+      id: options.instance?.id || 'unknown',
+      region: options.instance?.region || 'unknown',
+      zone: options.instance?.zone || 'unknown',
+      startedAt: Date.now(),
+    },
     modules: options.modules || {},
+    services: options.services || {},
     config: options.config || {},
-    state: options.state || {},
     lifecycle: {
-      onShutdown: (fn) => {
-        shutdownFns.push(fn);
+      onStartup: (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority) => {
+        lifecycleManager.onStartup(name, fn, priority);
       },
-      isShuttingDown: () => false, // Will be updated by shutdownGlobalContext
+      onHealthCheck: (name: string, fn: () => Promise<{ status: 'pass' | 'fail' | 'warn'; message?: string; }>) => {
+        lifecycleManager.onHealthCheck(name, fn);
+      },
+      onShutdown: (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority) => {
+        lifecycleManager.onShutdown(name, fn, priority);
+      },
+      onPreShutdown: (name: string, fn: () => void | Promise<void>) => {
+        lifecycleManager.onPreShutdown(name, fn);
+      },
+      onConfigReload: (name: string, fn: (newConfig: Record<string, unknown>) => void | Promise<void>) => {
+        lifecycleManager.onConfigReload(name, fn);
+      },
+      onMemoryPressure: (name: string, fn: (level: 'low' | 'medium' | 'high') => void | Promise<void>) => {
+        lifecycleManager.onMemoryPressure(name, fn);
+      },
+      onCircuitBreakerChange: (name: string, fn: (service: string, state: 'open' | 'closed' | 'half-open') => void) => {
+        lifecycleManager.onCircuitBreakerChange(name, fn);
+      },
+      executeStartup: () => lifecycleManager.executeStartup(),
+      executeHealthChecks: () => lifecycleManager.executeHealthChecks(),
+      executeShutdown: () => lifecycleManager.executeShutdown(),
+      isShuttingDown: () => lifecycleManager.isShuttingDown(),
+      coordinator: options.coordinator,
     },
   };
 
-  // Store shutdown functions and module loader for later access
-  (gctx as unknown as Record<symbol, unknown>)[shutdownSymbol] = shutdownFns;
-  (gctx as unknown as Record<symbol, unknown>)[moduleLoaderSymbol] =
-    moduleLoader;
+  // Store module loader and lifecycle manager for later access
+  (gctx as unknown as Record<symbol, unknown>)[moduleLoaderSymbol] = moduleLoader;
+  (gctx as unknown as Record<symbol, unknown>)[lifecycleSymbol] = lifecycleManager;
 
   return gctx;
 }

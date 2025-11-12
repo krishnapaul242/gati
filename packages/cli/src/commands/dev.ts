@@ -11,7 +11,7 @@ import ora from 'ora';
 import { loadDevEnv } from '../utils/env-loader.js';
 import { createWatcher } from '../utils/watcher.js';
 import type { FSWatcher } from 'chokidar';
-import type { GatiApp } from '@gati-framework/core';
+import type { GatiApp } from '@gati-framework/runtime';
 
 interface DevOptions {
   port?: string;
@@ -136,6 +136,11 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
 
         spinner.text = 'Starting HTTP server...';
         if (app) {
+          // Execute startup hooks before listening
+          const gctx = app.getGlobalContext();
+          console.log(chalk.blue('\n🚀 Executing startup hooks...'));
+          await gctx.lifecycle.executeStartup();
+          
           await app.listen();
         }
 
@@ -211,8 +216,11 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
         await watcher.close();
       }
 
-      // Stop server
+      // Stop server with lifecycle hooks
       if (app && typeof app.close === 'function') {
+        const gctx = app.getGlobalContext();
+        console.log(chalk.blue('\n🛑 Executing shutdown hooks...'));
+        await gctx.lifecycle.executeShutdown();
         await app.close();
       }
 

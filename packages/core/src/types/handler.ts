@@ -21,7 +21,26 @@ export interface GlobalContext {
 
 export interface LocalContext {
   requestId: string;
-  timestamp: number;
+  traceId: string;
+  parentSpanId?: string;
+  clientId: string;
+  refs: {
+    sessionId?: string;
+    userId?: string;
+    tenantId?: string;
+  };
+  client: {
+    ip: string;
+    userAgent: string;
+    region: string;
+  };
+  meta: {
+    timestamp: number;
+    instanceId: string;
+    region: string;
+    method: string;
+    path: string;
+  };
 }
 
 export type Handler = (
