@@ -147,6 +147,75 @@ export interface ServiceConfig {
 }
 
 /**
+ * Horizontal Pod Autoscaler configuration
+ */
+export interface HPAConfig {
+  /** HPA name */
+  name: string;
+  /** Namespace */
+  namespace: string;
+  /** Target deployment name */
+  targetDeployment: string;
+  /** Minimum number of replicas */
+  minReplicas: number;
+  /** Maximum number of replicas */
+  maxReplicas: number;
+  /** Target CPU utilization percentage */
+  targetCPUUtilizationPercentage: number;
+  /** Target memory utilization percentage (optional) */
+  targetMemoryUtilizationPercentage?: number;
+  /** Additional labels */
+  labels?: Record<string, string>;
+  /** Annotations */
+  annotations?: Record<string, string>;
+}
+
+/**
+ * Ingress rule configuration
+ */
+export interface IngressRule {
+  /** Hostname for the rule */
+  host: string;
+  /** HTTP paths */
+  paths: Array<{
+    path: string;
+    pathType: 'Prefix' | 'Exact' | 'ImplementationSpecific';
+    serviceName: string;
+    servicePort: number;
+  }>;
+}
+
+/**
+ * Ingress TLS configuration
+ */
+export interface IngressTLS {
+  /** Hosts covered by certificate */
+  hosts: string[];
+  /** Secret name containing TLS certificate */
+  secretName: string;
+}
+
+/**
+ * Kubernetes Ingress configuration
+ */
+export interface IngressConfig {
+  /** Ingress name */
+  name: string;
+  /** Namespace */
+  namespace: string;
+  /** Ingress class name (e.g., 'nginx', 'alb') */
+  ingressClassName: string;
+  /** Ingress rules */
+  rules: IngressRule[];
+  /** TLS configuration */
+  tls?: IngressTLS[];
+  /** Additional labels */
+  labels?: Record<string, string>;
+  /** Annotations */
+  annotations?: Record<string, string>;
+}
+
+/**
  * Helm chart configuration
  */
 export interface HelmChartConfig {
@@ -207,6 +276,10 @@ export interface DeploymentManifests {
   deployment: string;
   /** Kubernetes service YAML */
   service: string;
+  /** Kubernetes HPA YAML (optional) */
+  hpa?: string;
+  /** Kubernetes Ingress YAML (optional) */
+  ingress?: string;
   /** Helm chart files */
   helm: {
     chartYaml: string;
@@ -215,5 +288,7 @@ export interface DeploymentManifests {
     serviceTemplate: string;
     configMapTemplate?: string;
     secretTemplate?: string;
+    hpaTemplate?: string;
+    ingressTemplate?: string;
   };
 }

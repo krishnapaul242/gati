@@ -11,6 +11,8 @@ import type {
   DockerfileConfig,
   DeploymentConfig,
   ServiceConfig,
+  HPAConfig,
+  IngressConfig,
   HelmChartConfig,
   DeploymentManifests,
   DeploymentEnvironment,
@@ -25,6 +27,8 @@ const TEMPLATES_DIR = join(__dirname, 'templates');
 const DOCKERFILE_TEMPLATE = join(TEMPLATES_DIR, 'Dockerfile.ejs');
 const DEPLOYMENT_TEMPLATE = join(TEMPLATES_DIR, 'deployment.yaml.ejs');
 const SERVICE_TEMPLATE = join(TEMPLATES_DIR, 'service.yaml.ejs');
+const HPA_TEMPLATE = join(TEMPLATES_DIR, 'hpa.yaml.ejs');
+const INGRESS_TEMPLATE = join(TEMPLATES_DIR, 'ingress.yaml.ejs');
 const HELM_CHART_TEMPLATE = join(TEMPLATES_DIR, 'helm', 'Chart.yaml.ejs');
 const HELM_VALUES_TEMPLATE = join(TEMPLATES_DIR, 'helm', 'values.yaml.ejs');
 
@@ -132,6 +136,63 @@ export function generateDeployment(config: DeploymentConfig): string {
  */
 export function generateService(config: ServiceConfig): string {
   const template = readFileSync(SERVICE_TEMPLATE, 'utf-8');
+  return ejs.render(template, config);
+}
+
+/**
+ * Generate Kubernetes HPA (Horizontal Pod Autoscaler) manifest
+ * 
+ * @param config - HPA configuration
+ * @returns Generated HPA YAML
+ * 
+ * @example
+ * ```typescript
+ * const hpa = generateHPA({
+ *   name: 'my-app',
+ *   namespace: 'default',
+ *   targetDeployment: 'my-app',
+ *   minReplicas: 2,
+ *   maxReplicas: 10,
+ *   targetCPUUtilizationPercentage: 70,
+ *   targetMemoryUtilizationPercentage: 80
+ * });
+ * ```
+ */
+export function generateHPA(config: HPAConfig): string {
+  const template = readFileSync(HPA_TEMPLATE, 'utf-8');
+  return ejs.render(template, config);
+}
+
+/**
+ * Generate Kubernetes Ingress manifest
+ * 
+ * @param config - Ingress configuration
+ * @returns Generated Ingress YAML
+ * 
+ * @example
+ * ```typescript
+ * const ingress = generateIngress({
+ *   name: 'my-app',
+ *   namespace: 'default',
+ *   ingressClassName: 'nginx',
+ *   rules: [{
+ *     host: 'api.example.com',
+ *     paths: [{
+ *       path: '/',
+ *       pathType: 'Prefix',
+ *       serviceName: 'my-app',
+ *       servicePort: 80
+ *     }]
+ *   }],
+ *   tls: [{
+ *     hosts: ['api.example.com'],
+ *     secretName: 'my-app-tls'
+ *   }]
+ * });
+ * ```
+ */
+export function generateIngress(config: IngressConfig): string {
+  const template = readFileSync(INGRESS_TEMPLATE, 'utf-8');
   return ejs.render(template, config);
 }
 
@@ -355,6 +416,15 @@ export function generateCompleteManifests(
     buildCommand?: string;
     serviceType?: 'ClusterIP' | 'LoadBalancer' | 'NodePort';
     enableAutoscaling?: boolean;
+    minReplicas?: number;
+    maxReplicas?: number;
+    targetCPUUtilization?: number;
+    targetMemoryUtilization?: number;
+    enableIngress?: boolean;
+    ingressHost?: string;
+    ingressClassName?: string;
+    enableTLS?: boolean;
+    tlsSecretName?: string;
     additionalEnv?: EnvironmentVariable[];
   } = {}
 ): DeploymentManifests {
@@ -428,9 +498,9 @@ export function generateCompleteManifests(
       autoscaling: options.enableAutoscaling
         ? {
             enabled: true,
-            minReplicas: 2,
-            maxReplicas: 10,
-            targetCPUUtilizationPercentage: 80,
+            minReplicas: options.minReplicas || 2,
+            maxReplicas: options.maxReplicas || 10,
+            targetCPUUtilizationPercentage: options.targetCPUUtilization || 70,
           }
         : {
             enabled: false,
@@ -441,10 +511,61 @@ export function generateCompleteManifests(
     },
   });
 
+  // Generate HPA (if autoscaling enabled and not development)
+  let hpa: string | undefined;
+  if (options.enableAutoscaling && env !== 'development') {
+    hpa = generateHPA({
+      name: `${appName}-hpa`,
+      namespace,
+      targetDeployment: appName,
+      minReplicas: options.minReplicas || 2,
+      maxReplicas: options.maxReplicas || 10,
+      targetCPUUtilizationPercentage: options.targetCPUUtilization || 70,
+      targetMemoryUtilizationPercentage: options.targetMemoryUtilization,
+    });
+  }
+
+  // Generate Ingress (if enabled)
+  let ingress: string | undefined;
+  if (options.enableIngress && options.ingressHost) {
+    const ingressConfig: IngressConfig = {
+      name: `${appName}-ingress`,
+      namespace,
+      ingressClassName: options.ingressClassName || 'nginx',
+      rules: [
+        {
+          host: options.ingressHost,
+          paths: [
+            {
+              path: '/',
+              pathType: 'Prefix',
+              serviceName: appName,
+              servicePort: 80,
+            },
+          ],
+        },
+      ],
+    };
+
+    // Add TLS if enabled
+    if (options.enableTLS) {
+      ingressConfig.tls = [
+        {
+          hosts: [options.ingressHost],
+          secretName: options.tlsSecretName || `${appName}-tls`,
+        },
+      ];
+    }
+
+    ingress = generateIngress(ingressConfig);
+  }
+
   return {
     dockerfile,
     deployment,
     service,
+    hpa,
+    ingress,
     helm: {
       chartYaml: helm.chartYaml,
       valuesYaml: helm.valuesYaml,

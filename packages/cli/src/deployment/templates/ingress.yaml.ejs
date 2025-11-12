@@ -1,0 +1,58 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: <%= name %>
+  namespace: <%= namespace %>
+  labels:
+    app: <%= name %>
+    managed-by: gati
+    <%_ if (typeof labels !== 'undefined' && labels) { _%>
+    <%_ for (const [key, value] of Object.entries(labels)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+    <%_ } _%>
+  annotations:
+    # Default annotations for common ingress controllers
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # AWS ALB annotations
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
+    <%_ if (typeof annotations !== 'undefined' && annotations) { _%>
+    <%_ for (const [key, value] of Object.entries(annotations)) { _%>
+    <%= key %>: <%= value %>
+    <%_ } _%>
+    <%_ } _%>
+spec:
+  ingressClassName: <%= ingressClassName %>
+  <%_ if (typeof tls !== 'undefined' && tls && tls.length > 0) { _%>
+  tls:
+  <%_ for (const tlsConfig of tls) { _%>
+  - hosts:
+    <%_ for (const host of tlsConfig.hosts) { _%>
+    - <%= host %>
+    <%_ } _%>
+    secretName: <%= tlsConfig.secretName %>
+  <%_ } _%>
+  <%_ } _%>
+  rules:
+  <%_ for (const rule of rules) { _%>
+  - host: <%= rule.host %>
+    http:
+      paths:
+      <%_ for (const path of rule.paths) { _%>
+      - path: <%= path.path %>
+        pathType: <%= path.pathType %>
+        backend:
+          service:
+            name: <%= path.serviceName %>
+            port:
+              number: <%= path.servicePort %>
+      <%_ } _%>
+  <%_ } _%>
