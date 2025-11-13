@@ -19,12 +19,19 @@ Handlers are the core of your Gati application - they process HTTP requests and 
 
 ## Handler Anatomy
 
-A handler is a function that processes an HTTP request and generates a response:
+A handler is a function that processes an HTTP request and generates a response. Gati uses file-based routing with explicit exports:
 
 ```typescript
-import type { Handler } from 'gati';
+import type { Handler } from '@gati-framework/runtime';
 
-export const myHandler: Handler = (req, res, gctx, lctx) => {
+// HTTP method (optional, defaults to GET)
+export const METHOD = 'GET';
+
+// Custom route (optional, auto-generated from file path)
+export const ROUTE = '/users/:id';
+
+// Handler function (required)
+export const handler: Handler = (req, res, gctx, lctx) => {
   // Process request
   // Generate response
 };
@@ -33,12 +40,15 @@ export const myHandler: Handler = (req, res, gctx, lctx) => {
 ### Basic Structure
 
 ```typescript
-const getUserHandler: Handler = async (req, res, gctx, lctx) => {
+// src/handlers/users/[id].ts
+export const METHOD = 'GET';
+
+export const handler: Handler = async (req, res, gctx, lctx) => {
   // 1. Extract data from request
   const userId = req.params.id;
   
   // 2. Use modules from global context
-  const db = gctx.modules['db'];
+  const db = gctx.modules.db;
   
   // 3. Perform business logic
   const user = await db.findUser(userId);
@@ -46,6 +56,8 @@ const getUserHandler: Handler = async (req, res, gctx, lctx) => {
   // 4. Send response
   res.json({ user });
 };
+
+// Automatically available at GET /api/users/:id
 ```
 
 ## Handler Signature

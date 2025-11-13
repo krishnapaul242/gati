@@ -5,7 +5,7 @@
 
 import { Command } from 'commander';
 import { resolve } from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import chalk from 'chalk';
 import ora from 'ora';
 import { loadDevEnv } from '../utils/env-loader.js';
@@ -29,6 +29,26 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
   try {
     // Load environment variables
     loadDevEnv(cwd, true);
+
+    // Auto-generate types if schema exists
+    const { generateTypes } = await import('@gati-framework/runtime');
+    const schemaPath = resolve(cwd, 'gati.types.json');
+    if (existsSync(schemaPath)) {
+      try {
+        const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
+        const declarations = generateTypes(schema);
+        const typesDir = resolve(cwd, '.gati');
+        const typesPath = resolve(typesDir, 'types.d.ts');
+        
+        if (!existsSync(typesDir)) {
+          mkdirSync(typesDir, { recursive: true });
+        }
+        writeFileSync(typesPath, declarations);
+        console.log(chalk.gray('🔧 Auto-generated types from gati.types.json'));
+      } catch (error) {
+        console.log(chalk.yellow('⚠ Failed to auto-generate types'));
+      }
+    }
 
     // Check if gati.config.js exists (compiled from .ts)
     const configPath = resolve(cwd, 'gati.config.js');
@@ -71,12 +91,51 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const config = configModule.default || configModule;
         
+        // Find available port
+        const { findAvailablePort } = await import('../utils/port-finder.js');
+        const availablePort = await findAvailablePort(config.server?.port || 3000);
+        
+        if (availablePort !== (config.server?.port || 3000)) {
+          console.log(chalk.yellow(`Port ${config.server?.port || 3000} in use, using port ${availablePort}`));
+        }
+        
         // Create app from config
         const { createApp } = await import('@gati-framework/runtime');
         const gatiApp = createApp({
-          port: config.server?.port || 3000,
+          port: availablePort,
           host: config.server?.host || 'localhost',
         });
+        
+        // Load handlers from manifests
+        const manifestsDir = resolve(cwd, '.gati', 'manifests');
+        if (existsSync(manifestsDir)) {
+          const appManifestPath = resolve(manifestsDir, '_app.json');
+          if (existsSync(appManifestPath)) {
+            try {
+              const appManifest = JSON.parse(readFileSync(appManifestPath, 'utf-8'));
+              for (const handler of appManifest.handlers || []) {
+                // Convert .ts to .js and use dist/src directory
+                const jsPath = handler.filePath
+                  .replace(/\.ts$/, '.js')
+                  .replace(/[\\/]src[\\/]/, '/dist/src/') // Cross-platform path replacement
+                  .replace(/\\/g, '/'); // Normalize to forward slashes
+                
+                try {
+                  const handlerModule = await import(`file://${jsPath}?t=${Date.now()}`);
+                  const handlerFn = handlerModule[handler.exportName];
+                  if (handlerFn) {
+                    gatiApp.registerRoute(handler.method || 'GET', handler.route, handlerFn);
+                    console.log(`✅ Loaded ${handler.method} ${handler.route}`);
+                  }
+                } catch (error) {
+                  console.warn(`Failed to load handler ${jsPath}:`, error);
+                }
+              }
+            } catch (error) {
+              console.warn('Failed to load app manifest:', error);
+            }
+          }
+        }
         
         // Initialize modules if provided
         if (config.modules && typeof config.modules === 'function') {
@@ -85,30 +144,42 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
           config.modules(gctx);
         }
         
-        // Register routes
+        // Register custom routes from config (overrides auto-discovered)
         if (config.routes && Array.isArray(config.routes)) {
           for (const route of config.routes) {
             const method = route.method?.toLowerCase();
             if (method && route.path && route.handler) {
-              switch (method) {
-                case 'get':
-                  gatiApp.get(route.path, route.handler);
-                  break;
-                case 'post':
-                  gatiApp.post(route.path, route.handler);
-                  break;
-                case 'put':
-                  gatiApp.put(route.path, route.handler);
-                  break;
-                case 'patch':
-                  gatiApp.patch(route.path, route.handler);
-                  break;
-                case 'delete':
-                  gatiApp.delete(route.path, route.handler);
-                  break;
-              }
+              gatiApp.registerRoute(method.toUpperCase(), route.path, route.handler);
             }
           }
+        }
+        
+        // Initialize file watcher for hot reloading (only if watch enabled)
+        if (options.watch) {
+          const { FileWatcher } = await import('../analyzer/file-watcher.js');
+          new FileWatcher(cwd, async (manifest) => {
+            // Clear existing routes and reload all
+            gatiApp.getRouteManager().clear();
+            
+            // Update routes when manifest changes
+            for (const handler of manifest.handlers) {
+              try {
+                const jsPath = handler.filePath
+                  .replace(/\.ts$/, '.js')
+                  .replace(/[\\/]src[\\/]/, '/dist/src/')
+                  .replace(/\\/g, '/');
+                
+                const handlerModule = await import(`file://${jsPath}?t=${Date.now()}`);
+                const handlerFn = handlerModule[handler.exportName];
+                if (handlerFn) {
+                  gatiApp.registerRoute(handler.method || 'GET', handler.route, handlerFn);
+                  console.log(`🔄 Reloaded ${handler.method} ${handler.route}`);
+                }
+              } catch (error) {
+                console.warn(`Failed to reload handler ${handler.route}:`, error);
+              }
+            }
+          }).start();
         }
         
         return gatiApp;
@@ -142,13 +213,15 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
           await gctx.lifecycle.executeStartup();
           
           await app.listen();
+          
+          // Show success message
+          spinner.succeed(chalk.green('✔ Development server started'));
+          console.log(chalk.cyan(`\n🚀 Server running on http://localhost:${app.getConfig().port}`));
+          console.log(chalk.gray('\n📝 Press Ctrl+C to stop\n'));
+          return; // Exit function to prevent duplicate messages
         }
 
-        spinner.succeed(chalk.green('✔ Development server started'));
-        // eslint-disable-next-line no-console
-        console.log(chalk.cyan('\n🚀 Server running'));
-        // eslint-disable-next-line no-console
-        console.log(chalk.gray('\n📝 Press Ctrl+C to stop\n'));
+        // Success message moved above
       } catch (error) {
         spinner.fail(chalk.red('✖ Failed to start server'));
         // eslint-disable-next-line no-console

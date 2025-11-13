@@ -6,16 +6,9 @@
 import type { Handler } from '@gati-framework/runtime';
 import { RequestPhase } from '@gati-framework/runtime';
 
-/**
- * GET /hello
- * Returns a simple "Hello, World!" message
- *
- * @example
- * ```bash
- * curl http://localhost:3000/hello
- * # {"message":"Hello, World!","timestamp":1699564800000}
- * ```
- */
+export const METHOD = 'GET';
+export const ROUTE = '/hello';
+
 export const helloHandler: Handler = async (_req, res, _gctx, lctx) => {
   // Register request cleanup
   lctx.lifecycle.onCleanup('hello-cleanup', async () => {

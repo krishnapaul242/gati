@@ -37,6 +37,10 @@ export type {
 export { HandlerError } from './types/handler.js';
 export type { HandlerExecutionOptions } from './types/handler.js';
 
+// Hot loading system
+export { HotLoader } from './hot-loader.js';
+export type { HotLoaderOptions } from './hot-loader.js';
+
 // Runtime-specific types
 export type { Middleware, ErrorMiddleware } from './middleware.js';
 export type { RouteManager } from './route-manager.js';
@@ -50,3 +54,10 @@ export type { LifecycleHook, HealthStatus, LifecycleCoordinator } from './types/
 // Coordinators
 export { ConsulCoordinator } from './coordinators/consul-coordinator.js';
 export type { ConsulConfig } from './coordinators/consul-coordinator.js';
+export { DefaultWebSocketCoordinator } from './websocket-coordinator.js';
+export type { WebSocketCoordinator, WebSocketEvent } from './websocket-coordinator.js';
+export type { WebSocketCoordinator as WSCoordinator, WebSocketEvent as WSEvent } from './types/context.js';
+
+// Type schema system
+export { generateTypes } from './types/schema.js';
+export type { TypeSchema, StateSchema, ModuleSchema } from './types/schema.js';

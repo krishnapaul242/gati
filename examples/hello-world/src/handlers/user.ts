@@ -6,6 +6,9 @@
 import type { Handler } from '@gati-framework/runtime';
 import { HandlerError } from '@gati-framework/runtime';
 
+export const METHOD = 'GET';
+export const ROUTE = '/user';
+
 // Mock user data for demonstration
 const users = [
   { id: '1', name: 'Alice', email: 'alice@example.com' },
@@ -13,19 +16,6 @@ const users = [
   { id: '3', name: 'Charlie', email: 'charlie@example.com' },
 ];
 
-/**
- * GET /user/:id
- * Retrieves user by ID demonstrating path parameters
- *
- * @example
- * ```bash
- * curl http://localhost:3000/user/1
- * # {"user":{"id":"1","name":"Alice","email":"alice@example.com"}}
- *
- * curl http://localhost:3000/user/999
- * # {"error":"User not found"}
- * ```
- */
 export const getUserHandler: Handler = (req, res, gctx, _lctx) => {
   // Extract path parameter
   const userId = req.params['id'] as string;
@@ -48,19 +38,6 @@ export const getUserHandler: Handler = (req, res, gctx, _lctx) => {
   res.json({ user });
 };
 
-/**
- * GET /users
- * Lists all users with optional query filtering
- *
- * @example
- * ```bash
- * curl http://localhost:3000/users
- * # {"users":[...], "count":3}
- *
- * curl http://localhost:3000/users?name=Alice
- * # {"users":[{"id":"1","name":"Alice",...}], "count":1}
- * ```
- */
 export const listUsersHandler: Handler = (req, res, _gctx, _lctx) => {
   // Extract query parameter for filtering
   const nameFilter = req.query['name'] as string | undefined;

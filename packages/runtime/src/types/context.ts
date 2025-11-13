@@ -8,9 +8,37 @@
 
 /**
  * Module registry for dependency injection
+ * Can be extended via declaration merging
  */
 export interface ModuleRegistry {
   [moduleName: string]: unknown;
+}
+
+/**
+ * Local context state interface
+ * Can be extended via declaration merging
+ */
+export interface LocalContextState {
+  [key: string]: unknown;
+}
+
+/**
+ * WebSocket event interface
+ */
+export interface WebSocketEvent {
+  type: string;
+  requestId: string;
+  data?: unknown;
+  timestamp: number;
+}
+
+/**
+ * WebSocket coordinator interface
+ */
+export interface WebSocketCoordinator {
+  waitForEvent(requestId: string, eventType: string, timeout?: number): Promise<WebSocketEvent>;
+  emitEvent(event: WebSocketEvent): void;
+  cleanup(requestId: string): void;
 }
 
 /**
@@ -34,6 +62,7 @@ export interface ExternalServices {
     get(sessionId: string): Promise<unknown>;
     set(sessionId: string, data: unknown, ttl?: number): Promise<void>;
   };
+  websocket?: WebSocketCoordinator;
 }
 
 /**
@@ -332,9 +361,24 @@ export interface LocalContext {
   };
 
   /**
-   * Request-scoped state (minimal)
+   * Request-scoped state (typed via declaration merging)
    */
-  state: Record<string, unknown>;
+  state: LocalContextState;
+
+  /**
+   * WebSocket event coordination
+   */
+  websocket: {
+    /**
+     * Wait for a WebSocket event before proceeding
+     */
+    waitForEvent: (eventType: string, timeout?: number) => Promise<WebSocketEvent>;
+    
+    /**
+     * Emit a WebSocket event for this request
+     */
+    emitEvent: (eventType: string, data?: unknown) => void;
+  };
 
   /**
    * Enhanced lifecycle hooks for request processing

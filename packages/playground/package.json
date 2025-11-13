@@ -1,0 +1,20 @@
+{
+  "name": "@gati-framework/playground",
+  "version": "0.1.0",
+  "description": "Visual request flow debugging for Gati framework",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@gati-framework/runtime": "workspace:*",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.8",
+    "typescript": "^5.2.2"
+  }
+}
