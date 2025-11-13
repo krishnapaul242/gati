@@ -1,0 +1,19 @@
+{
+  "name": "gati-playground-demo",
+  "version": "1.0.0",
+  "description": "Demo application showcasing Gati Playground features",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@gati-framework/runtime": "workspace:*",
+    "@gati-framework/playground": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

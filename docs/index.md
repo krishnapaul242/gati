@@ -22,39 +22,39 @@ hero:
 features:
   - icon: ⚡
     title: Lightning Fast Development
-    details: Write business logic only. No boilerplate for routing, deployment, or infrastructure. Get your API running in under 5 minutes.
+    details: File-based routing with hot reloading (50-200ms). Write handlers, see changes instantly. No server restarts needed.
   
-  - icon: 🧬
-    title: Built-in API Versioning
-    details: Timestamp-based routing keeps your APIs backward-compatible forever. Clients can pin to any version with "X-API-Version" header.
+  - icon: 📁
+    title: Zero-Configuration Routing
+    details: Drop files in src/handlers/ and they become API routes. users/[id].ts → /api/users/:id. METHOD and ROUTE exports for full control.
   
-  - icon: ☁️
-    title: Cloud-Native by Default
-    details: Automatic Kubernetes manifests, Docker configs, and multi-cloud deployment (AWS, GCP, Azure). Scale from 1 to millions of requests.
+  - icon: 🔥
+    title: Manifest-Based Hot Reload
+    details: Individual file manifests enable incremental updates. Only changed files are reprocessed, making development blazingly fast.
   
-  - icon: 🛠️
-    title: Auto-Generated SDKs
-    details: Generate fully-typed TypeScript clients from your handlers. One command gives your frontend team a ready-to-use SDK.
+  - icon: 🚀
+    title: Auto Port Detection
+    details: Smart port detection finds available ports automatically. Remembers your last port and handles conflicts gracefully.
   
   - icon: 📦
     title: Modular Architecture
-    details: Handlers for routes, Modules for business logic, Effects for async tasks. Clean separation with dependency injection.
+    details: Handlers for routes, Modules for business logic, Context for shared state. Clean separation with dependency injection.
   
   - icon: 🔍
-    title: Production-Ready Observability
-    details: Structured logging with Pino, request tracking, graceful shutdown, and CORS out of the box. Monitor everything from day one.
+    title: Built-in Observability
+    details: Structured logging, request tracking, health checks, and performance metrics. Monitor everything from day one.
   
-  - icon: 🚀
-    title: Zero-Downtime Deployments
-    details: Rolling updates, health checks, and automatic rollbacks. Your API stays online during every deployment.
+  - icon: ☁️
+    title: Cloud-Native Deployment
+    details: Automatic Kubernetes manifests, Docker configs, and multi-cloud deployment (AWS, GCP, Azure). Deploy anywhere in seconds.
   
   - icon: 🎯
     title: TypeScript-First
-    details: Full type safety from handlers to SDKs. Catch errors at compile time, not in production.
+    details: Full type safety from handlers to context. Auto-generated types from schemas. Catch errors at compile time.
   
-  - icon: 📊
-    title: Live Control Panel
-    details: Web UI to monitor deployments, view logs, inspect metrics, and manage your application — no kubectl needed.
+  - icon: 🛠️
+    title: Developer Experience
+    details: Comprehensive CLI, detailed error messages, debugging tools, and extensive documentation. Built by developers, for developers.
 
 ---
 
@@ -93,6 +93,10 @@ gati deploy dev --local
 // src/handlers/hello.ts
 import type { Handler } from '@gati-framework/runtime';
 
+// HTTP method (optional, defaults to GET)
+export const METHOD = 'GET';
+
+// Handler function - automatically available at /api/hello
 export const handler: Handler = (req, res) => {
   const name = req.query.name || 'World';
   

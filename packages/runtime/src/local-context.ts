@@ -3,7 +3,7 @@
  * @description Local context manager for request-scoped data in Gati framework
  */
 
-import type { LocalContext, LocalContextOptions } from './types/context.js';
+import type { LocalContext, LocalContextOptions, WebSocketCoordinator, WebSocketEvent } from './types/context.js';
 import { RequestPhase } from './types/context.js';
 import { RequestLifecycleManager } from './lifecycle-manager.js';
 
@@ -40,6 +40,7 @@ function generateTraceId(): string {
  * Creates a local context instance for a single request
  *
  * @param options - Configuration options for the local context
+ * @param wsCoordinator - WebSocket coordinator for event handling
  * @returns LocalContext instance
  *
  * @example
@@ -51,7 +52,8 @@ function generateTraceId(): string {
  * ```
  */
 export function createLocalContext(
-  options: LocalContextOptions = {}
+  options: LocalContextOptions = {},
+  wsCoordinator?: WebSocketCoordinator
 ): LocalContext {
   const requestLifecycle = new RequestLifecycleManager();
   const lifecycleSymbol = Symbol.for('gati:requestLifecycle');
@@ -78,6 +80,25 @@ export function createLocalContext(
       ...options.meta,
     },
     state: options.state || {},
+    websocket: {
+      waitForEvent: async (eventType: string, timeout?: number): Promise<WebSocketEvent> => {
+        if (!wsCoordinator) {
+          throw new Error('WebSocket coordinator not available');
+        }
+        return wsCoordinator.waitForEvent(lctx.requestId, eventType, timeout);
+      },
+      emitEvent: (eventType: string, data?: unknown): void => {
+        if (!wsCoordinator) {
+          throw new Error('WebSocket coordinator not available');
+        }
+        wsCoordinator.emitEvent({
+          type: eventType,
+          requestId: lctx.requestId,
+          data,
+          timestamp: Date.now(),
+        });
+      },
+    },
     lifecycle: {
       onCleanup: (name: string, fn: () => void | Promise<void>) => {
         requestLifecycle.onCleanup(name, fn);
@@ -111,6 +132,7 @@ export function createLocalContext(
  * Cleans up the local context, calling all registered cleanup hooks
  *
  * @param lctx - Local context instance
+ * @param wsCoordinator - WebSocket coordinator for cleanup
  * @returns Promise that resolves when all cleanup hooks complete
  *
  * @example
@@ -119,8 +141,14 @@ export function createLocalContext(
  * ```
  */
 export async function cleanupLocalContext(
-  lctx: LocalContext
+  lctx: LocalContext,
+  wsCoordinator?: WebSocketCoordinator
 ): Promise<void> {
+  // Clean up WebSocket listeners
+  if (wsCoordinator) {
+    wsCoordinator.cleanup(lctx.requestId);
+  }
+
   // Execute cleanup through lifecycle manager
   await lctx.lifecycle.executeCleanup();
 

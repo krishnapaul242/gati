@@ -142,6 +142,16 @@ export class RouteManager {
   }
 
   /**
+   * Unregister a route
+   */
+  unregister(method: HttpMethod, path: string): void {
+    const normalizedPath = normalizePath(path);
+    this.routes = this.routes.filter(route => 
+      !(route.method === method && route.path === normalizedPath)
+    );
+  }
+
+  /**
    * Clear all registered routes
    */
   clear(): void {

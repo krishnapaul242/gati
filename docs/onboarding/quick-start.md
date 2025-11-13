@@ -90,11 +90,15 @@ Response:
 
 ## Step 4: Create a New Handler
 
-Create `src/handlers/users.ts`:
+Create `src/handlers/users/[id].ts`:
 
 ```typescript
 import type { Handler } from '@gati-framework/runtime';
 
+// HTTP method (optional, defaults to GET)
+export const METHOD = 'GET';
+
+// Handler function
 export const handler: Handler = (req, res) => {
   const userId = req.params.id;
   
@@ -109,7 +113,7 @@ export const handler: Handler = (req, res) => {
 };
 ```
 
-The handler is automatically discovered and available at `/api/users/:id`.
+The handler is automatically discovered and available at `/api/users/:id` with hot reloading enabled.
 
 Test it:
 
@@ -131,9 +135,11 @@ Response:
 
 ## Step 5: Add Query Parameters
 
-Update `src/handlers/users.ts`:
+Update `src/handlers/users/[id].ts`:
 
 ```typescript
+export const METHOD = 'GET';
+
 export const handler: Handler = (req, res) => {
   const userId = req.params.id;
   const includeOrders = req.query.includeOrders === 'true';
@@ -153,6 +159,8 @@ export const handler: Handler = (req, res) => {
   res.json({ user });
 };
 ```
+
+Notice how the file automatically reloads when you save - no server restart needed!
 
 Test with query params:
 
@@ -264,9 +272,15 @@ Handlers are automatically mapped to routes based on their filename:
 | File | Route |
 |------|-------|
 | `handlers/hello.ts` | `/api/hello` |
-| `handlers/users.ts` | `/api/users/:id` |
+| `handlers/users/[id].ts` | `/api/users/:id` |
 | `handlers/posts/create.ts` | `/api/posts/create` |
-| `handlers/posts/[id].ts` | `/api/posts/:id` |
+| `handlers/posts/[id]/comments.ts` | `/api/posts/:id/comments` |
+
+**New Features:**
+- 🔥 **Hot Reloading**: Changes appear instantly (50-200ms)
+- 📦 **Manifest System**: Individual file manifests for fast updates
+- 🚀 **Auto Port Detection**: Finds available ports automatically
+- 📊 **Built-in Health Checks**: `/health` endpoint included
 
 ## Next Steps
 

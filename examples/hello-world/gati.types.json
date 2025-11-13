@@ -1,0 +1,36 @@
+{
+  "state": {
+    "user": "object",
+    "permissions": "array",
+    "authenticated": "boolean",
+    "sessionData": "object"
+  },
+  "modules": {
+    "db": {
+      "findUser": {
+        "params": { "id": "string" },
+        "returns": "object"
+      },
+      "createUser": {
+        "params": { "data": "object" },
+        "returns": "object"
+      }
+    },
+    "auth": {
+      "validateToken": {
+        "params": { "token": "string" },
+        "returns": "boolean"
+      },
+      "getUserPermissions": {
+        "params": { "userId": "string" },
+        "returns": "array"
+      }
+    }
+  },
+  "refs": {
+    "sessionId": "string",
+    "userId": "string",
+    "tenantId": "string",
+    "organizationId": "string"
+  }
+}

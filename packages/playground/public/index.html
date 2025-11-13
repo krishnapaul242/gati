@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gati Playground - Visual API Debugger</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0e27;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    #container {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 300px 1fr 350px;
+      grid-template-rows: 60px 1fr 50px;
+      grid-template-areas:
+        "header header header"
+        "sidebar canvas panel"
+        "footer footer footer";
+    }
+
+    #header {
+      grid-area: header;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 100;
+    }
+
+    #header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: white;
+    }
+
+    #header .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #header .logo svg {
+      width: 32px;
+      height: 32px;
+      fill: white;
+    }
+
+    #mode-toggle {
+      display: flex;
+      gap: 8px;
+    }
+
+    .mode-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .mode-btn.active {
+      background: white;
+      color: #667eea;
+    }
+
+    #sidebar {
+      grid-area: sidebar;
+      background: #1a1f3a;
+      overflow-y: auto;
+      padding: 16px;
+      border-right: 1px solid #2a3050;
+    }
+
+    #canvas-container {
+      grid-area: canvas;
+      position: relative;
+      background: #0a0e27;
+    }
+
+    #panel {
+      grid-area: panel;
+      background: #1a1f3a;
+      overflow-y: auto;
+      padding: 16px;
+      border-left: 1px solid #2a3050;
+    }
+
+    #footer {
+      grid-area: footer;
+      background: #141830;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-top: 1px solid #2a3050;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #8b93ff;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .route-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #252b4d;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .route-item:hover {
+      background: #2d3456;
+      border-left-color: #667eea;
+    }
+
+    .route-item.selected {
+      background: #2d3456;
+      border-left-color: #667eea;
+    }
+
+    .route-method {
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-right: 8px;
+      display: inline-block;
+    }
+
+    .route-method.get { background: #22c55e; color: white; }
+    .route-method.post { background: #3b82f6; color: white; }
+    .route-method.put { background: #f59e0b; color: white; }
+    .route-method.delete { background: #ef4444; color: white; }
+    .route-method.patch { background: #8b5cf6; color: white; }
+
+    .route-path {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #e0e0e0;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 10px;
+      background: #252b4d;
+      border: 1px solid #3a405d;
+      border-radius: 6px;
+      color: #e0e0e0;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .request-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #8b93ff;
+      text-transform: uppercase;
+    }
+
+    .input-group select,
+    .input-group input,
+    .input-group textarea {
+      padding: 10px;
+      background: #252b4d;
+      border: 1px solid #3a405d;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .input-group textarea {
+      min-height: 120px;
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+    }
+
+    .send-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    .stats {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+    }
+
+    .stat-item {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .stat-label {
+      color: #8b93ff;
+    }
+
+    .stat-value {
+      color: #22c55e;
+      font-weight: 600;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .connection-status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .connection-status.disconnected .dot {
+      background: #ef4444;
+      animation: none;
+    }
+
+    /* Three.js canvas styling */
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 14, 39, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      transition: opacity 0.3s;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(102, 126, 234, 0.3);
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <!-- Header -->
+    <div id="header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+        </svg>
+        <h1>Gati Playground</h1>
+      </div>
+      <div id="mode-toggle">
+        <button class="mode-btn active" data-mode="go">⚡ Go Mode</button>
+        <button class="mode-btn" data-mode="debug">🐛 Debug Mode</button>
+        <span style="margin: 0 16px; color: rgba(255,255,255,0.5)">|</span>
+        <button class="mode-btn active" data-view="block">🧊 Block View</button>
+        <button class="mode-btn" data-view="outline">📋 Outline View</button>
+      </div>
+    </div>
+
+    <!-- Left Sidebar: Route Explorer -->
+    <div id="sidebar">
+      <div class="section-title">API Routes</div>
+      <input type="text" class="search-box" id="route-search" placeholder="Search routes...">
+      <div id="route-list">
+        <!-- Routes will be populated here -->
+        <div class="route-item" data-route-id="1">
+          <span class="route-method get">GET</span>
+          <span class="route-path">/playground/api/routes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: 3D Visualization Canvas -->
+    <div id="canvas-container">
+      <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+      </div>
+      <!-- Three.js canvas will be inserted here -->
+    </div>
+
+    <!-- Right Panel: Request Builder -->
+    <div id="panel">
+      <div class="section-title">Request Builder</div>
+      <div class="request-builder">
+        <div class="input-group">
+          <label>Instance</label>
+          <select id="instance-select">
+            <!-- Instances will be populated dynamically -->
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Method</label>
+          <select id="method-select">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Path</label>
+          <input type="text" id="path-input" placeholder="/api/endpoint" value="/hello">
+        </div>
+
+        <div class="input-group">
+          <label>Headers (JSON)</label>
+          <textarea id="headers-input" placeholder='{"Content-Type": "application/json"}'>{"Content-Type": "application/json"}</textarea>
+        </div>
+
+        <div class="input-group">
+          <label>Body (JSON)</label>
+          <textarea id="body-input" placeholder='{"key": "value"}'></textarea>
+        </div>
+
+        <button class="send-btn" id="send-request">🚀 Send Request</button>
+      </div>
+    </div>
+
+    <!-- Footer: Stats -->
+    <div id="footer">
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">Requests:</span>
+          <span class="stat-value" id="request-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Avg Response:</span>
+          <span class="stat-value" id="avg-response">0ms</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Active Traces:</span>
+          <span class="stat-value" id="active-traces">0</span>
+        </div>
+      </div>
+      <div class="connection-status" id="ws-status">
+        <span class="dot"></span>
+        <span>Connected</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js and Application Scripts -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="/playground/app.js"></script>
+</body>
+</html>

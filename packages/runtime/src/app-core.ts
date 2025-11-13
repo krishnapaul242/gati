@@ -232,6 +232,27 @@ export class GatiApp {
   }
 
   /**
+   * Register a route dynamically
+   */
+  registerRoute(method: string, path: string, handler: Handler): void {
+    const methodUpper = method.toUpperCase();
+    switch (methodUpper) {
+      case 'GET': this.router.get(path, handler); break;
+      case 'POST': this.router.post(path, handler); break;
+      case 'PUT': this.router.put(path, handler); break;
+      case 'PATCH': this.router.patch(path, handler); break;
+      case 'DELETE': this.router.delete(path, handler); break;
+    }
+  }
+
+  /**
+   * Unregister a route
+   */
+  unregisterRoute(method: string, path: string): void {
+    this.router.unregister(method.toUpperCase() as any, path);
+  }
+
+  /**
    * Start the HTTP server
    */
   async listen(): Promise<void> {
@@ -582,6 +603,13 @@ export class GatiApp {
    */
   getGlobalContext(): GlobalContext {
     return this.gctx;
+  }
+
+  /**
+   * Get route manager (for clearing routes)
+   */
+  getRouteManager(): RouteManager {
+    return this.router;
   }
 
   /**

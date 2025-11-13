@@ -60,8 +60,10 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "fs-extra": "^11.3.2",
+    "glob": "^11.0.3",
     "ora": "^9.0.0",
-    "prompts": "^2.4.2"
+    "prompts": "^2.4.2",
+    "ts-morph": "^27.0.2"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
