@@ -3,7 +3,7 @@
  * @description Gati Playground - Visual request flow debugging
  */
 
-export { PlaygroundEngine, playgroundEngine } from './playground-engine.js';
+export { PlaygroundEngine, playgroundEngine, PLAYGROUND_HEADERS } from './playground-engine.js';
 export { PlaygroundWebSocketServer } from './websocket-server.js';
 export { PlaygroundIntegration, createPlaygroundIntegration } from './runtime-integration.js';
 export { createBlocksFromManifest, generateHumanReadableName } from './manifest-loader.js';
