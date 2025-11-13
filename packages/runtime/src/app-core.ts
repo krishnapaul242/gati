@@ -118,6 +118,17 @@ export interface AppConfig {
     region: string;
     zone: string;
   };
+
+  /**
+   * Playground configuration
+   * @default false
+   */
+  playground?: boolean | {
+    enabled: boolean;
+    port?: number;
+    wsPort?: number;
+    debugMode?: boolean;
+  };
 }
 
 /**
@@ -128,13 +139,14 @@ export class GatiApp {
   private router: RouteManager;
   private middleware: MiddlewareManager;
   private gctx: GlobalContext;
-  private config: Required<Omit<AppConfig, 'logger' | 'cluster' | 'performance' | 'tracing' | 'services' | 'instance'>> & { 
+  private config: Required<Omit<AppConfig, 'logger' | 'cluster' | 'performance' | 'tracing' | 'services' | 'instance' | 'playground'>> & { 
     logger?: LoggerOptions;
     cluster?: AppConfig['cluster'];
     performance?: AppConfig['performance'];
     tracing?: AppConfig['tracing'];
     services?: AppConfig['services'];
     instance?: AppConfig['instance'];
+    playground?: AppConfig['playground'];
   };
   private isShuttingDown = false;
   private activeRequests = 0;
@@ -152,6 +164,7 @@ export class GatiApp {
       tracing: config.tracing,
       services: config.services,
       instance: config.instance,
+      playground: config.playground,
     };
 
     this.logger = createLogger({
