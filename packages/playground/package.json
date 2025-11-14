@@ -1,17 +1,43 @@
 {
   "name": "@gati-framework/playground",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Visual request flow debugging for Gati framework",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "public",
+    "README.md"
+  ],
+  "keywords": [
+    "gati",
+    "playground",
+    "debugging",
+    "visual",
+    "websocket"
+  ],
+  "author": "Krishna Paul",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krishnapaul242/gati.git",
+    "directory": "packages/playground"
+  },
+  "bugs": {
+    "url": "https://github.com/krishnapaul242/gati/issues"
+  },
+  "homepage": "https://github.com/krishnapaul242/gati#readme",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@gati-framework/runtime": "workspace:*",
+    "@gati-framework/runtime": "^2.0.3",
     "ws": "^8.14.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@types/ws": "^8.5.8",

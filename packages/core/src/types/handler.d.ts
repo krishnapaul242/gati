@@ -1,3 +1,6 @@
+/**
+ * Core handler type for Gati apps
+ */
 export interface Request {
     path: string;
     method: string;
@@ -37,3 +40,4 @@ export interface LocalContext {
     };
 }
 export type Handler = (req: Request, res: Response, gctx: GlobalContext, lctx: LocalContext) => unknown | Promise<unknown>;
+//# sourceMappingURL=handler.d.ts.map
