@@ -1,0 +1,24 @@
+{
+  "name": "@gati-framework/production-hardening",
+  "version": "1.0.0",
+  "description": "Production hardening utilities for Gati - secret management, config validation, auto-scaling",
+  "keywords": ["gati", "production", "hardening", "security", "secrets", "validation", "scaling"],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "zod": "^3.24.1",
+    "ajv": "^8.17.1",
+    "dotenv": "^16.4.7",
+    "@gati-framework/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  }
+}

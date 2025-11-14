@@ -1,0 +1,25 @@
+{
+  "name": "@gati-framework/cloud-azure",
+  "version": "1.0.0",
+  "description": "Azure cloud provider plugin for Gati framework",
+  "keywords": ["gati", "azure", "aks", "cloud", "deployment"],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@azure/arm-containerservice": "^21.2.0",
+    "@azure/arm-network": "^33.3.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@azure/identity": "^4.5.0",
+    "@gati-framework/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  }
+}
