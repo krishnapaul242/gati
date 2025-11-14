@@ -202,19 +202,19 @@ curl http://localhost:3000/api/hello**Package Versions:**
 
 # {"message": "Hello from Gati!"}
 
-```- **[What is Gati?](./docs/onboarding/what-is-gati.md)** - Introduction- `@gati-framework/core` - v0.4.1 (Types and base configuration)
+```- **[What is Gati?](./docs/onboarding/what-is-gati.md)** - Introduction- `@gati-framework/core` - v0.4.3 (Types and base configuration)
 
 
 
-<br/>- **[Quick Start](./docs/onboarding/quick-start.md)** - 5-minute guide- `@gati-framework/runtime` - v2.0.0 (Runtime execution engine)
+<br/>- **[Quick Start](./docs/onboarding/quick-start.md)** - 5-minute guide- `@gati-framework/runtime` - v2.0.3 (Runtime execution engine)
 
 
 
-## 📖 Examples- **[Getting Started](./docs/onboarding/getting-started.md)** - Complete tutorial- `@gati-framework/cli` - v1.0.0 (Development and deployment tools)
+## 📖 Examples- **[Getting Started](./docs/onboarding/getting-started.md)** - Complete tutorial- `@gati-framework/cli` - v1.0.7 (Development and deployment tools)
 
 
 
-### Hello World Handler- **[GatiC CLI](./docs/onboarding/gatic.md)** - Scaffolding tool- `gatic` - v0.1.0 (Project scaffolding command)
+### Hello World Handler- **[GatiC CLI](./docs/onboarding/gatic.md)** - Scaffolding tool- `gatic` - v0.1.6 (Project scaffolding command)
 
 
 
@@ -326,19 +326,19 @@ export const database: Module = {- **[Examples](./docs/examples/)** - Code examp
 
 
 
-**🎓 Learn more:** [Full documentation →](https://krishnapaul242.github.io/gati/)| [`@gati-framework/core`](./packages/core) | 0.4.1 | Core types and configuration || M2 — Kubernetes deployment + AWS plugin | 🚧 In Progress| Q2     |
+**🎓 Learn more:** [Full documentation →](https://krishnapaul242.github.io/gati/)| [`@gati-framework/core`](./packages/core) | 0.4.3 | Core types and configuration || M2 — Kubernetes deployment + AWS plugin | 🚧 In Progress| Q2     |
 
 
 
-<br/>| [`@gati-framework/runtime`](./packages/runtime) | 2.0.0 | Runtime execution engine || M3 — Versioned routing engine           | ⏳ Pending    | Q2     |
+<br/>| [`@gati-framework/runtime`](./packages/runtime) | 2.0.3 | Runtime execution engine || M3 — Versioned routing engine           | ⏳ Pending    | Q2     |
 
 
 
-## 📦 Packages| [`@gati-framework/cli`](./packages/cli) | 1.0.0 | CLI tools || M4 — Control Panel (read-only)          | ⏳ Pending    | Q3     |
+## 📦 Packages| [`@gati-framework/cli`](./packages/cli) | 1.0.7 | CLI tools || M4 — Control Panel (read-only)          | ⏳ Pending    | Q3     |
 
 
 
-| Package | Version | Description || [`gatic`](./packages/gatic) | 0.1.0 | Project scaffolding || M5 — Codegen + SDK ship                 | ⏳ Pending    | Q3     |
+| Package | Version | Description || [`gatic`](./packages/gatic) | 0.1.6 | Project scaffolding || M5 — Codegen + SDK ship                 | ⏳ Pending    | Q3     |
 
 |---------|---------|-------------|
 

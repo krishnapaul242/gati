@@ -1,13 +1,15 @@
-# Gati - Current State (November 10, 2025)
+# Gati - Current State (November 15, 2025)
 
 ## Package Versions
 
 | Package | Version | Status | Published |
-|---------|---------|--------|-----------|
-| `@gati-framework/core` | 0.4.1 | ✅ Stable | ✅ npm |
-| `@gati-framework/runtime` | 2.0.0 | ✅ Stable | ✅ npm |
-| `@gati-framework/cli` | 1.0.0 | ✅ Stable | ⏳ Ready |
-| `gatic` | 0.1.0 | ✅ Stable | ✅ npm |
+|---------|---------|--------|-----------||
+| `@gati-framework/core` | 0.4.3 | ✅ Stable | ✅ npm |
+| `@gati-framework/runtime` | 2.0.3 | ✅ Stable | ✅ npm |
+| `@gati-framework/cli` | 1.0.7 | ✅ Stable | ✅ npm |
+| `gatic` | 0.1.6 | ✅ Stable | ✅ npm |
+| `@gati-framework/cloud-aws` | 1.0.0 | ✅ Stable | ✅ npm |
+| `@gati-framework/playground` | 1.0.0 | ✅ Stable | ✅ npm |
 
 ## What's Working Now
 
@@ -95,6 +97,32 @@ gati deploy dev --local
 - ✅ Rollout monitoring
 - ✅ Port-forwarding support
 - ✅ Namespace management
+
+### 6. AWS Cloud Deployment (@gati-framework/cloud-aws v1.0.0)
+
+```bash
+npm install @gati-framework/cloud-aws
+```
+
+**Features:**
+- ✅ EKS cluster management
+- ✅ Application Load Balancer integration
+- ✅ Secrets Manager support
+- ✅ IAM role automation
+- ✅ Multi-AZ high availability
+
+### 7. Visual Debugging (@gati-framework/playground v1.0.0)
+
+```bash
+npm install @gati-framework/playground
+```
+
+**Features:**
+- ✅ Real-time request flow visualization
+- ✅ WebSocket-based debugging interface
+- ✅ Handler execution tracking
+- ✅ Performance metrics
+- ✅ Interactive testing UI
 
 **Advanced Options:**
 ```bash
@@ -354,6 +382,6 @@ curl http://localhost:3000/health          # Test health check
 
 ---
 
-**Last Updated:** November 10, 2025  
-**Status:** Production Ready (v1.0.0)  
-**Next Milestone:** M2 - Multi-Cloud Support
+**Last Updated:** November 15, 2025  
+**Status:** Production Ready (v1.0.7)  
+**Next Milestone:** M2 - Multi-Cloud Support (AWS Complete ✅)

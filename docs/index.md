@@ -143,30 +143,33 @@ Gati follows three core principles:
 
 ## What's Included
 
-- 📦 **Runtime** (`@gati-framework/runtime@2.0.0`) — HTTP server, handler engine, middleware
-- 🛠️ **CLI** (`@gati-framework/cli@1.0.0`) — Development server, build tools, deployment
-- 🎯 **GatiC** (`gatic@0.1.0`) — Project scaffolding command
-- 📘 **Core Types** (`@gati-framework/core@0.4.1`) — TypeScript definitions, interfaces
-- ☁️ **Cloud Plugins** — AWS EKS, GCP GKE, Azure AKS adapters (in progress)
+- 📦 **Runtime** (`@gati-framework/runtime@2.0.3`) — HTTP server, handler engine, middleware
+- 🛠️ **CLI** (`@gati-framework/cli@1.0.7`) — Development server, build tools, deployment
+- 🎯 **GatiC** (`gatic@0.1.6`) — Project scaffolding command
+- 📘 **Core Types** (`@gati-framework/core@0.4.3`) — TypeScript definitions, interfaces
+- ☁️ **AWS Plugin** (`@gati-framework/cloud-aws@1.0.0`) — AWS EKS deployment (NEW!)
+- 🎮 **Playground** (`@gati-framework/playground@1.0.0`) — Visual debugging (NEW!)
 - 🎨 **Control Panel** — Web UI for monitoring and management (planned)
 
 ## Current Status
 
-🚀 **Production Ready** — Core runtime (v2.0.0) and CLI (v1.0.0) are stable
+🚀 **Production Ready** — Core runtime (v2.0.3) and CLI (v1.0.7) are stable
 
 | Feature | Status |
 |---------|--------|
-| Handler Execution | ✅ Stable (v2.0.0) |
+| Handler Execution | ✅ Stable (v2.0.3) |
 | Structured Logging | ✅ Stable (Pino) |
 | CORS Middleware | ✅ Stable |
 | Hot Reload (Dev) | ✅ Stable |
 | Docker Support | ✅ Stable |
 | Kubernetes Manifests | ✅ Stable |
 | Local K8s Deployment | ✅ Stable (kind) |
-| Cloud Deployment | 🚧 In Progress (M2) |
-| API Versioning | 📅 Planned (Q2 2025) |
-| SDK Generation | 📅 Planned (Q3 2025) |
-| Control Panel | 📅 Planned (Q3 2025) |
+| AWS EKS Deployment | ✅ Stable (v1.0.0) |
+| Visual Debugging | ✅ Stable (Playground v1.0.0) |
+| GCP/Azure Deployment | 🚧 In Progress (M2) |
+| API Versioning | 📅 Planned (Q1 2026) |
+| SDK Generation | 📅 Planned (Q2 2026) |
+| Control Panel | 📅 Planned (Q2 2026) |
 
 ## Community
 
