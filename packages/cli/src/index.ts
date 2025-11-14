@@ -12,6 +12,7 @@ import { registerDeployCommand } from './commands/deploy.js';
 import { generateTypesCommand } from './commands/generate-types.js';
 import { analyzeCommand } from './commands/analyze.js';
 import { generateManifestsCommand } from './commands/generate-manifests.js';
+import { playgroundCommand } from './commands/playground.js';
 
 const program = new Command();
 
@@ -27,6 +28,7 @@ program.addCommand(buildCommand);
 program.addCommand(generateTypesCommand);
 program.addCommand(analyzeCommand);
 program.addCommand(generateManifestsCommand);
+program.addCommand(playgroundCommand);
 registerDeployCommand(program);
 
 // Parse command line arguments
