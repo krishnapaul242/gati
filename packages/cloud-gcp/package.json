@@ -1,0 +1,58 @@
+{
+  "name": "@gati-framework/cloud-gcp",
+  "version": "1.0.0",
+  "description": "GCP cloud provider plugin for Gati framework",
+  "keywords": [
+    "gati",
+    "gcp",
+    "gke",
+    "cloud",
+    "deployment"
+  ],
+  "homepage": "https://github.com/krishnapaul242/gati#readme",
+  "bugs": {
+    "url": "https://github.com/krishnapaul242/gati/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krishnapaul242/gati.git",
+    "directory": "packages/cloud-gcp"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Krishna Paul",
+    "email": "krishnapaulmailbox@gmail.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google-cloud/container": "^5.13.0",
+    "@google-cloud/compute": "^4.10.0",
+    "@google-cloud/secret-manager": "^6.1.0",
+    "@gati-framework/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
