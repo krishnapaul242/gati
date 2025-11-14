@@ -6,6 +6,16 @@
 import { EventEmitter } from 'events';
 import type { Handler } from '@gati-framework/runtime';
 
+/**
+ * Playground request headers
+ */
+export const PLAYGROUND_HEADERS = {
+  /** Indicates this is a playground request */
+  PLAYGROUND_REQUEST: 'x-gati-playground',
+  /** Unique playground instance ID */
+  PLAYGROUND_ID: 'x-gati-playground-id',
+} as const;
+
 export interface PlaygroundBlock {
   id: string;
   name: string;
@@ -19,6 +29,7 @@ export interface PlaygroundEvent {
   type: 'enter' | 'exit' | 'error';
   timestamp: number;
   data?: unknown;
+  playgroundId?: string;
 }
 
 export class PlaygroundEngine extends EventEmitter {
@@ -38,7 +49,13 @@ export class PlaygroundEngine extends EventEmitter {
   }
 
   isPlaygroundRequest(headers: Record<string, string | string[] | undefined>): boolean {
-    return !!headers['x-playground-request'];
+    const headerValue = headers[PLAYGROUND_HEADERS.PLAYGROUND_REQUEST];
+    return headerValue === 'true' || headerValue === '1';
+  }
+
+  getPlaygroundId(headers: Record<string, string | string[] | undefined>): string | undefined {
+    const id = headers[PLAYGROUND_HEADERS.PLAYGROUND_ID];
+    return typeof id === 'string' ? id : undefined;
   }
 
   emitEvent(event: PlaygroundEvent): void {
@@ -53,11 +70,14 @@ export class PlaygroundEngine extends EventEmitter {
         return handler(req, res, gctx, lctx);
       }
 
+      const playgroundId = this.getPlaygroundId(req.headers);
+
       this.emitEvent({
         requestId: lctx.requestId,
         blockId,
         type: 'enter',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        playgroundId,
       });
 
       try {
@@ -66,7 +86,8 @@ export class PlaygroundEngine extends EventEmitter {
           requestId: lctx.requestId,
           blockId,
           type: 'exit',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          playgroundId,
         });
         return result;
       } catch (error) {
@@ -75,7 +96,8 @@ export class PlaygroundEngine extends EventEmitter {
           blockId,
           type: 'error',
           timestamp: Date.now(),
-          data: error
+          data: error,
+          playgroundId,
         });
         throw error;
       }

@@ -48,6 +48,7 @@ const state = {
   particles: [], // Active request particles
   routes: [],
   instances: [],
+  playgroundId: `playground_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, // Unique ID for this playground instance
 };
 
 /**
@@ -882,7 +883,9 @@ async function sendRequest() {
   const url = instance + path;
   const traceId = `trace_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   
-  // Add trace ID to headers
+  // Add playground headers for request tracking
+  headers['x-gati-playground'] = 'true';
+  headers['x-gati-playground-id'] = state.playgroundId;
   headers['x-trace-id'] = traceId;
   
   // Subscribe to this trace for real-time updates

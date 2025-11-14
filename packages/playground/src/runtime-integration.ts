@@ -11,6 +11,8 @@ import { createBlocksFromManifest } from './manifest-loader.js';
 export interface PlaygroundConfig {
   enabled: boolean;
   port?: number;
+  wsPort?: number;
+  debugMode?: boolean;
   priority?: number;
 }
 
@@ -33,9 +35,15 @@ export class PlaygroundIntegration {
       playgroundEngine.registerBlock(block);
     });
 
-    // Start WebSocket server
-    this.wsServer = new PlaygroundWebSocketServer(playgroundEngine, this.config.port);
+    // Start WebSocket server with configured port
+    const wsPort = this.config.wsPort || 8080;
+    this.wsServer = new PlaygroundWebSocketServer(playgroundEngine, wsPort);
     playgroundEngine.enable();
+
+    console.log(`[Playground] Enabled - WebSocket server on port ${wsPort}`);
+    if (this.config.debugMode) {
+      console.log('[Playground] Debug mode enabled');
+    }
 
     // Register lifecycle hooks
     gctx.lifecycle.onShutdown('playground', () => this.cleanup());
