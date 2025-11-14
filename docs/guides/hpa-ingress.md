@@ -403,8 +403,8 @@ const manifests = generateCompleteManifests(
 
 - [Deployment Guide](./deployment.md)
 - [Kubernetes Guide](./kubernetes.md)
-- [Environment Configuration](./configuration.md)
-- [Production Best Practices](./production.md)
+- [Configuration Guide](./configuration.md)
+- [AWS EKS Deployment](./aws-eks-deployment.md)
 
 ---
 

@@ -514,10 +514,10 @@ await deployer.destroy({ dryRun: false });
 
 ## Next Steps
 
-- [Configure Ingress and Load Balancing](./ingress-alb.md)
-- [Set Up CI/CD Pipeline](./cicd-github-actions.md)
-- [Enable Monitoring and Observability](./monitoring.md)
-- [Configure Auto-scaling](./autoscaling.md)
+- [HPA and Ingress Configuration](./hpa-ingress.md) - Configure auto-scaling and load balancing
+- [Deployment Guide](./deployment.md) - General deployment best practices
+- [Kubernetes Guide](./kubernetes.md) - Kubernetes-specific configuration
+- [Configuration Guide](./configuration.md) - Environment configuration
 
 ## Support
 
