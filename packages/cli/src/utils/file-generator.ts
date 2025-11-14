@@ -145,9 +145,9 @@ async function generateDefaultTemplate(
     )
   );
 
-  // gati.config.ts
+  // gati.config.js
   await writeFile(
-    join(projectPath, 'gati.config.ts'),
+    join(projectPath, 'gati.config.js'),
     `/**
  * @file Gati configuration
  */
@@ -202,7 +202,7 @@ ${projectName}/
 │   └── integration/  # Integration tests
 ├── Dockerfile        # Production Docker image
 ├── docker-compose.yml # Local Docker setup
-├── gati.config.ts    # Gati configuration
+├── gati.config.js    # Gati configuration
 └── package.json
 \`\`\`
 
@@ -736,7 +736,7 @@ async function generateMinimalTemplate(
   );
 
   await writeFile(
-    join(projectPath, 'gati.config.ts'),
+    join(projectPath, 'gati.config.js'),
     `export default {
   port: 3000,
   handlers: './src/handlers',
