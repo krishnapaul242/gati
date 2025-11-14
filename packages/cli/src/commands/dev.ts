@@ -50,20 +50,14 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
       }
     }
 
-    // Check if gati.config.js exists (compiled from .ts)
-    const configPath = resolve(cwd, 'gati.config.js');
+    // Check if gati.config exists (.js or .ts in root)
+    const configJsPath = resolve(cwd, 'gati.config.js');
     const configTsPath = resolve(cwd, 'gati.config.ts');
     
-    if (!existsSync(configPath)) {
-      if (existsSync(configTsPath)) {
-        spinner.fail(chalk.red('✖ gati.config.ts found but not compiled'));
-        // eslint-disable-next-line no-console
-        console.log(chalk.yellow('\n💡 Run `npm run build` or `tsc` to compile your config'));
-      } else {
-        spinner.fail(chalk.red('✖ No gati.config.ts found in current directory'));
-        // eslint-disable-next-line no-console
-        console.log(chalk.yellow('\n💡 Run `gati create` to create a new project'));
-      }
+    if (!existsSync(configJsPath) && !existsSync(configTsPath)) {
+      spinner.fail(chalk.red('✖ No gati.config.js or gati.config.ts found in current directory'));
+      // eslint-disable-next-line no-console
+      console.log(chalk.yellow('\n💡 Run `gati create` to create a new project'));
       process.exit(1);
     }
 
@@ -78,8 +72,11 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
     let app: GatiApp | null = null;
     const loadApp = async (): Promise<GatiApp> => {
       try {
-        // Import the config and create app
-        const configPath = resolve(cwd, 'dist', 'gati.config.js');
+        // Import the config from root directory
+        const configJsPath = resolve(cwd, 'gati.config.js');
+        const configPath = existsSync(configJsPath) 
+          ? configJsPath 
+          : resolve(cwd, 'gati.config.ts');
         
         // Convert to file:// URL for Windows compatibility
         const configUrl = new URL(`file://${configPath.replace(/\\/g, '/')}`).href;

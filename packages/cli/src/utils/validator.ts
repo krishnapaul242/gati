@@ -36,7 +36,6 @@ export function validateProject(cwd: string): ValidationResult {
   const requiredFiles = [
     'package.json',
     'tsconfig.json',
-    'gati.config.ts',
   ];
 
   for (const file of requiredFiles) {
@@ -44,6 +43,13 @@ export function validateProject(cwd: string): ValidationResult {
     if (!existsSync(filePath)) {
       errors.push(`Missing required file: ${file}`);
     }
+  }
+
+  // Check for config file (either .ts or .js)
+  const configTsPath = resolve(cwd, 'gati.config.ts');
+  const configJsPath = resolve(cwd, 'gati.config.js');
+  if (!existsSync(configTsPath) && !existsSync(configJsPath)) {
+    errors.push('Missing required file: gati.config.ts or gati.config.js');
   }
 
   // Check for src directory
