@@ -60,6 +60,7 @@ export function createLocalContext(
 
   const lctx: LocalContext = {
     requestId: options.requestId || generateRequestId(),
+    timestamp: Date.now(),
     traceId: options.traceId || generateTraceId(),
     parentSpanId: options.parentSpanId,
     clientId: options.clientId || generateClientId(),
@@ -100,8 +101,11 @@ export function createLocalContext(
       },
     },
     lifecycle: {
-      onCleanup: (name: string, fn: () => void | Promise<void>) => {
-        requestLifecycle.onCleanup(name, fn);
+      onCleanup: ((...args: unknown[]) => {
+        requestLifecycle.onCleanup(args[0] as never, args[1] as never);
+      }) as {
+        (name: string, fn: () => void | Promise<void>): void;
+        (fn: () => void | Promise<void>): void;
       },
       onTimeout: (fn: () => void | Promise<void>) => {
         requestLifecycle.onTimeout(fn);

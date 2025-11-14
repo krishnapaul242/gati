@@ -60,18 +60,28 @@ export function createGlobalContext(
     modules: options.modules || {},
     services: options.services || {},
     config: options.config || {},
+    state: options.state || {},
     lifecycle: {
-      onStartup: (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority) => {
-        lifecycleManager.onStartup(name, fn, priority);
+      onStartup: ((...args: unknown[]) => {
+        lifecycleManager.onStartup(args[0] as never, args[1] as never, args[2] as never);
+      }) as {
+        (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
+        (fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
       },
       onHealthCheck: (name: string, fn: () => Promise<{ status: 'pass' | 'fail' | 'warn'; message?: string; }>) => {
         lifecycleManager.onHealthCheck(name, fn);
       },
-      onShutdown: (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority) => {
-        lifecycleManager.onShutdown(name, fn, priority);
+      onShutdown: ((...args: unknown[]) => {
+        lifecycleManager.onShutdown(args[0] as never, args[1] as never, args[2] as never);
+      }) as {
+        (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
+        (fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
       },
-      onPreShutdown: (name: string, fn: () => void | Promise<void>) => {
-        lifecycleManager.onPreShutdown(name, fn);
+      onPreShutdown: ((...args: unknown[]) => {
+        lifecycleManager.onPreShutdown(args[0] as never, args[1] as never);
+      }) as {
+        (name: string, fn: () => void | Promise<void>): void;
+        (fn: () => void | Promise<void>): void;
       },
       onConfigReload: (name: string, fn: (newConfig: Record<string, unknown>) => void | Promise<void>) => {
         lifecycleManager.onConfigReload(name, fn);
@@ -155,12 +165,10 @@ export function getModule<T = unknown>(
 export async function shutdownGlobalContext(
   gctx: GlobalContext
 ): Promise<void> {
-  // Mark as shutting down
-  const isShuttingDown = true;
-  (gctx.lifecycle as { isShuttingDown: () => boolean }).isShuttingDown =
-    () => isShuttingDown;
+  // Execute shutdown hooks via lifecycle manager
+  await gctx.lifecycle.executeShutdown();
 
-  // Shutdown module loader first
+  // Shutdown module loader
   const moduleLoaderSymbol = Symbol.for('gati:moduleLoader');
   const moduleLoader = (gctx as unknown as Record<symbol, unknown>)[
     moduleLoaderSymbol
@@ -168,17 +176,6 @@ export async function shutdownGlobalContext(
 
   if (moduleLoader) {
     await moduleLoader.shutdownAll();
-  }
-
-  // Get shutdown functions from symbol
-  const shutdownSymbol = Symbol.for('gati:shutdown');
-  const fns = (gctx as unknown as Record<symbol, unknown>)[shutdownSymbol] as
-    | Array<() => void | Promise<void>>
-    | undefined;
-
-  if (fns && fns.length > 0) {
-    // Execute all shutdown hooks in parallel
-    await Promise.all(fns.map((fn) => Promise.resolve(fn())));
   }
 }
 

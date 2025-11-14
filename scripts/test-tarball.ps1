@@ -16,13 +16,13 @@ Write-Host "Creating tarballs..." -ForegroundColor Cyan
 New-Item -ItemType Directory -Path $TestDir -Force | Out-Null
 
 Push-Location "$RepoRoot\packages\runtime"
-$runtimeOut = pnpm pack --pack-destination $TestDir 2>&1 | Out-String
-$runtimeTar = ($runtimeOut -split "`n" | Where-Object { $_ -match '\.tgz$' } | Select-Object -First 1).Trim()
+pnpm pack --pack-destination $TestDir | Out-Null
+$runtimeTar = Get-ChildItem -Path $TestDir -Filter "gati-framework-runtime-*.tgz" | Select-Object -First 1 -ExpandProperty Name
 Pop-Location
 
 Push-Location "$RepoRoot\packages\cli"
-$cliOut = pnpm pack --pack-destination $TestDir 2>&1 | Out-String
-$cliTar = ($cliOut -split "`n" | Where-Object { $_ -match '\.tgz$' } | Select-Object -First 1).Trim()
+pnpm pack --pack-destination $TestDir | Out-Null
+$cliTar = Get-ChildItem -Path $TestDir -Filter "gati-framework-cli-*.tgz" | Select-Object -First 1 -ExpandProperty Name
 Pop-Location
 
 Write-Host "Tarballs created:" -ForegroundColor Green
@@ -73,30 +73,36 @@ New-Item -ItemType Directory -Path "$ProjectPath\src\modules" -Force | Out-Null
 
 # gati.config.ts
 @'
-import { defineConfig } from '@gati-framework/core';
-
-export default defineConfig({
+export default {
   name: 'tarball-app',
   version: '0.1.0',
   handlers: { dir: './src/handlers' },
   modules: { dir: './src/modules' }
-});
+};
 '@ | Out-File -FilePath "$ProjectPath\gati.config.ts" -Encoding utf8
 
 # src/index.ts
 @'
 import { createApp } from '@gati-framework/runtime';
-import config from '../gati.config.js';
 
-const app = createApp(config);
-app.start();
+const app = createApp({ port: 3000 });
+
+// Load handler from file
+import('./handlers/health.js').then(({ handler }) => {
+  app.get('/health', handler);
+  
+  app.listen().then(() => {
+    console.log('✅ Tarball test server running on http://localhost:3000');
+    console.log('🧪 Test: curl http://localhost:3000/health');
+  });
+});
 '@ | Out-File -FilePath "$ProjectPath\src\index.ts" -Encoding utf8
 
 # src/handlers/health.ts
 @'
 import type { Handler } from '@gati-framework/runtime';
 
-export const handler: Handler = async (req, res) => {
+export const handler: Handler = (req, res) => {
   res.json({ status: 'ok', message: 'Tarball test works!' });
 };
 '@ | Out-File -FilePath "$ProjectPath\src\handlers\health.ts" -Encoding utf8

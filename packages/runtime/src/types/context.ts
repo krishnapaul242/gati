@@ -155,13 +155,21 @@ export interface GlobalContext {
   config: Record<string, unknown>;
 
   /**
+   * Global state (shared across requests)
+   */
+  state: Record<string, unknown>;
+
+  /**
    * Enhanced lifecycle management for distributed systems
    */
   lifecycle: {
     /**
      * Application startup hooks
      */
-    onStartup: (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority) => void;
+    onStartup: {
+      (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
+      (fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
+    };
 
     /**
      * Health check registration
@@ -171,12 +179,18 @@ export interface GlobalContext {
     /**
      * Graceful shutdown hooks
      */
-    onShutdown: (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority) => void;
+    onShutdown: {
+      (name: string, fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
+      (fn: () => void | Promise<void>, priority?: LifecyclePriority): void;
+    };
 
     /**
      * Pre-shutdown hooks (stop accepting new requests)
      */
-    onPreShutdown: (name: string, fn: () => void | Promise<void>) => void;
+    onPreShutdown: {
+      (name: string, fn: () => void | Promise<void>): void;
+      (fn: () => void | Promise<void>): void;
+    };
 
     /**
      * Configuration reload hooks
@@ -314,6 +328,11 @@ export interface LocalContext {
   requestId: string;
 
   /**
+   * Request timestamp
+   */
+  timestamp: number;
+
+  /**
    * Distributed tracing ID
    */
   traceId: string;
@@ -386,8 +405,12 @@ export interface LocalContext {
   lifecycle: {
     /**
      * Register a cleanup function to be called when request completes
+     * Can be called with just a function or with a name and function
      */
-    onCleanup: (name: string, fn: () => void | Promise<void>) => void;
+    onCleanup: {
+      (name: string, fn: () => void | Promise<void>): void;
+      (fn: () => void | Promise<void>): void;
+    };
 
     /**
      * Register timeout handler
@@ -448,6 +471,11 @@ export interface GlobalContextOptions {
    * External services
    */
   services?: ExternalServices;
+
+  /**
+   * Initial global state
+   */
+  state?: Record<string, unknown>;
 
   /**
    * Application configuration

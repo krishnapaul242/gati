@@ -7,7 +7,7 @@ import { Command } from 'commander';
 import { resolve } from 'path';
 import { existsSync, writeFileSync, readFileSync, mkdirSync } from 'fs';
 import chalk from 'chalk';
-import { generateTypes, type TypeSchema } from '@gati-framework/runtime';
+import type { TypeSchema } from '@gati-framework/runtime';
 
 /**
  * Generate TypeScript declarations
@@ -49,6 +49,7 @@ async function generateTypeDeclarations(cwd: string): Promise<void> {
     }
     
     // Generate TypeScript declarations
+    const { generateTypes } = await import('@gati-framework/runtime');
     const declarations = generateTypes(schema);
     
     // Write to .gati/types.d.ts

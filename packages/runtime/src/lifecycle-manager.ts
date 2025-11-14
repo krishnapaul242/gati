@@ -32,8 +32,20 @@ export class LifecycleManager {
   /**
    * Register startup hook
    */
-  onStartup(name: string, fn: () => void | Promise<void>, priority = LifecyclePriority.NORMAL): void {
-    this.startupHooks.push({ name, fn, priority });
+  onStartup(nameOrFn: string | (() => void | Promise<void>), fnOrPriority?: (() => void | Promise<void>) | LifecyclePriority, maybePriority?: LifecyclePriority): void {
+    // Support both onStartup(name, fn, priority) and onStartup(fn, priority) signatures
+    if (typeof nameOrFn === 'function') {
+      // onStartup(fn, priority?)
+      const fn = nameOrFn;
+      const priority = (typeof fnOrPriority === 'number' ? fnOrPriority : LifecyclePriority.NORMAL) as LifecyclePriority;
+      this.startupHooks.push({ name: `startup-${this.startupHooks.length}`, fn, priority });
+    } else {
+      // onStartup(name, fn, priority?)
+      const name = nameOrFn;
+      const fn = fnOrPriority as () => void | Promise<void>;
+      const priority = maybePriority || LifecyclePriority.NORMAL;
+      this.startupHooks.push({ name, fn, priority });
+    }
     this.startupHooks.sort((a, b) => b.priority - a.priority);
   }
 
@@ -47,20 +59,43 @@ export class LifecycleManager {
   /**
    * Register shutdown hook
    */
-  onShutdown(name: string, fn: () => void | Promise<void>, priority = LifecyclePriority.NORMAL): void {
-    this.shutdownHooks.push({ name, fn, priority });
+  onShutdown(nameOrFn: string | (() => void | Promise<void>), fnOrPriority?: (() => void | Promise<void>) | LifecyclePriority, maybePriority?: LifecyclePriority): void {
+    // Support both onShutdown(name, fn, priority) and onShutdown(fn, priority) signatures
+    if (typeof nameOrFn === 'function') {
+      // onShutdown(fn, priority?)
+      const fn = nameOrFn;
+      const priority = (typeof fnOrPriority === 'number' ? fnOrPriority : LifecyclePriority.NORMAL) as LifecyclePriority;
+      this.shutdownHooks.push({ name: `shutdown-${this.shutdownHooks.length}`, fn, priority });
+    } else {
+      // onShutdown(name, fn, priority?)
+      const name = nameOrFn;
+      const fn = fnOrPriority as () => void | Promise<void>;
+      const priority = maybePriority || LifecyclePriority.NORMAL;
+      this.shutdownHooks.push({ name, fn, priority });
+    }
     this.shutdownHooks.sort((a, b) => b.priority - a.priority);
   }
 
   /**
    * Register pre-shutdown hook
    */
-  onPreShutdown(name: string, fn: () => void | Promise<void>): void {
-    this.preShutdownHooks.push({ 
-      name, 
-      fn, 
-      priority: LifecyclePriority.HIGH 
-    });
+  onPreShutdown(nameOrFn: string | (() => void | Promise<void>), maybeFn?: () => void | Promise<void>): void {
+    // Support both onPreShutdown(name, fn) and onPreShutdown(fn) signatures
+    if (typeof nameOrFn === 'function') {
+      // onPreShutdown(fn)
+      this.preShutdownHooks.push({ 
+        name: `pre-shutdown-${this.preShutdownHooks.length}`, 
+        fn: nameOrFn, 
+        priority: LifecyclePriority.HIGH 
+      });
+    } else {
+      // onPreShutdown(name, fn)
+      this.preShutdownHooks.push({ 
+        name: nameOrFn, 
+        fn: maybeFn!, 
+        priority: LifecyclePriority.HIGH 
+      });
+    }
   }
 
   /**
@@ -297,8 +332,15 @@ export class RequestLifecycleManager {
   /**
    * Register cleanup hook
    */
-  onCleanup(name: string, fn: () => void | Promise<void>): void {
-    this.cleanupHooks.push({ name, fn });
+  onCleanup(nameOrFn: string | (() => void | Promise<void>), maybeFn?: () => void | Promise<void>): void {
+    // Support both onCleanup(name, fn) and onCleanup(fn) signatures
+    if (typeof nameOrFn === 'function') {
+      // onCleanup(fn)
+      this.cleanupHooks.push({ name: `cleanup-${this.cleanupHooks.length}`, fn: nameOrFn });
+    } else {
+      // onCleanup(name, fn)
+      this.cleanupHooks.push({ name: nameOrFn, fn: maybeFn! });
+    }
   }
 
   /**
