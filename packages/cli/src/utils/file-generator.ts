@@ -99,6 +99,8 @@ async function generateDefaultTemplate(
           dev: 'gati dev',
           build: 'gati build',
           start: 'node dist/index.js',
+          'generate:manifests': 'gati generate:manifests',
+          'generate:types': 'gati generate:types',
           test: 'vitest',
           typecheck: 'tsc --noEmit',
           lint: 'eslint . --ext .ts',

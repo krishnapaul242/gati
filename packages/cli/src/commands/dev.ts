@@ -50,6 +50,48 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
       }
     }
 
+    // Auto-generate manifests from handlers
+    const srcDir = resolve(cwd, 'src');
+    const manifestsDir = resolve(cwd, '.gati', 'manifests');
+    if (existsSync(srcDir)) {
+      try {
+        const { analyzeFile } = await import('../analyzer/simple-analyzer.js');
+        const { glob } = await import('glob');
+        
+        if (!existsSync(manifestsDir)) {
+          mkdirSync(manifestsDir, { recursive: true });
+        }
+        
+        const handlers: any[] = [];
+        const modules: any[] = [];
+        
+        // Find all TypeScript/JavaScript files
+        const files = await glob('src/**/*.{ts,js}', { cwd, absolute: true });
+        
+        for (const filePath of files) {
+          const result = analyzeFile(filePath, srcDir);
+          
+          if (result) {
+            // Add to collections
+            if ((result as any).route) {
+              handlers.push(result);
+            } else {
+              modules.push(result);
+            }
+          }
+        }
+        
+        // Write app manifest
+        const appManifest = { handlers, modules, timestamp: Date.now() };
+        const appManifestPath = resolve(manifestsDir, '_app.json');
+        writeFileSync(appManifestPath, JSON.stringify(appManifest, null, 2));
+        
+        console.log(chalk.gray(`🔧 Auto-generated manifests (${handlers.length} handlers, ${modules.length} modules)`));
+      } catch (error) {
+        console.log(chalk.yellow('⚠ Failed to auto-generate manifests'));
+      }
+    }
+
     // Check if gati.config exists (.js or .ts in root)
     const configJsPath = resolve(cwd, 'gati.config.js');
     const configTsPath = resolve(cwd, 'gati.config.ts');
@@ -111,21 +153,22 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
             try {
               const appManifest = JSON.parse(readFileSync(appManifestPath, 'utf-8'));
               for (const handler of appManifest.handlers || []) {
-                // Convert .ts to .js and use dist/src directory
-                const jsPath = handler.filePath
-                  .replace(/\.ts$/, '.js')
-                  .replace(/[\\/]src[\\/]/, '/dist/src/') // Cross-platform path replacement
-                  .replace(/\\/g, '/'); // Normalize to forward slashes
+                // In dev mode, load TypeScript files directly using tsx
+                const handlerFilePath = handler.filePath;
                 
                 try {
-                  const handlerModule = await import(`file://${jsPath}?t=${Date.now()}`);
+                  // Use tsx's tsImport to load TypeScript files
+                  // Convert Windows paths to file:// URLs properly
+                  const { tsImport } = await import('tsx/esm/api');
+                  const fileUrl = `file:///${handlerFilePath.replace(/\\/g, '/')}`;
+                  const handlerModule = await tsImport(fileUrl, import.meta.url);
                   const handlerFn = handlerModule[handler.exportName];
                   if (handlerFn) {
                     gatiApp.registerRoute(handler.method || 'GET', handler.route, handlerFn);
                     console.log(`✅ Loaded ${handler.method} ${handler.route}`);
                   }
                 } catch (error) {
-                  console.warn(`Failed to load handler ${jsPath}:`, error);
+                  console.warn(`Failed to load handler ${handlerFilePath}:`, error);
                 }
               }
             } catch (error) {
