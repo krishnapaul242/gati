@@ -1,16 +1,626 @@
-# GitHub Copilot Instructions for Gati
+# GitHub Copilot Instructions for Gati Framework Development
+
+> **Note**: These instructions are for developing **Gati Framework itself** - the core platform that enables developers to build backend applications. For building applications with Gati, see user documentation.
+
+---
+
+## Vision & Mission
+
+**Gati** is a **self-managing backend platform** that eliminates infrastructure complexity and API evolution pain.
+
+### Mission Statement
+> **"Let developers write business logic. Let Gati handle everything else."**
+
+Gati transforms backend development from a complex, fragile process into an automated, intelligent, and developer-first experience through:
+
+- **Zero-Ops Deployment** - Automatic containerization, scaling, and multi-cloud deployment
+- **Timescape Versioning** - APIs that never break, automatic schema evolution, parallel version execution  
+- **AI-Augmented DX** - Automated migrations, transformer generation, intelligent debugging
+- **Manifest-Driven Architecture** - Code analysis generates runtime configuration automatically
+- **Plugin Ecosystem** - Extensible marketplace for modules, handlers, and capabilities
+
+**What makes Gati different**: Unlike Express/Nest/Fastify, Gati **understands your code** and auto-generates infrastructure, handles version evolution, and provides visual debugging - not just request routing.
+
+See [VISION.md](../VISION.md) for complete vision and [CANONICAL-FEATURE-REGISTRY.md](../CANONICAL-FEATURE-REGISTRY.MD) for all planned features.
+
+---
 
 ## Project Context
 
-**Gati** is a next-generation TypeScript/Node.js framework for building cloud-native, versioned APIs with automatic scaling, deployment, and SDK generation.
+**Gati** is a next-generation TypeScript/Node.js platform for building cloud-native backends with automatic routing, deployment, version management, and lifecycle control.
+
+### Architecture Overview
+
+- **Monorepo**: PNPM workspace with `packages/` (framework) and `examples/` (demo apps)
+- **ESM-only**: All packages use `"type": "module"` with `.js` extensions in imports
+- **Manifest-driven**: Analyzer auto-generates runtime configuration from source code
+- **Version-aware**: Designed for Timescape parallel version execution (in development)
+- **Plugin-based**: Extensible through modules (code/npm/docker) and plugins (full Gati projects)
+
+### Package Structure
+
+**Existing packages** (check `packages/*/package.json` for current versions):
+- `@gati-framework/core` - Types, base configuration, interfaces
+- `@gati-framework/runtime` - Handler execution engine, context management, lifecycle
+- `@gati-framework/cli` - Dev server, build tools, deployment commands
+- `@gati-framework/playground` - 3-mode visualization (API/Network/Tracking) - **in active development**
+- `@gati-framework/cloud-aws` - AWS EKS deployment
+- `@gati-framework/observability` - Tracing, metrics, monitoring
+- `@gati-framework/production-hardening` - Enterprise features
+- `gatic` - Project scaffolding command
+
+**Planned packages** (under active development):
+- `@gati-framework/types` - Gati type system (branded types, constraints) - **core priority**
+- `@gati-framework/validation` - Runtime validator, schema diff engine
+- `@gati-framework/analyzer` - File watching, manifest generation, AST extraction
+- `@gati-framework/codegen` - SDK generation, OpenAPI, K8s manifests
+- `@gati-framework/timescape` - Version registry, transformer chains, compatibility - **core priority**
+- `@gati-framework/plugins` - Plugin contracts, sandboxing, marketplace
+- `@gati-framework/operator` - Kubernetes operator, CRDs, rollouts
+- `@gati-framework/testing` - Test harness, Timescape evolution tests
+- `@gati-framework/cloud-gcp` - GCP deployment
+- `@gati-framework/cloud-azure` - Azure deployment
 
 ### Core Concepts
 
-- **Handlers**: Functions that process HTTP requests with signature `handler(req, res, gctx, lctx)`
-- **Modules**: Reusable business logic loaded with dependency injection
-- **Context**: Global (gctx) for shared resources, Local (lctx) for request-scoped data
-- **Versioning**: Timestamp-based routing for backward compatibility
-- **Cloud-Native**: Kubernetes deployment with multi-cloud support
+- **Handlers**: `(req, res, gctx, lctx) => unknown | Promise<unknown>` - stateless request processors
+- **Modules**: Custom code/npm packages/docker images providing specific functionality (database, cache, auth)
+- **Plugins**: Full Gati projects that extend applications with handlers/modules/other plugins
+- **Contexts**: 
+  - `gctx` (Global) - Shared resources, modules, app config (created once, never mutates)
+  - `lctx` (Local) - Request-scoped data with `requestId`, `traceId`, lifecycle hooks
+- **Routing**: File-based by default (`handlers/users/[id].ts` → `/users/:id`), declarative takes precedence
+- **Lifecycle**: Phase tracking (`RECEIVED` → `VALIDATED` → `PROCESSING` → `COMPLETED`)
+- **Manifests**: Auto-generated by analyzer from source code - **single source of truth** for runtime
+
+---
+
+## Critical Architectural Principles
+
+### 1. Version-First Design (Timescape Foundation)
+
+**Status**: Not yet implemented, but core priority feature - design all code to be version-aware
+
+**Why it matters**: Timescape enables APIs that never break by running multiple versions simultaneously
+
+```typescript
+// ✅ DO: Design for version isolation
+export const getUserHandler: Handler = async (req, res, gctx, lctx) => {
+  // Handlers must be stateless - enables parallel version execution
+  const userId = req.params.id;
+  const user = await gctx.modules['database']?.findUser(userId);
+  res.json({ user });
+};
+
+// ❌ DON'T: Use global mutable state
+let cache = {}; // Breaks version isolation
+export const handler = (req, res) => {
+  cache[req.params.id] = data; // Different versions will conflict
+};
+```
+
+**Key principles**:
+- Handlers must be **pure, stateless functions**
+- All state lives in `gctx` (shared, immutable) or `lctx` (request-scoped)
+- No global variables, no module-level state mutations
+- Enables version transformers to bridge schema changes automatically
+
+See [docs/architecture/timescape.md](../docs/architecture/timescape.md) for full specification.
+
+### 2. Manifest-Driven Development
+
+**Why it matters**: Analyzers generate manifests automatically - developers write code, Gati generates config
+
+```typescript
+// ✅ DO: Write code with proper exports - analyzer discovers it
+// File: src/handlers/users/[id].ts
+export const METHOD = 'GET'; // Declarative route (takes precedence)
+export const ROUTE = '/api/users/:id';
+
+export const getUserHandler: Handler = async (req, res, gctx, lctx) => {
+  // Implementation
+};
+
+// ❌ DON'T: Manually edit manifests
+// .gati/manifests/_app.json <- NEVER edit directly, analyzer regenerates
+```
+
+**How it works**:
+- `gati dev` watches `src/**/*.{ts,js}` and regenerates manifests on change
+- File path routing: `handlers/users/[id].ts` → `/users/:id`
+- Declarative routing: `METHOD` + `ROUTE` exports override file path
+- `gati build` reorganizes files based on declarative metadata
+
+**Rationale**: Single source of truth prevents config drift, enables codegen ecosystem (SDKs, OpenAPI, K8s), supports hot reload.
+
+### 3. Module vs Plugin Architecture
+
+**Module** (functional unit):
+- Custom TypeScript code, NPM package, Docker image, or binary
+- Provides specific functionality (database, cache, auth, email)
+- Loaded into `gctx.modules` via dependency injection
+- Examples: `databaseModule`, `cacheModule`, `authModule`
+
+```typescript
+// src/modules/database.ts
+export const databaseModule: Module = {
+  name: 'database',
+  version: '1.0.0',
+  async init(gctx) {
+    const client = await connectToDatabase(gctx.config.databaseUrl);
+    return {
+      findUser: (id) => client.query('SELECT * FROM users WHERE id = $1', [id]),
+    };
+  },
+  async shutdown() { await client.close(); }
+};
+```
+
+**Plugin** (complete Gati project):
+- Full Gati application with own `gati.config.ts` and manifest
+- Contains handlers, modules, and other plugins
+- Extends/enhances host application capabilities
+- Marketplace-distributable with versioning
+
+```
+packages/my-plugin/        # Full Gati project
+  src/
+    handlers/              # Plugin-provided endpoints
+    modules/               # Plugin-provided modules
+    plugins/               # Can include other plugins
+  gati.config.ts           # Plugin configuration
+  package.json             # Published to marketplace
+```
+
+**Key distinction**: Modules are **building blocks**, plugins are **complete features**.
+
+---
+
+## Gati Type System (Core Priority - Active Development)
+
+**Status**: Not yet implemented, TypeScript-native approach using branded types with constraint combinators
+
+### Philosophy: TypeScript-First, Zero Boilerplate
+
+Gati's type system follows a **single definition → many artifacts** principle:
+
+```typescript
+// ✅ Write ONCE - TypeScript types with branded constraints
+type CreateUser = {
+  email: EmailString;
+  password: string & MinLen<8>;
+  age?: number & Min<18> & Max<100>;
+};
+
+// ✅ Gati analyzer automatically generates:
+// - Runtime validators
+// - GType schemas (for manifests)
+// - OpenAPI specifications
+// - Client SDK types
+// - Timescape diff metadata
+// - Transformer suggestions
+```
+
+**What makes this different from Zod/Yup/class-validator**:
+- ❌ No separate schema definitions (`z.object({...})`)
+- ❌ No decorators (`@IsEmail()`)
+- ❌ No runtime builders
+- ✅ Pure TypeScript types
+- ✅ Zero runtime cost for type metadata
+- ✅ Automatic schema extraction via analyzer
+
+### Branded Types & Constraints
+
+**Branded type** = TypeScript primitive + metadata for Gati analyzer:
+
+```typescript
+// Brand helper (zero runtime cost)
+type Brand<T extends string> = { __brand: T };
+
+// Email is a string with "email" brand
+type EmailString = string & Brand<"email">;
+
+// Gati analyzer extracts:
+// { "type": "string", "format": "email" }
+```
+
+### Built-in Constraint Combinators
+
+Located in `@gati-framework/types` (when implemented):
+
+```typescript
+// String constraints
+type MinLen<N extends number> = { __minLen: N };
+type MaxLen<N extends number> = { __maxLen: N };
+type Pattern<S extends string> = { __pattern: S };
+
+// Number constraints
+type Min<N extends number> = { __min: N };
+type Max<N extends number> = { __max: N };
+
+// Enum constraint
+type Enum<T> = { __enum: T };
+
+// Usage examples
+type Password = string & MinLen<8> & MaxLen<128>;
+type Age = number & Min<0> & Max<120>;
+type Username = string & Pattern<"^[a-zA-Z0-9_]+$">;
+type Role = Enum<"admin" | "user" | "guest">;
+```
+
+### Common Branded Types Library
+
+Pre-defined types for convenience (avoid reinventing):
+
+```typescript
+// Strings
+type EmailString = string & Brand<"email">;
+type PasswordString = string & MinLen<8>;
+type UsernameString = string & Pattern<"^[a-zA-Z0-9_]+$">;
+type PhoneString = string & Brand<"phone">;
+type URLString = string & Brand<"url">;
+type HexString = string & Pattern<"^[0-9a-fA-F]+$">;
+type Base64String = string & Brand<"base64">;
+
+// Numbers
+type PositiveNumber = number & Min<0>;
+type NegativeNumber = number & Max<0>;
+type IntegerNumber = number & Brand<"integer">;
+type FloatNumber = number & Brand<"float">;
+type PortNumber = number & Min<1> & Max<65535>;
+
+// IDs
+type UUID = string & Brand<"uuid">;
+type CUID = string & Brand<"cuid">;
+type ObjectId = string & Brand<"objectId">;
+
+// Timestamps
+type TimestampString = string & Brand<"timestamp">;
+type DateString = string & Brand<"date">;
+```
+
+### Current Development Approach
+
+**Until `@gati-framework/types` is implemented**:
+
+```typescript
+// ✅ Use TypeScript types for structure
+interface CreateUserInput {
+  email: string;
+  password: string;
+  age?: number;
+}
+
+// ✅ Use validation libraries for runtime checks
+import { z } from 'zod';
+
+const CreateUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  age: z.number().min(18).max(100).optional(),
+});
+
+// ✅ Validate in handlers
+export const createUserHandler: Handler = async (req, res, gctx, lctx) => {
+  const result = CreateUserSchema.safeParse(req.body);
+  if (!result.success) {
+    throw new HandlerError('Validation failed', 400, result.error);
+  }
+  
+  // Use validated data
+  const userData = result.data;
+};
+```
+
+**When `@gati-framework/types` is ready**:
+
+```typescript
+// ✅ Single definition with branded types
+type CreateUserInput = {
+  email: EmailString;
+  password: PasswordString;
+  age?: number & Min<18> & Max<100>;
+};
+
+// ✅ Handler with automatic validation (via analyzer + runtime)
+export const input = CreateUserInput; // Analyzer extracts schema
+export const output = User;
+
+export const createUserHandler: Handler = async (req, res, gctx, lctx) => {
+  // req.body is automatically validated by runtime
+  // Type is correctly inferred as CreateUserInput
+  const { email, password, age } = req.body;
+  
+  // Business logic
+  const user = await gctx.modules['database']?.createUser({ email, password, age });
+  
+  res.json({ user }); // Output validated against User type
+};
+```
+
+### How Gati Analyzer Extracts Types
+
+**Process flow**:
+
+1. **AST Parsing**: CLI watches handler files, uses `ts-morph` to parse TypeScript
+2. **Type Extraction**: TypeChecker API extracts branded types and constraints
+3. **GType Schema Generation**: Converts to runtime-safe JSON schema
+4. **Manifest Integration**: Includes schemas in `.gati/manifests/_app.json`
+5. **Validation Compilation**: Generates optimized validators (Ajv-level performance)
+
+**Example extraction**:
+
+```typescript
+// Source code
+type CreateUser = {
+  email: EmailString;
+  password: string & MinLen<8>;
+  age?: number & Min<18> & Max<100>;
+};
+
+// Analyzer output (GType schema)
+{
+  "type": "object",
+  "properties": {
+    "email": { "type": "string", "format": "email" },
+    "password": { "type": "string", "minLength": 8 },
+    "age": { "type": "number", "minimum": 18, "maximum": 100 }
+  },
+  "required": ["email", "password"]
+}
+```
+
+### Timescape Integration
+
+**Why branded types matter for version evolution**:
+
+Schema changes are automatically detected and categorized:
+
+```typescript
+// Version 1
+type User = {
+  name: string;
+  email: EmailString;
+};
+
+// Version 2 (non-breaking: added constraint)
+type User = {
+  name: string & MinLen<3>; // Added constraint
+  email: EmailString;
+};
+
+// Timescape analysis:
+// - Constraint tightened on 'name'
+// - Non-breaking for old data (optional transformer)
+// - Breaking for new submissions (reject <3 chars)
+
+// Version 3 (breaking: shape change)
+type User = {
+  firstName: string;  // name split into two
+  lastName: string;
+  email: EmailString;
+};
+
+// Timescape analysis:
+// - Shape changed (name → firstName + lastName)
+// - Breaking change detected
+// - Auto-generate transformer stub:
+export const transformV1toV3 = (v1: UserV1): UserV3 => ({
+  firstName: v1.name.split(' ')[0],
+  lastName: v1.name.split(' ')[1] || '',
+  email: v1.email,
+});
+```
+
+### Design Principles for Type-Safe Code
+
+```typescript
+// ✅ DO: Use branded types (when available)
+type UserId = string & Brand<"userId">;
+const getUserById = (id: UserId) => { /* ... */ };
+
+// ✅ DO: Combine constraints
+type StrongPassword = string & MinLen<12> & Pattern<"^(?=.*[A-Z])(?=.*[0-9])">;
+
+// ✅ DO: Keep types DRY
+type BaseEntity = {
+  id: UUID;
+  createdAt: TimestampString;
+  updatedAt: TimestampString;
+};
+
+type User = BaseEntity & {
+  email: EmailString;
+  username: UsernameString;
+};
+
+// ❌ DON'T: Duplicate schemas
+const UserSchema = z.object({ email: z.string() }); // Separate schema
+type User = { email: string }; // Duplicate structure
+
+// ❌ DON'T: Use 'any' (defeats type extraction)
+type UserData = any; // Analyzer can't extract schema
+```
+
+### What Gati Generates from Types
+
+**Single type definition produces**:
+
+1. **Runtime Validator** - High-performance validation
+2. **GType Schema** - Manifest metadata
+3. **OpenAPI Spec** - API documentation
+4. **Client SDK** - Type-safe client libraries
+5. **Timescape Metadata** - Version diff analysis
+6. **Transformer Hints** - AI-generated migration suggestions
+7. **Playground Config** - Auto-complete and validation
+8. **Test Fixtures** - Mock data generators
+
+**Developer writes**:
+```typescript
+type CreateUser = { email: EmailString; password: PasswordString };
+```
+
+**Gati generates** (automatically):
+- Validator function
+- OpenAPI endpoint spec
+- TypeScript SDK method
+- Python SDK method (future)
+- Go SDK method (future)
+- Timescape version entry
+- Playground request template
+
+### Type System Development Checklist
+
+When implementing `@gati-framework/types`:
+
+- [ ] Define core branded type helper: `Brand<T>`
+- [ ] Implement constraint combinators: `Min`, `Max`, `MinLen`, `MaxLen`, `Pattern`, `Enum`
+- [ ] Create common branded types library: `EmailString`, `UUID`, `PasswordString`, etc.
+- [ ] Build analyzer extraction: AST parsing → GType schema generation
+- [ ] Implement runtime validator: Compile GType → optimized validation functions
+- [ ] Integrate with Timescape: Schema diff detection, breaking change analysis
+- [ ] Generate OpenAPI: GType → OpenAPI 3.0 spec
+- [ ] Support handler `input`/`output` exports for automatic validation
+- [ ] Add Playground integration: Type-aware request building
+- [ ] Create transformer suggestion engine: Breaking changes → AI-generated stubs
+- [ ] Write migration guide: Zod/Yup → Gati branded types
+- [ ] Performance optimization: Ensure validator performance matches Ajv
+- [ ] Documentation: Type system guide, examples, best practices
+
+See [docs/architecture/type-system.md](../docs/architecture/type-system.md) for complete specification.
+
+---
+
+## Timescape Version System (Core Priority - Not Yet Implemented)
+
+**Status**: Foundational feature - design code to be version-ready even before implementation
+
+### What Timescape Enables
+
+- **Automatic version creation** when handlers change
+- **Parallel version execution** - v1 and v2 run simultaneously
+- **Automatic schema diffing** - detect breaking changes
+- **Auto-generated transformers** - bridge old ↔ new data formats
+- **Zero-downtime evolution** - deploy new versions without breaking old clients
+
+### Design Principles for Timescape-Ready Code
+
+```typescript
+// ✅ DO: Stateless handlers (version-safe)
+export const getUserV2: Handler = async (req, res, gctx, lctx) => {
+  const user = await gctx.modules['database']?.findUser(req.params.id);
+  // Each version runs independently
+  res.json({ user });
+};
+
+// ❌ DON'T: Shared mutable state (version conflicts)
+let requestCount = 0; // Multiple versions will conflict
+export const handler = (req, res) => {
+  requestCount++; // V1 and V2 increment same counter
+};
+
+// ✅ DO: Version metadata in handler (future)
+export const metadata = {
+  version: '2024-11-17', // Timestamp-based versioning
+  input: UserInputSchema,
+  output: UserOutputSchema,
+};
+```
+
+### Future Timescape API (Planned)
+
+```typescript
+// When implemented, transformers will bridge versions automatically
+import { createTransformer } from '@gati-framework/timescape';
+
+// V1 schema
+const UserV1 = { id: string, name: string };
+
+// V2 schema (breaking change: split name)
+const UserV2 = { id: string, firstName: string, lastName: string };
+
+// Auto-generated transformer stub (AI-assisted)
+const transformV1toV2 = createTransformer({
+  from: UserV1,
+  to: UserV2,
+  transform: (v1User) => ({
+    id: v1User.id,
+    firstName: v1User.name.split(' ')[0],
+    lastName: v1User.name.split(' ')[1] || '',
+  }),
+});
+```
+
+See [docs/architecture/timescape.md](../docs/architecture/timescape.md) for complete specification.
+
+---
+
+## Critical Development Workflows
+
+### Development Commands
+
+```bash
+# Root workspace
+pnpm install              # Install all dependencies
+pnpm build                # Compile all packages (tsc)
+pnpm test                 # Run vitest tests
+pnpm dev                  # Start runtime dev server
+
+# Inside a Gati app (examples/*)
+gati dev                  # Hot-reload server (auto-reorganizes src/ per metadata)
+gati build                # Compile + reorganize files per declarative routing
+gati deploy dev --local   # Deploy to local kind cluster
+```
+
+### Hot Reload & Auto-Organization
+
+**What happens during `gati dev`**:
+1. CLI watches `src/**/*.{ts,js}` via `chokidar`
+2. On change: Analyzer extracts handler metadata (`METHOD`, `ROUTE`)
+3. Auto-generates `.gati/manifests/_app.json` with all handlers/modules
+4. **Auto-reorganizes** `src/` folders to match declarative routes
+5. Auto-generates types from `gati.types.json` → `.gati/types.d.ts`
+6. Debounced restart (500ms)
+
+**Example auto-reorganization**:
+```typescript
+// Developer writes:
+// src/handlers/user.ts
+export const METHOD = 'GET';
+export const ROUTE = '/api/v1/users/:id';
+
+// After 'gati dev' or 'gati build':
+// src/handlers/api/v1/users/[id].ts (auto-moved to match route structure)
+```
+
+**Why auto-reorganization**: Keeps file structure in sync with API structure, makes codebase navigable, prevents route conflicts.
+
+### Testing Setup (Vitest)
+
+```typescript
+// Use globals from vitest.config.ts
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('handler-engine', () => {
+  beforeEach(() => vi.clearAllMocks());
+  
+  it('executes handler with contexts', async () => {
+    const handler: Handler = vi.fn((req, res) => res.json({ ok: true }));
+    await executeHandler(handler, mockReq, mockRes, gctx, lctx);
+    expect(handler).toHaveBeenCalledWith(mockReq, mockRes, gctx, lctx);
+  });
+});
+
+// When Timescape is implemented - add version evolution tests
+describe('timescape-compatibility', () => {
+  it('transforms v1 request to v2 handler', async () => {
+    // Test cross-version compatibility
+  });
+});
+```
+
+**Coverage thresholds**: 80% (lines, functions, branches, statements)  
+**Test locations**: `tests/{unit,integration,e2e}/*.test.ts` OR `packages/*/src/**/*.test.ts`
 
 ---
 
@@ -19,149 +629,312 @@
 ### TypeScript Standards
 
 ```typescript
-// ✅ DO: Use strict type safety
+// ✅ DO: Use strict type safety (tsconfig has all strict flags enabled)
 const handler: Handler = (req, res, gctx, lctx) => {
   const userId: string = req.params.id;
   return res.json({ userId });
 };
 
-// ❌ DON'T: Use 'any'
-const handler = (req: any, res: any) => {
-  /* ... */
+// ✅ DO: Use .js extensions in ESM imports (required for Node.js ESM)
+import { Handler } from './types/handler.js';
+import type { Request } from './types/request.js';
+
+// ❌ DON'T: Use 'any' or omit import extensions
+const handler = (req: any, res: any) => { /* ... */ };
+import { Handler } from './types/handler'; // Missing .js
+```
+
+**Why ESM-only**: Future-proof, better tree-shaking, native TypeScript support, enables dynamic imports for version loading.
+
+### Naming & Patterns
+
+**Files**: `kebab-case.ts` (handler-engine.ts, route-manager.ts)  
+**Functions**: `camelCase` verb-first (executeHandler, registerModule)  
+**Types/Interfaces**: `PascalCase` (Handler, GlobalContext, ModuleRegistry)  
+**Constants**: `UPPER_SNAKE_CASE` (MAX_RETRIES, DEFAULT_PORT)
+
+```typescript
+// Import order
+import { createServer } from 'http';            // 1. Node built-ins
+import chalk from 'chalk';                      // 2. External deps
+import type { Handler } from './types/handler.js'; // 3. Relative (with .js)
+
+// Functional patterns preferred (classes only for complex state)
+function createLocalContext(requestId: string): LocalContext {
+  const cleanupHooks: (() => Promise<void>)[] = [];
+  return {
+    requestId,
+    lifecycle: { onCleanup: (name, fn) => cleanupHooks.push(fn) },
+  };
+}
+```
+
+**Why functional**: Stateless functions enable version isolation, are easier to test, support distributed execution.
+
+---
+
+## Handler Patterns & Routing
+
+### Declarative Route Definition (Preferred)
+
+```typescript
+// src/handlers/users/operations.ts
+import type { Handler } from '@gati-framework/runtime';
+import { RequestPhase } from '@gati-framework/runtime';
+
+// Declarative metadata - takes precedence over file path
+export const METHOD = 'GET';
+export const ROUTE = '/api/v1/users/:id';
+
+export const getUserHandler: Handler = async (req, res, gctx, lctx) => {
+  // Register cleanup hook
+  lctx.lifecycle.onCleanup('user-query', async () => {
+    console.log(`Cleanup for request ${lctx.requestId}`);
+  });
+
+  // Track request phases
+  lctx.lifecycle.setPhase(RequestPhase.RECEIVED);
+  lctx.lifecycle.setPhase(RequestPhase.VALIDATED);
+  lctx.lifecycle.setPhase(RequestPhase.PROCESSING);
+
+  const userId = req.params.id as string;
+  
+  // Access modules from global context (dependency injection)
+  const user = await gctx.modules['database']?.findUser(userId);
+  
+  if (!user) {
+    throw new HandlerError('User not found', 404, { userId });
+  }
+
+  lctx.lifecycle.setPhase(RequestPhase.COMPLETED);
+  
+  res.json({
+    user,
+    requestId: lctx.requestId,
+    traceId: lctx.traceId,
+  });
 };
 ```
 
-### Naming Conventions
+**Note**: After `gati build`, this file will be auto-moved to `src/handlers/api/v1/users/[id].ts` to match route structure.
 
-```typescript
-// Interfaces: PascalCase with descriptive names
-interface HandlerContext {
-  /* ... */
-}
-interface ModuleRegistry {
-  /* ... */
-}
+### File-Based Routing (Default)
 
-// Functions: camelCase, verb-first
-function executeHandler() {
-  /* ... */
-}
-function registerModule() {
-  /* ... */
-}
-
-// Constants: UPPER_SNAKE_CASE
-const MAX_RETRIES = 3;
-const DEFAULT_PORT = 3000;
-
-// Files: kebab-case
-// handler-engine.ts, module-loader.ts
+```
+src/handlers/
+  users/
+    [id].ts       → GET /users/:id
+    index.ts      → GET /users
+    create.ts     → POST /users (if METHOD export present)
+  posts/
+    [postId]/
+      comments.ts → GET /posts/:postId/comments
 ```
 
-### Import Order
+**Routing precedence**:
+1. Declarative (`METHOD` + `ROUTE` exports)
+2. File path convention
+3. CLI auto-reorganizes files during build
+
+---
+
+## Module & Plugin Development
+
+### Module Pattern
 
 ```typescript
-// 1. Node.js built-ins
-import { createServer } from 'http';
-import { resolve } from 'path';
+// src/modules/database.ts
+import type { Module } from '@gati-framework/runtime';
 
-// 2. External dependencies
-import express from 'express';
-import { z } from 'zod';
-
-// 3. Internal modules (absolute imports via tsconfig paths)
-import { Handler } from '@/runtime/types/handler';
-import { Context } from '@/runtime/types/context';
-
-// 4. Relative imports (same directory)
-import { parseRoute } from './parser';
-import { matchRoute } from './matcher';
+export const databaseModule: Module = {
+  name: 'database',
+  version: '1.0.0',
+  dependencies: [], // Other modules this depends on
+  
+  async init(gctx) {
+    const client = await connectToDatabase(gctx.config.databaseUrl);
+    return {
+      findUser: (id: string) => client.query('SELECT * FROM users WHERE id = $1', [id]),
+      createUser: (data: any) => client.query('INSERT INTO users ...', [data]),
+    };
+  },
+  
+  async shutdown() {
+    await client.close();
+  },
+  
+  async healthCheck() {
+    return { status: 'healthy' };
+  }
+};
 ```
 
-### Functional Patterns Preferred
+**Modules can be**:
+- TypeScript/JavaScript code (above example)
+- NPM packages (`npm install @company/auth-module`)
+- Docker containers (exposed via RPC)
+- Binaries (called via process spawn)
+
+### Plugin Pattern
+
+```
+packages/auth-plugin/              # Publishable to marketplace
+  src/
+    handlers/
+      login.ts                     # POST /auth/login
+      logout.ts                    # POST /auth/logout
+    modules/
+      jwt.ts                       # JWT token management
+      session.ts                   # Session storage
+  gati.config.ts                   # Plugin configuration
+  package.json
+  README.md
+```
 
 ```typescript
-// ✅ DO: Use functional composition
-const processRequest = pipe(
-  parseBody,
-  validateInput,
-  executeHandler,
-  formatResponse
-);
+// packages/auth-plugin/gati.config.ts
+export default {
+  name: 'auth-plugin',
+  version: '1.0.0',
+  provides: ['authentication', 'authorization'],
+  
+  // Plugin can require host to provide certain modules
+  requires: {
+    modules: ['database'], // Host must have database module
+  },
+  
+  // Plugin configuration schema (future: use branded types)
+  config: {
+    jwtSecret: { type: 'string', required: true },
+    sessionTTL: { type: 'number', default: 3600 },
+  },
+};
+```
 
-// ✅ DO: Pure functions when possible
-function createContext(req: Request): Context {
-  return {
-    requestId: generateId(),
-    timestamp: Date.now(),
-  };
-}
+**Using a plugin**:
+```bash
+# Install from marketplace or npm
+gati plugin add @gati-plugins/auth
 
-// ❌ AVOID: Classes unless necessary (e.g., errors, complex state)
-class RequestProcessor {
-  /* ... */
-} // Only if truly needed
+# Or local development
+gati plugin link ../auth-plugin
 ```
 
 ---
 
-## Testing Requirements
+## Gati Playground Architecture
 
-### Framework: Vitest
+**Status**: Active development - basic functionality in all 3 modes
+
+### Three Modes
+
+**🟦 API Mode** (Postman alternative):
+- Request builder with auto-complete from manifests
+- Stress/load testing built-in
+- Mock datasets and environments
+- Version switching (future: test against v1, v2, v3 simultaneously)
+
+**🟧 Network Mode** (2D visualization):
+- Real-time map of distributed backend
+- Particle flow showing request paths
+- Component health (latency, memory, CPU)
+- Module/handler dependency graph
+
+**🟪 Tracking Mode** (3D request lifecycle):
+- Visualize handler → middleware → module → plugin execution
+- Debug gates - pause execution mid-request
+- Data inspection at each step
+- Time-travel replay for debugging
+
+### Development Guidelines
 
 ```typescript
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+// packages/playground/src/modes/api/
+// When adding features to Playground, ensure observability hooks
 
-describe('HandlerEngine', () => {
-  beforeEach(() => {
-    // Setup
-    vi.clearAllMocks();
-  });
-
-  it('should execute handler with correct parameters', async () => {
-    // Arrange
-    const req = createMockRequest();
-    const res = createMockResponse();
-    const gctx = createMockGlobalContext();
-    const lctx = createMockLocalContext();
-
-    // Act
-    await executeHandler(handler, req, res, gctx, lctx);
-
-    // Assert
-    expect(handler).toHaveBeenCalledWith(req, res, gctx, lctx);
-  });
-
-  it('should handle errors gracefully', async () => {
-    // Test error scenarios
-  });
+// ✅ DO: Emit lifecycle events for visualization
+lctx.lifecycle.onPhaseChange((phase, prev) => {
+  // Playground can subscribe to these events
+  emitToPlayground('phase-change', { phase, prev, requestId: lctx.requestId });
 });
+
+// ✅ DO: Add debug gate support
+if (lctx.debugMode) {
+  await waitForDebugRelease(lctx.requestId); // Pause execution
+}
 ```
 
-### Coverage Requirements
-
-- **Minimum:** 80% line coverage
-- **Target:** 90% line coverage
-- Test edge cases, errors, and async flows
-- Mock external dependencies (DB, APIs, file system)
-
-### Test Structure
-
-```
-tests/
-├── unit/              # Unit tests (isolated functions)
-├── integration/       # Integration tests (multiple components)
-└── e2e/               # End-to-end tests (full request flow)
-```
+See [packages/playground/README.md](../packages/playground/README.md) for current state and roadmap.
 
 ---
 
-## Error Handling
+## Deployment Architecture
+
+### Multi-Cloud Strategy
+
+Gati provides **zero-ops deployment** to:
+- **AWS** - EKS, Fargate, Lambda (via `@gati-framework/cloud-aws`)
+- **GCP** - GKE, Cloud Run (planned: `@gati-framework/cloud-gcp`)
+- **Azure** - AKS, Container Apps (planned: `@gati-framework/cloud-azure`)
+- **Kubernetes** - Any cluster via operator (planned: `@gati-framework/operator`)
+- **Gati Cloud** - Managed hosting (future)
+
+### Local Development (Kind)
+
+```bash
+# From inside a Gati app
+gati deploy dev --local --auto-tag --health-check-path /health --port-forward
+
+# What happens:
+# 1. Builds Docker image (multi-stage, non-root user)
+# 2. Loads image into kind cluster (gati-local)
+# 3. Generates K8s manifests (Deployment, Service, ConfigMap)
+# 4. Applies to namespace, waits for rollout
+# 5. Runs health probe via ephemeral port-forward
+# 6. Optionally keeps port-forward open for testing
+```
+
+**Key flags**:
+- `--dry-run` - Preview manifests without deploying
+- `--auto-tag` - Tag image with `YYYYMMDD-HHMMSS-<gitsha>`
+- `--timeout <seconds>` - Rollout timeout (default: 120)
+- `--cluster-name <name>` - Override kind cluster name
+- `--skip-cluster` - Assume cluster exists
+
+### Manifest Generation
+
+CLI auto-generates `.gati/manifests/_app.json` with:
+- Discovered handlers from `src/handlers/**/*.{ts,js}`
+- Routes derived from file paths (`users/[id].ts` → `/users/:id`)
+- Modules from `src/modules/**`
+
+### Cloud Deployment (Future)
+
+```bash
+# One command to deploy to any cloud
+gati deploy production --provider aws --region us-east-1
+
+# Gati handles:
+# - Container registry
+# - K8s cluster provisioning (or uses existing)
+# - Load balancer setup
+# - SSL/TLS certificates
+# - DNS configuration
+# - Secrets management
+# - Auto-scaling policies
+# - Monitoring/alerting
+```
+
+**Abstraction principle**: Cloud plugins implement common interface - switching providers requires no code changes.
+
+---
+
+## Error Handling & Observability
 
 ### Custom Error Classes
 
 ```typescript
-// Create typed errors
+// packages/runtime/src/types/handler.ts
 export class HandlerError extends Error {
   constructor(
     message: string,
@@ -173,222 +946,235 @@ export class HandlerError extends Error {
   }
 }
 
-// Usage
-throw new HandlerError('Invalid request body', 400, { field: 'email' });
+// Usage in handlers
+throw new HandlerError('User not found', 404, { userId, attemptedBy: lctx.clientId });
 ```
 
 ### Error Handling Pattern
 
 ```typescript
 try {
-  await executeHandler(req, res, gctx, lctx);
+  await handler(req, res, gctx, lctx);
 } catch (error) {
   if (error instanceof HandlerError) {
-    res.status(error.statusCode).json({
+    // Expected error with status code
+    res.status(error.statusCode).json({ 
       error: error.message,
-      context: error.context,
+      context: error.context 
     });
   } else {
-    // Log unknown errors
-    logger.error('Unexpected error', { error, requestId: lctx.requestId });
+    // Unexpected error - log internally, return generic message
+    logger.error({ 
+      error, 
+      requestId: lctx.requestId,
+      traceId: lctx.traceId,
+      handler: lctx.meta.handlerName 
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
 }
 ```
 
----
+**Why not expose stack traces**: Security (leak internal paths), clarity (users don't need implementation details), observability (use structured logging instead).
 
-## File Organization
-
-### Project Structure (Reference)
-
-```
-src/
-├── runtime/
-│   ├── app-core.ts           # Main HTTP server
-│   ├── handler-engine.ts     # Handler execution
-│   ├── module-loader.ts      # Module system
-│   ├── route-manager.ts      # Route registration
-│   ├── context-manager.ts    # Context lifecycle
-│   └── types/
-│       ├── request.ts
-│       ├── response.ts
-│       ├── context.ts
-│       └── handler.ts
-├── cli/
-│   ├── index.ts
-│   ├── commands/
-│   │   ├── create.ts
-│   │   ├── dev.ts
-│   │   └── build.ts
-│   └── utils/
-└── plugins/
-    ├── aws/
-    ├── gcp/
-    └── azure/
-```
-
-### File Template
+### Observability Integration
 
 ```typescript
-/**
- * @module runtime/handler-engine
- * @description Core handler execution engine for Gati framework
- */
+// Use pino for structured logging
+import { logger } from '@gati-framework/runtime';
 
-import type { Handler, Request, Response, Context } from './types';
-
-// Constants
-const DEFAULT_TIMEOUT = 30_000; // 30 seconds
-
-// Types
-interface ExecutionOptions {
-  timeout?: number;
-}
-
-// Main exports
-export async function executeHandler(
-  handler: Handler,
-  req: Request,
-  res: Response,
-  gctx: Context,
-  lctx: Context,
-  options?: ExecutionOptions
-): Promise<void> {
-  // Implementation
-}
-
-// Helper functions (not exported)
-function validateHandler(handler: unknown): handler is Handler {
-  // Implementation
-}
-```
-
----
-
-## Documentation Standards
-
-### JSDoc Comments
-
-````typescript
-/**
- * Executes a handler function with the provided request context.
- *
- * @param handler - The handler function to execute
- * @param req - HTTP request object
- * @param res - HTTP response object
- * @param gctx - Global context (shared across requests)
- * @param lctx - Local context (request-scoped)
- * @returns Promise that resolves when handler completes
- *
- * @throws {HandlerError} If handler validation fails
- * @throws {TimeoutError} If execution exceeds timeout
- *
- * @example
- * ```typescript
- * const handler: Handler = (req, res) => res.json({ ok: true });
- * await executeHandler(handler, req, res, gctx, lctx);
- * ```
- */
-export async function executeHandler(/* ... */) {
-  /* ... */
-}
-````
-
-### Inline Comments
-
-```typescript
-// ✅ DO: Explain WHY, not WHAT
-// Using WeakMap to prevent memory leaks when modules are unloaded
-const moduleCache = new WeakMap();
-
-// ❌ DON'T: State the obvious
-// Create a new variable for user ID
-const userId = req.params.id;
-```
-
----
-
-## Performance Considerations
-
-### Async Best Practices
-
-```typescript
-// ✅ DO: Run independent async operations in parallel
-const [user, posts, comments] = await Promise.all([
-  fetchUser(userId),
-  fetchPosts(userId),
-  fetchComments(userId),
-]);
-
-// ❌ DON'T: Sequential awaits when not needed
-const user = await fetchUser(userId);
-const posts = await fetchPosts(userId);
-const comments = await fetchComments(userId);
-```
-
-### Memory Management
-
-```typescript
-// ✅ DO: Clean up resources
-function createContext(): Context {
-  const cleanupFns: (() => void)[] = [];
-
-  return {
-    cleanup: () => cleanupFns.forEach((fn) => fn()),
-    onCleanup: (fn) => cleanupFns.push(fn),
-  };
-}
-
-// Usage
-lctx.onCleanup(() => dbConnection.close());
-```
-
----
-
-## Security Guidelines
-
-### Input Validation
-
-```typescript
-import { z } from 'zod';
-
-// Define schemas
-const UserSchema = z.object({
-  email: z.string().email(),
-  age: z.number().int().min(0).max(120),
-});
-
-// Validate in handlers
-const handler: Handler = (req, res) => {
-  const result = UserSchema.safeParse(req.body);
-  if (!result.success) {
-    throw new HandlerError('Invalid input', 400, result.error);
-  }
-  // Use result.data (typed correctly)
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  logger.info({ 
+    requestId: lctx.requestId,
+    traceId: lctx.traceId,
+    userId: req.params.id 
+  }, 'Fetching user');
+  
+  // Business logic
+  
+  logger.info({
+    requestId: lctx.requestId,
+    duration: Date.now() - lctx.meta.startTime
+  }, 'User fetch completed');
 };
 ```
 
-### Avoid Common Pitfalls
+**Future**: Integration with OpenTelemetry, DataDog, New Relic via `@gati-framework/observability`.
+
+---
+
+## What NOT to Do (Critical Guardrails)
+
+### ❌ Don't Copy Framework Patterns from Express/Nest/Koa
+
+**Why**: Gati is designed around **manifest-driven architecture** and **version-aware execution** - other framework patterns break these principles.
 
 ```typescript
-// ❌ DON'T: Expose internal errors
-catch (error) {
-  res.json({ error: error.stack });
+// ❌ DON'T: Express middleware pattern
+app.use((req, res, next) => {
+  req.user = await authenticate(req); // Mutates request
+  next();
+});
+
+// ✅ DO: Gati middleware pattern (immutable context)
+export const authMiddleware: Middleware = async (req, res, gctx, lctx, next) => {
+  const user = await authenticate(req, gctx);
+  lctx.user = user; // Store in request-scoped context
+  await next();
+};
+
+// ❌ DON'T: NestJS decorator-heavy approach
+@Controller('/users')
+export class UserController {
+  @Get(':id')
+  async getUser(@Param('id') id: string) { }
 }
 
-// ✅ DO: Log internally, return generic message
-catch (error) {
-  logger.error('Database error', { error, userId });
-  res.status(500).json({ error: 'Service temporarily unavailable' });
-}
+// ✅ DO: Gati declarative handler
+export const METHOD = 'GET';
+export const ROUTE = '/users/:id';
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const id = req.params.id;
+  // Implementation
+};
+```
+
+**Explanation**: Other patterns are valid for their frameworks, but Gati's analyzer needs specific patterns to auto-generate manifests. Using Express/Nest patterns prevents manifest generation and Timescape integration.
+
+### ❌ Don't Use Global Mutable State
+
+```typescript
+// ❌ DON'T: Global state (breaks version isolation)
+let requestCache = {}; // Multiple versions will conflict
+export const handler = (req, res) => {
+  requestCache[req.params.id] = data;
+};
+
+// ✅ DO: Context-scoped state
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  // Use gctx for shared resources (immutable after init)
+  const cache = gctx.modules['cache'];
+  await cache.set(req.params.id, data);
+  
+  // Use lctx for request-scoped data
+  lctx.tempData = computeExpensiveValue();
+};
+```
+
+**Explanation**: Global state prevents parallel version execution (Timescape), breaks distributed runtime, makes testing difficult.
+
+### ❌ Don't Manually Edit Generated Files
+
+```typescript
+// ❌ DON'T: Edit analyzer-generated manifests
+// .gati/manifests/_app.json <- Regenerated on every file change
+// .gati/types.d.ts <- Regenerated from gati.types.json
+
+// ✅ DO: Edit source code, let analyzer regenerate
+// src/handlers/users.ts <- Edit this
+// gati.types.json <- Edit this
+```
+
+**Explanation**: Analyzer regenerates these files - manual edits will be overwritten. Fix issues in source code.
+
+### ❌ Don't Ignore Version-Aware Design
+
+```typescript
+// ❌ DON'T: Break handler signatures (prevents version isolation)
+export const handler = (req) => {
+  return { data: 'response' }; // Missing res, gctx, lctx
+};
+
+// ✅ DO: Use full signature (enables Timescape)
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  res.json({ data: 'response' });
+};
+```
+
+**Explanation**: Even though Timescape isn't implemented yet, using correct signatures now prevents breaking changes later.
+
+### ✅ Flexible Framework - Many Patterns Are Welcome
+
+**Gati is flexible**: You can use various architectural patterns, libraries, and approaches. The above guidelines prevent **architectural incompatibilities**, not stylistic choices.
+
+**Feel free to**:
+- Use any database library (Prisma, TypeORM, Drizzle, raw SQL)
+- Choose any validation library (Zod, Yup, Joi) until branded types are ready
+- Organize code with classes, functions, or mixtures
+- Use dependency injection libraries if needed
+- Import utilities from other frameworks (just not core patterns)
+
+---
+
+## Project Structure Reference
+
+```
+packages/
+  runtime/src/
+    app-core.ts                  # HTTP server orchestrator
+    handler-engine.ts            # Handler execution
+    route-manager.ts             # Route matching
+    module-loader.ts             # Module DI system
+    context-manager.ts           # gctx/lctx lifecycle
+    lifecycle-manager.ts         # Request phase tracking
+    websocket-coordinator.ts     # WebSocket support
+    types/
+      handler.ts                 # Handler type signature
+      context.ts                 # GlobalContext, LocalContext
+      request.ts                 # Request object
+      response.ts                # Response object
+      module.ts                  # Module interface
+  
+  cli/src/
+    commands/
+      dev.ts                     # Hot-reload dev server
+      build.ts                   # TypeScript compilation + file reorganization
+      deploy.ts                  # K8s/cloud deployment
+    analyzer/
+      simple-analyzer.ts         # AST extraction, manifest generation
+    deployment/
+      kubernetes.ts              # K8s manifest generation
+      local.ts                   # Kind cluster deployment
+    utils/
+      watcher.ts                 # File watching (chokidar)
+      env-loader.ts              # Environment variables
+  
+  core/src/
+    types.ts                     # Core type definitions
+    config.ts                    # Configuration interfaces
+  
+  playground/src/               # 3-mode visualization (active development)
+    modes/
+      api/                       # API testing mode
+      network/                   # 2D network visualization
+      tracking/                  # 3D request lifecycle
+  
+  cloud-aws/src/
+    deployment/                  # EKS deployment
+    networking/                  # VPC, ALB setup
+    secrets/                     # Secret management
+  
+  types/                         # Planned: Branded types, constraints
+  validation/                    # Planned: Runtime validator
+  analyzer/                      # Planned: Advanced AST analysis
+  codegen/                       # Planned: SDK generation
+  timescape/                     # Planned: Version management
+  plugins/                       # Planned: Plugin contracts
+  operator/                      # Planned: K8s operator
+  testing/                       # Planned: Test framework
+
+examples/
+  hello-world/src/
+    handlers/
+      hello.ts                   # Example handler with lifecycle
+    modules/                     # Example modules
+  playground-demo/               # Playground integration demo
+  lifecycle-example/             # Lifecycle hooks example
 ```
 
 ---
 
-## Git Commit Standards
-
-### Conventional Commits
+## Git Workflow & Commits
 
 ```
 <type>(<scope>): <subject>
@@ -398,131 +1184,132 @@ catch (error) {
 <footer>
 ```
 
-**Types:**
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation
-- `style`: Code style (formatting, no logic change)
-- `refactor`: Code refactoring
-- `test`: Adding tests
-- `chore`: Maintenance
-
-**Examples:**
-
+**Examples**:
 ```
-feat(runtime): implement handler execution pipeline
+feat(timescape): implement version registry and transformer chains
 
-- Add Request and Response type definitions
-- Create context manager for gctx and lctx
-- Implement handler execution flow with error handling
+- Add VersionRegistry for managing handler versions
+- Implement TransformerChain for cross-version data migration
+- Add schema diff detection with breaking change analysis
+- Generate transformer stubs for AI completion
 
-Closes #1
+Related to #156
+See docs/architecture/timescape.md for specification
 ```
 
 ```
-fix(router): handle path params with special characters
+fix(cli): handle missing gati.config.ts gracefully
 
-Path params containing dots were not being parsed correctly.
-Updated regex to support alphanumeric + dots + dashes.
+Previously crashed with ENOENT when neither .ts nor .js config existed.
+Now falls back to package.json for basic configuration.
 
-Fixes #45
+Fixes #38
 ```
 
 ---
 
-## Dependencies & Versions
+## Key Dependencies & Versions
 
-### Preferred Libraries
+Check `packages/*/package.json` for current versions instead of hardcoding here.
 
-```json
-{
-  "typescript": "^5.x",
-  "vitest": "^1.x",
-  "zod": "^3.x",
-  "pino": "^8.x" // Logging
-}
-```
+**Core dependencies**:
+- `typescript` (^5.3.2) - Type system
+- `vitest` (^1.0.0) - Testing framework
+- `pino` (^9.5.0) - Structured logging
+- `chokidar` (^4.0.3) - File watching
+- `chalk` (^5.6.2) - Terminal colors
+- `commander` (^14.0.2) - CLI framework
 
-### Adding New Dependencies
-
-Before adding a dependency:
-
-1. Check if functionality can be implemented in ~50 lines
-2. Verify package is actively maintained (updated in last 6 months)
+**Adding dependencies**: 
+1. Check if ~50 lines could replace it
+2. Verify active maintenance (updated in last 6 months)
 3. Check bundle size impact
 4. Prefer zero-dependency packages
+5. Ensure license compatibility (MIT preferred)
 
 ---
 
-## Issue Workflow
+## Documentation & Issue References
 
-When working on an issue:
+### For New Features
 
-1. **Read Acceptance Criteria** in issue description
-2. **Check Dependencies** in MILESTONES.md
-3. **Create Branch**: `feat/issue-<number>-<short-description>`
-4. **Implement** with tests
-5. **Update Documentation** if needed
-6. **Open PR** with:
-   - Reference to issue: "Closes #X"
-   - Description of changes
-   - Screenshots/examples (if UI/CLI)
+1. Check [docs/architecture/milestones.md](../docs/architecture/milestones.md) for priority
+2. Read related GitHub issues for acceptance criteria
+3. Review `examples/` directory for usage patterns
+4. Read [VISION.md](../VISION.md) to understand big picture
+5. Check [CANONICAL-FEATURE-REGISTRY.md](../CANONICAL-FEATURE-REGISTRY.MD) for planned features
 
----
+### Branch Naming
 
-## Common Patterns
+`<type>/issue-<number>-<short-description>`
 
-### Handler Definition
+Examples:
+- `feat/issue-156-timescape-version-registry`
+- `fix/issue-38-config-fallback`
+- `docs/update-handler-examples`
 
-```typescript
-export const getUserHandler: Handler = async (req, res, gctx, lctx) => {
-  const userId = req.params.id;
+### PR Requirements
 
-  // Business logic
-  const user = await gctx.modules.db.users.findById(userId);
-
-  if (!user) {
-    throw new HandlerError('User not found', 404);
-  }
-
-  res.json({ user });
-};
-```
-
-### Module Registration
-
-```typescript
-export function registerModule(
-  name: string,
-  module: Module,
-  gctx: GlobalContext
-): void {
-  if (gctx.modules.has(name)) {
-    throw new Error(`Module ${name} already registered`);
-  }
-
-  gctx.modules.set(name, module);
-
-  // Initialize if needed
-  if (module.init) {
-    module.init(gctx);
-  }
-}
-```
+- Reference issue: "Closes #X" or "Related to #Y"
+- Update docs if API changes
+- Add/update tests (maintain 80% coverage)
+- Include examples for new features
+- Update CHANGELOG.md (if exists)
 
 ---
 
-## Questions & Clarifications
+## Critical Files to Reference
 
-If requirements are unclear:
+When working on specific areas:
 
-1. Check MILESTONES.md for context
-2. Review related issues
-3. Look at examples/ directory
-4. Ask human developer in PR comments
+**Runtime & Handlers**:
+- [`packages/runtime/src/types/handler.ts`](../packages/runtime/src/types/handler.ts) - Handler signature
+- [`packages/runtime/src/types/context.ts`](../packages/runtime/src/types/context.ts) - Context interfaces
+- [`packages/runtime/src/app-core.ts`](../packages/runtime/src/app-core.ts) - Main orchestrator
+- [`packages/runtime/src/handler-engine.ts`](../packages/runtime/src/handler-engine.ts) - Execution engine
+
+**CLI & Build**:
+- [`packages/cli/src/commands/dev.ts`](../packages/cli/src/commands/dev.ts) - Hot reload
+- [`packages/cli/src/commands/build.ts`](../packages/cli/src/commands/build.ts) - Build & reorganize
+- [`packages/cli/src/analyzer/simple-analyzer.ts`](../packages/cli/src/analyzer/simple-analyzer.ts) - Manifest generation
+
+**Deployment**:
+- [`packages/cli/src/deployment/kubernetes.ts`](../packages/cli/src/deployment/kubernetes.ts) - K8s manifests
+- [`packages/cli/src/deployment/local.ts`](../packages/cli/src/deployment/local.ts) - Kind deployment
+- [`packages/cloud-aws/src/deployment/`](../packages/cloud-aws/src/deployment/) - AWS EKS
+
+**Configuration**:
+- [`vitest.config.ts`](../vitest.config.ts) - Test setup
+- [`tsconfig.json`](../tsconfig.json) - TypeScript strict settings
+- [`pnpm-workspace.yaml`](../pnpm-workspace.yaml) - Monorepo config
+
+**Vision & Architecture**:
+- [`VISION.md`](../VISION.md) - Product vision
+- [`CANONICAL-FEATURE-REGISTRY.md`](../CANONICAL-FEATURE-REGISTRY.MD) - All planned features
+- [`docs/architecture/overview.md`](../docs/architecture/overview.md) - Architecture deep dive
+- [`docs/architecture/timescape.md`](../docs/architecture/timescape.md) - Versioning system
+- [`docs/architecture/type-system.md`](../docs/architecture/type-system.md) - Branded types specification
 
 ---
 
-**Last Updated:** 2025-11-09  
+## Quick Troubleshooting
+
+**Import errors**: Ensure `.js` extension in ESM imports  
+**Type errors**: Check `tsconfig.json` has all strict flags enabled  
+**Hot reload not working**: Check `chokidar` watching `src/**/*.{ts,js}`, restart dev server  
+**Deploy fails**: Verify Docker/kubectl/kind installed, check cluster name  
+**Tests fail**: Run `pnpm build` first (tests use compiled output)  
+**File not reorganizing**: Check `METHOD` and `ROUTE` exports are correct, run `gati build`  
+**Manifest not updating**: Delete `.gati/manifests/` and restart `gati dev`
+
+---
+
+**Last Updated:** 2025-11-18  
 **Maintained By:** Krishna Paul (@krishnapaul242)
+
+**For Questions**: 
+- Framework development: Open issue with `[dev-question]` label
+- Architecture decisions: Reference [VISION.md](../VISION.md) and [CANONICAL-FEATURE-REGISTRY.md](../CANONICAL-FEATURE-REGISTRY.MD)
+- Feature status: Check [docs/architecture/milestones.md](../docs/architecture/milestones.md)
