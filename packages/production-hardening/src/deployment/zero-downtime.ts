@@ -239,8 +239,11 @@ spec:
         revisionHistoryLimit: 20,
       },
     };
-
-    return configs[environment];
+    const selectedConfig = configs[environment];
+    if(!selectedConfig) {
+      throw new Error(`No recommended config for environment: ${environment}`);
+    }
+    return selectedConfig;
   }
 
   /**
@@ -290,11 +293,56 @@ spec:
     success: boolean;
     message: string;
   }> {
-    // This would use kubectl in practice
-    // Placeholder implementation
+    const startTime = Date.now();
+    const checkInterval = 5000; // Check every 5 seconds
+
+    while (Date.now() - startTime < timeout) {
+      try {
+        // Check rollout status using kubectl
+        const { execSync } = await import('child_process');
+        
+        const statusCommand = `kubectl rollout status deployment/${appName} -n ${namespace} --timeout=10s`;
+        
+        try {
+          const output = execSync(statusCommand, {
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'pipe'],
+          });
+
+          // Check if rollout completed successfully
+          if (output.includes('successfully rolled out')) {
+            return {
+              success: true,
+              message: `Deployment ${appName} in namespace ${namespace} rolled out successfully`,
+            };
+          }
+        } catch (cmdError) {
+          // kubectl rollout status returns non-zero if not complete yet
+          // Continue monitoring unless it's a fatal error
+          const errorMessage = cmdError instanceof Error ? cmdError.message : String(cmdError);
+          
+          if (errorMessage.includes('not found') || errorMessage.includes('error')) {
+            return {
+              success: false,
+              message: `Deployment monitoring failed: ${errorMessage}`,
+            };
+          }
+        }
+
+        // Wait before next check
+        await new Promise((resolve) => setTimeout(resolve, checkInterval));
+      } catch (error) {
+        return {
+          success: false,
+          message: `Error monitoring rollout: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        };
+      }
+    }
+
+    // Timeout reached
     return {
-      success: true,
-      message: `Deployment ${appName} rolled out successfully`,
+      success: false,
+      message: `Deployment rollout timeout after ${timeout}ms for ${appName} in namespace ${namespace}`,
     };
   }
 }

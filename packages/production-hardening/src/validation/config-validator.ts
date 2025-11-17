@@ -210,10 +210,10 @@ export class ConfigValidator {
   /**
    * Pre-deployment validation checklist
    */
-  async preDeploymentCheck(config: DeploymentConfig): Promise<{
+  preDeploymentCheck(config: DeploymentConfig): {
     passed: boolean;
     checks: Array<{ name: string; passed: boolean; message?: string }>;
-  }> {
+  } {
     const checks: Array<{ name: string; passed: boolean; message?: string }> = [];
 
     // Check 1: Configuration valid

@@ -5,7 +5,6 @@
 
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import * as path from 'path';
 
 /**
  * Secret configuration
@@ -30,7 +29,7 @@ export class SecretManager {
 
   constructor(encryptionKey?: string) {
     // Use provided key or generate from environment
-    const key = encryptionKey || process.env.GATI_SECRET_KEY;
+    const key = encryptionKey || process.env['GATI_SECRET_KEY'];
     
     if (!key) {
       throw new Error('Encryption key required for SecretManager');
@@ -45,7 +44,7 @@ export class SecretManager {
    */
   encrypt(value: string): string {
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(this.algorithm, this.encryptionKey, iv);
+    const cipher = crypto.createCipheriv(this.algorithm, this.encryptionKey, iv) as crypto.CipherGCM;
 
     let encrypted = cipher.update(value, 'utf8', 'hex');
     encrypted += cipher.final('hex');
@@ -66,10 +65,14 @@ export class SecretManager {
     }
 
     const [ivHex, authTagHex, encrypted] = parts;
+    if (!ivHex || !authTagHex || !encrypted) {
+      throw new Error('Invalid encrypted value format');
+    }
+    
     const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
 
-    const decipher = crypto.createDecipheriv(this.algorithm, this.encryptionKey, iv);
+    const decipher = crypto.createDecipheriv(this.algorithm, this.encryptionKey, iv) as crypto.DecipherGCM;
     decipher.setAuthTag(authTag);
 
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
@@ -102,7 +105,13 @@ export class SecretManager {
       throw new Error(`Secret file not found: ${filePath}`);
     }
 
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const data = JSON.parse(fileContent) as {
+      name: string;
+      value: string;
+      rotationDays?: number;
+      lastRotated?: string;
+    };
     
     return {
       name: data.name,
