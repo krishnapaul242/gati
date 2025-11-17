@@ -21,7 +21,7 @@ export default defineConfig({
   ],
   
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/gati/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/gati/gati.png' }],
     ['meta', { name: 'theme-color', content: '#646cff' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'en' }],
@@ -32,7 +32,7 @@ export default defineConfig({
 
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    logo: { src: '/logo.svg', width: 24, height: 24 },
+    logo: { src: '/gati.png', width: 24, height: 24 },
     
     nav: [
       { text: 'Home', link: '/' },

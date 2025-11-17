@@ -123,8 +123,8 @@ export default defineConfig({
 **Fix:** All assets should be in `docs/public/` and referenced with absolute paths:
 
 ```markdown
-![Logo](/gati/logo.svg)
-<!-- NOT: ![Logo](./logo.svg) -->
+![Logo](/gati/gati.png)
+<!-- NOT: ![Logo](./gati.png) -->
 ```
 
 ### Issue: Search Not Working

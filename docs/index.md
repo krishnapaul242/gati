@@ -3,58 +3,58 @@ layout: home
 
 hero:
   name: "Gati"
-  text: "Motion in Code"
-  tagline: "Build cloud-native, versioned APIs with TypeScript — Deploy anywhere in seconds"
+  text: "The Backend That Builds, Scales, and Evolves Itself"
+  tagline: "Zero-Ops, Infinite Evolution — Let developers write business logic. Let Gati handle everything else."
   image:
-    src: /logo-large.svg
-    alt: Gati
+    src: /gati.png
+    alt: Gati Framework
   actions:
     - theme: brand
-      text: Get Started
-      link: /guide/getting-started
+      text: Quick Start
+      link: /onboarding/quick-start
+    - theme: alt
+      text: Why Gati?
+      link: /vision/why-gati
     - theme: alt
       text: View on GitHub
       link: https://github.com/krishnapaul242/gati
-    - theme: alt
-      text: API Reference
-      link: /api/handler
 
 features:
-  - icon: ⚡
-    title: Lightning Fast Development
-    details: File-based routing with hot reloading (50-200ms). Write handlers, see changes instantly. No server restarts needed.
+  - icon: 🧠
+    title: Code That Understands Itself
+    details: Gati analyzes your handlers, modules, types, and schemas — automatically generating optimized runtime, manifests, validators, and deployment configs. No manual configuration needed.
   
-  - icon: 📁
-    title: Zero-Configuration Routing
-    details: Drop files in src/handlers/ and they become API routes. users/[id].ts → /api/users/:id. METHOD and ROUTE exports for full control.
-  
-  - icon: 🔥
-    title: Manifest-Based Hot Reload
-    details: Individual file manifests enable incremental updates. Only changed files are reprocessed, making development blazingly fast.
-  
-  - icon: 🚀
-    title: Auto Port Detection
-    details: Smart port detection finds available ports automatically. Remembers your last port and handles conflicts gracefully.
+  - icon: 🔄
+    title: Timescape — APIs That Never Break
+    details: Revolutionary version management with automatic schema diffing, transformer generation, and parallel version execution. Ship new versions without fear. (Planned M2+)
   
   - icon: 📦
     title: Modular Architecture
-    details: Handlers for routes, Modules for business logic, Context for shared state. Clean separation with dependency injection.
+    details: Everything is a module — databases, caches, auth, storage, AI models. Install modules like NPM packages with isolated processes, manifests, and contracts.
+  
+  - icon: ⚡
+    title: TypeScript-Native Type System
+    details: Branded types with constraint combinators (EmailString, MinLen<8>) generate validators, OpenAPI specs, SDKs, and Timescape metadata from single definitions. (Planned M2)
+  
+  - icon: 🚀
+    title: Zero-Ops Deployment
+    details: Automatic containerization, K8s manifests, multi-cloud deployment (AWS/GCP/Azure), scaling policies, SSL provisioning, and CDN integration. Deploy anywhere in seconds.
+  
+  - icon: 🎮
+    title: Visual Debugging Playground
+    details: 3-mode visualization (API testing, 2D network map, 3D request lifecycle) with debug gates, stress testing, and real-time observability. Postman on steroids.
   
   - icon: 🔍
-    title: Built-in Observability
-    details: Structured logging, request tracking, health checks, and performance metrics. Monitor everything from day one.
-  
-  - icon: ☁️
-    title: Cloud-Native Deployment
-    details: Automatic Kubernetes manifests, Docker configs, and multi-cloud deployment (AWS, GCP, Azure). Deploy anywhere in seconds.
-  
-  - icon: 🎯
-    title: TypeScript-First
-    details: Full type safety from handlers to context. Auto-generated types from schemas. Catch errors at compile time.
+    title: Manifest-Driven Development
+    details: File-based routing with auto-generated manifests. Write code, Gati generates config. Hot reload with 50-200ms updates. Single source of truth prevents config drift.
   
   - icon: 🛠️
-    title: Developer Experience
-    details: Comprehensive CLI, detailed error messages, debugging tools, and extensive documentation. Built by developers, for developers.
+    title: AI-Augmented DX
+    details: Auto-generated transformers for breaking changes, migration assistants for Express/Nest/Fastify, schema diff explanations, and intelligent debugging suggestions.
+  
+  - icon: 🌐
+    title: Plugin Ecosystem
+    details: Extend with full Gati projects as plugins. Marketplace-ready with versioning, sandboxing, and revenue-share (70/30 model). Build once, distribute everywhere.
 
 ---
 
@@ -71,105 +71,122 @@ features:
 ## Quick Start
 
 ```bash
-# Create a new project with GatiC
+# Create a new project
 npx gatic create my-api
-
-# Navigate to your project
 cd my-api
 
-# Start development server (with hot reload)
+# Start development server with hot reload
 pnpm dev
 
-# Build for production
-pnpm build
-
-# Deploy to Kubernetes
+# Deploy to local Kubernetes
 gati deploy dev --local
 ```
 
 ## Your First Handler
 
 ```typescript
-// src/handlers/hello.ts
+// src/handlers/users/[id].ts
 import type { Handler } from '@gati-framework/runtime';
 
-// HTTP method (optional, defaults to GET)
 export const METHOD = 'GET';
+export const ROUTE = '/api/users/:id';
 
-// Handler function - automatically available at /api/hello
-export const handler: Handler = (req, res) => {
-  const name = req.query.name || 'World';
+export const getUserHandler: Handler = async (req, res, gctx, lctx) => {
+  const userId = req.params.id;
   
-  res.json({
-    message: `Hello, ${name}!`,
-    timestamp: new Date().toISOString(),
+  // Access modules via dependency injection
+  const user = await gctx.modules['database']?.findUser(userId);
+  
+  if (!user) {
+    throw new HandlerError('User not found', 404, { userId });
+  }
+  
+  res.json({ 
+    user,
+    requestId: lctx.requestId,
+    traceId: lctx.traceId 
   });
 };
 ```
 
-```bash
-# Access your handler
-curl http://localhost:3000/api/hello?name=Gati
-# {"message":"Hello, Gati!","timestamp":"2025-11-10T..."}
+**That's it.** Gati handles routing, validation, deployment, scaling, versioning, and monitoring automatically.
+
+## The Gati Difference
+
+### Traditional Backend Development
+
+```
+❌ Manually configure routing, middleware, CORS
+❌ Write Dockerfile, K8s manifests, CI/CD pipelines
+❌ Manually version APIs, maintain backward compatibility
+❌ Set up logging, metrics, tracing infrastructure
+❌ Write client SDKs manually or use brittle codegen
+❌ Deploy/scale/monitor requires DevOps expertise
 ```
 
-## Why Gati?
+### With Gati
 
-<div class="tip custom-block">
+```
+✅ Write handlers — routing, middleware auto-configured
+✅ gati deploy dev --local — automatic containerization
+✅ Timescape handles versioning transparently (M2+)
+✅ Built-in observability with /_control panel (M4)
+✅ gati generate — type-safe SDKs auto-generated (M5)
+✅ Zero-ops deployment to AWS/GCP/Azure/K8s
+```
 
-**Problem:** Building production-ready APIs requires handling infrastructure, versioning, scaling, monitoring, and deployment — before you even write your first route.
+## Core Philosophy
 
-**Solution:** Gati abstracts all of this away. You write handlers, we handle the rest.
+**1. Let Developers Write Business Logic**
 
-</div>
+Gati analyzes your code and auto-generates everything else: manifests, validators, deployments, SDKs, transformers.
 
-### Compare Traditional vs Gati
+**2. APIs That Never Break**
 
-| Task | Traditional | Gati |
-|------|------------|------|
-| **Setup** | Install Express, configure routes, add middleware, set up logging | `npx gatic create my-api` |
-| **Deployment** | Write Dockerfile, K8s manifests, CI/CD pipeline, configure ingress | `gati deploy dev --local` |
-| **Versioning** | Manually create `/v1`, `/v2` routes, maintain backward compatibility | Automatic timestamp routing (planned) |
-| **SDK Generation** | Manually write client code or use OpenAPI generators | `gati generate` (planned) |
-| **Monitoring** | Set up Prometheus, Grafana, logging pipelines | Built-in dashboard at `/_control` (planned) |
+Timescape enables parallel version execution with automatic schema diffing and data transformation. Ship fearlessly.
 
-## Philosophy
+**3. Modules Like NPM Packages**
 
-Gati follows three core principles:
+Install databases, caches, auth providers like frontend dependencies. Isolated processes, automatic scaling.
 
-1. **Convention over Configuration** — Sensible defaults, minimal config files
-2. **Progressive Enhancement** — Start simple, add complexity only when needed
-3. **Cloud-Native First** — Built for Kubernetes from day one, but works anywhere
+**4. TypeScript-Native Types**
 
-## What's Included
+Single type definition → runtime validator, OpenAPI spec, client SDKs, Timescape metadata. Zero boilerplate.
 
-- 📦 **Runtime** (`@gati-framework/runtime@2.0.3`) — HTTP server, handler engine, middleware
-- 🛠️ **CLI** (`@gati-framework/cli@1.0.7`) — Development server, build tools, deployment
-- 🎯 **GatiC** (`gatic@0.1.6`) — Project scaffolding command
-- 📘 **Core Types** (`@gati-framework/core@0.4.3`) — TypeScript definitions, interfaces
-- ☁️ **AWS Plugin** (`@gati-framework/cloud-aws@1.0.0`) — AWS EKS deployment (NEW!)
-- 🎮 **Playground** (`@gati-framework/playground@1.0.0`) — Visual debugging (NEW!)
-- 🎨 **Control Panel** — Web UI for monitoring and management (planned)
+**5. Zero-Ops Deployment**
+
+One command to deploy anywhere. Gati handles containers, manifests, scaling, SSL, CDN, monitoring.
 
 ## Current Status
 
-🚀 **Production Ready** — Core runtime (v2.0.3) and CLI (v1.0.7) are stable
+| Component | Version | Status | Description |
+|-----------|---------|--------|-------------|
+| Runtime Engine | 2.0.3 | ✅ **Stable** | Handler execution, contexts, lifecycle management |
+| CLI Tools | 1.0.7 | ✅ **Stable** | Dev server, build, deployment commands |
+| GatiC Scaffolder | 0.1.6 | ✅ **Stable** | Project creation and templates |
+| AWS EKS Plugin | 1.0.0 | ✅ **Stable** | AWS deployment automation |
+| Playground | 1.0.0 | ✅ **Stable** | Visual debugging (3-mode) |
+| Type System | - | 🚧 **M2 Priority** | Branded types, constraint combinators |
+| Timescape | - | 🚧 **M2 Priority** | Version management, schema diffing |
+| GCP/Azure | - | 📅 **M2 Planned** | Multi-cloud deployment |
+| SDK Generation | - | 📅 **M5 Planned** | Auto-generated typed clients |
+| Control Panel | - | 📅 **M4 Planned** | Web UI for monitoring |
 
-| Feature | Status |
-|---------|--------|
-| Handler Execution | ✅ Stable (v2.0.3) |
-| Structured Logging | ✅ Stable (Pino) |
-| CORS Middleware | ✅ Stable |
-| Hot Reload (Dev) | ✅ Stable |
-| Docker Support | ✅ Stable |
-| Kubernetes Manifests | ✅ Stable |
-| Local K8s Deployment | ✅ Stable (kind) |
-| AWS EKS Deployment | ✅ Stable (v1.0.0) |
-| Visual Debugging | ✅ Stable (Playground v1.0.0) |
-| GCP/Azure Deployment | 🚧 In Progress (M2) |
-| API Versioning | 📅 Planned (Q1 2026) |
-| SDK Generation | 📅 Planned (Q2 2026) |
-| Control Panel | 📅 Planned (Q2 2026) |
+### Production-Ready Features (✅)
+
+- **Core Runtime** — Handler engine, modules, middleware, contexts
+- **Development** — Hot reload (50-200ms), manifest system, file-based routing
+- **Deployment** — Local K8s (kind), AWS EKS, Docker, HPA, Ingress
+- **Observability** — Structured logging (Pino), request tracing, health checks
+- **Debugging** — Playground with API/Network/Tracking visualization modes
+
+### Coming Soon (🚧)
+
+**M2 (Q2 2025)** — Type System & Timescape foundations  
+**M3 (Q3 2025)** — Multi-cloud deployment (GCP, Azure)  
+**M4 (Q3 2025)** — Control Panel (read-only monitoring UI)  
+**M5 (Q3 2025)** — SDK generation from handler signatures  
+**M6 (Q4 2025)** — CDN integration, SSL automation
 
 ## Community
 

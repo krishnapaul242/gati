@@ -386,7 +386,7 @@ Client can specify: v2-api + v3-data + v1-logic
 
 - [Type System Architecture](./type-system.md) - Branded types for schema diffing
 - [Manifest System](../guides/manifest-system.md) - How versions are tracked
-- [Playground Integration](../../packages/playground/README.md) - Visual debugging
+- [Playground Guide](../guides/playground.md) - Visual debugging and request tracking
 
 ---
 

@@ -2,15 +2,15 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'Gati',
-  description: 'Motion in Code - Build cloud-native, versioned APIs with TypeScript',
+  title: 'Gati Framework',
+  description: 'The Backend That Builds, Scales, and Evolves Itself — Zero-Ops, Infinite Evolution',
   base: '/gati/',
   
   // Ignore dead links during development
   ignoreDeadLinks: [
     // Localhost URLs
     /^http:\/\/localhost/,
-    // Guide pages to be created
+    // Planned features
     /\/guide\/logging/,
     /\/guide\/docker/,
     /\/guide\/cors/,
@@ -21,8 +21,8 @@ export default defineConfig({
   ],
   
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/gati/logo.svg' }],
-    ['meta', { name: 'theme-color', content: '#646cff' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/gati/gati.png' }],
+    ['meta', { name: 'theme-color', content: '#2d5a3d' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'en' }],
     ['meta', { property: 'og:title', content: 'Gati | Motion in Code' }],
@@ -32,53 +32,78 @@ export default defineConfig({
 
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    logo: { src: '/logo.svg', width: 24, height: 24 },
+    logo: { src: '/gati.png', width: 24, height: 24 },
     
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Getting Started', link: '/onboarding/quick-start' },
-      { text: 'Guides', link: '/guides/handlers' },
-      { text: 'API', link: '/api-reference/handler' },
+      { text: 'Quick Start', link: '/onboarding/quick-start' },
+      { text: 'Vision', link: '/vision/why-gati' },
+      { 
+        text: 'Guides', 
+        items: [
+          { text: 'Core Concepts', link: '/guides/handlers' },
+          { text: 'Timescape Versioning', link: '/architecture/timescape' },
+          { text: 'Type System', link: '/architecture/type-system' },
+          { text: 'Deployment', link: '/guides/deployment' },
+        ]
+      },
+      { text: 'API Reference', link: '/api-reference/handler' },
       {
         text: 'More',
         items: [
           { text: 'Examples', link: '/examples/hello-world' },
           { text: 'Architecture', link: '/architecture/overview' },
-          { text: 'Changelog', link: '/changelog/' },
+          { text: 'Roadmap', link: '/architecture/milestones' },
           { text: 'Contributing', link: '/contributing/' }
         ]
       }
     ],
 
     sidebar: {
+      '/vision/': [
+        {
+          text: 'Vision & Mission',
+          items: [
+            { text: 'Why Gati?', link: '/vision/why-gati' },
+            { text: 'Core Philosophy', link: '/vision/philosophy' },
+            { text: 'Feature Registry', link: '/vision/features' },
+          ]
+        }
+      ],
       '/onboarding/': [
         {
           text: 'Getting Started',
           items: [
             { text: 'What is Gati?', link: '/onboarding/what-is-gati' },
             { text: 'Quick Start', link: '/onboarding/quick-start' },
-            { text: 'Getting Started', link: '/onboarding/getting-started' },
-            { text: 'GatiC CLI', link: '/onboarding/gatic' }
+            { text: 'Installation', link: '/onboarding/getting-started' },
+            { text: 'GatiC CLI', link: '/guides/gatic' }
           ]
         }
       ],
       '/guides/': [
         {
-          text: 'Core Concepts',
+          text: 'Fundamentals',
           items: [
             { text: 'Handlers', link: '/guides/handlers' },
-            { text: 'File-Based Routing', link: '/guides/file-based-routing' },
-            { text: 'Manifest System', link: '/guides/manifest-system' },
-            { text: 'Hot Reloading', link: '/guides/hot-reloading' },
-            { text: 'Modules', link: '/guides/modules' },
-            { text: 'Context', link: '/guides/context' },
+            { text: 'Modules & Plugins', link: '/guides/modules' },
+            { text: 'Context (gctx/lctx)', link: '/guides/context' },
             { text: 'Middleware', link: '/guides/middleware' },
             { text: 'Error Handling', link: '/guides/error-handling' }
           ]
         },
         {
+          text: 'Routing & Manifests',
+          items: [
+            { text: 'File-Based Routing', link: '/guides/file-based-routing' },
+            { text: 'Manifest System', link: '/guides/manifest-system' },
+            { text: 'Hot Reloading', link: '/guides/hot-reloading' }
+          ]
+        },
+        {
           text: 'Development',
           items: [
+            { text: 'GatiC CLI', link: '/guides/gatic' },
             { text: 'Development Server', link: '/guides/development-server' },
             { text: 'Configuration', link: '/guides/configuration' },
             { text: 'TypeScript Config', link: '/guides/typescript-config' }
@@ -87,8 +112,10 @@ export default defineConfig({
         {
           text: 'Deployment',
           items: [
-            { text: 'Deployment Guide', link: '/guides/deployment' },
-            { text: 'Kubernetes', link: '/guides/kubernetes' }
+            { text: 'Deployment Overview', link: '/guides/deployment' },
+            { text: 'Local Kubernetes', link: '/guides/kubernetes' },
+            { text: 'AWS EKS', link: '/guides/aws-eks-deployment' },
+            { text: 'HPA & Ingress', link: '/guides/hpa-ingress' }
           ]
         }
       ],
@@ -113,13 +140,24 @@ export default defineConfig({
       ],
       '/architecture/': [
         {
-          text: 'Architecture',
+          text: 'Architecture Deep Dive',
           items: [
             { text: 'Overview', link: '/architecture/overview' },
-            { text: 'Design Decisions', link: '/architecture/design-decisions' },
+            { text: 'Design Decisions', link: '/architecture/design-decisions' }
+          ]
+        },
+        {
+          text: 'Core Systems (Planned)',
+          items: [
+            { text: 'Timescape Versioning', link: '/architecture/timescape' },
+            { text: 'Type System (Branded Types)', link: '/architecture/type-system' }
+          ]
+        },
+        {
+          text: 'Roadmap & Planning',
+          items: [
             { text: 'Milestones', link: '/architecture/milestones' },
-            { text: 'Roadmap', link: '/architecture/roadmap' },
-            { text: 'MVP Roadmap', link: '/architecture/mvp-roadmap' }
+            { text: 'Roadmap', link: '/architecture/roadmap' }
           ]
         }
       ],

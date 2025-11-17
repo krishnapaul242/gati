@@ -137,7 +137,7 @@ docs/
 │   └── dist/                  # Build output (gitignored)
 │
 ├── public/
-│   ├── logo.svg               # Small logo (nav)
+│   ├── gati.png               # Logo (nav and favicon)
 │   └── logo-large.svg         # Large logo (homepage)
 │
 ├── guide/
