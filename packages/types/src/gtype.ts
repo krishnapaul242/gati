@@ -137,6 +137,11 @@ export interface GPrimitive extends GBase {
   type: PrimitiveKind;
 
   /**
+   * Brand name for branded types (e.g., 'email', 'uuid', 'userId')
+   */
+  brand?: string;
+
+  /**
    * String-specific constraints
    */
   constraints?: StringConstraints;

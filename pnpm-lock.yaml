@@ -131,6 +131,9 @@ importers:
       '@gati-framework/runtime':
         specifier: ^2.0.3
         version: link:../runtime
+      '@gati-framework/types':
+        specifier: workspace:*
+        version: link:../types
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
@@ -277,7 +280,7 @@ importers:
   packages/gatic:
     dependencies:
       '@gati-framework/cli':
-        specifier: ^1.0.11
+        specifier: ^1.0.12
         version: link:../cli
 
   packages/observability:
@@ -376,6 +379,18 @@ importers:
       pino-pretty:
         specifier: ^13.1.2
         version: 13.1.2
+      typescript:
+        specifier: ^5.3.2
+        version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1(@types/node@20.19.24)
+
+  packages/types:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.24
       typescript:
         specifier: ^5.3.2
         version: 5.9.3

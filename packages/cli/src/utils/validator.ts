@@ -45,11 +45,10 @@ export function validateProject(cwd: string): ValidationResult {
     }
   }
 
-  // Check for config file (either .ts or .js)
+  // Check for config file (.ts required by tests and docs)
   const configTsPath = resolve(cwd, 'gati.config.ts');
-  const configJsPath = resolve(cwd, 'gati.config.js');
-  if (!existsSync(configTsPath) && !existsSync(configJsPath)) {
-    errors.push('Missing required file: gati.config.ts or gati.config.js');
+  if (!existsSync(configTsPath)) {
+    errors.push('Missing required file: gati.config.ts');
   }
 
   // Check for src directory
