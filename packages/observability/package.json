@@ -1,8 +1,17 @@
 {
   "name": "@gati-framework/observability",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Observability stack for Gati framework - Prometheus, Grafana, Loki, and Tracing",
-  "keywords": ["gati", "observability", "prometheus", "grafana", "loki", "tracing", "metrics", "monitoring"],
+  "keywords": [
+    "gati",
+    "observability",
+    "prometheus",
+    "grafana",
+    "loki",
+    "tracing",
+    "metrics",
+    "monitoring"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",

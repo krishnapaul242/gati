@@ -1,8 +1,16 @@
 {
   "name": "@gati-framework/production-hardening",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Production hardening utilities for Gati - secret management, config validation, auto-scaling",
-  "keywords": ["gati", "production", "hardening", "security", "secrets", "validation", "scaling"],
+  "keywords": [
+    "gati",
+    "production",
+    "hardening",
+    "security",
+    "secrets",
+    "validation",
+    "scaling"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",

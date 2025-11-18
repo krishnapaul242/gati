@@ -1,8 +1,14 @@
 {
   "name": "@gati-framework/cloud-azure",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Azure cloud provider plugin for Gati framework",
-  "keywords": ["gati", "azure", "aks", "cloud", "deployment"],
+  "keywords": [
+    "gati",
+    "azure",
+    "aks",
+    "cloud",
+    "deployment"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",

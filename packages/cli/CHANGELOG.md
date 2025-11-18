@@ -1,5 +1,13 @@
 # @gati-framework/cli
 
+## 1.0.13
+
+### Patch Changes
+
+- Updated dependencies
+  - @gati-framework/types@1.0.0
+  - @gati-framework/core@0.4.4
+
 ## 1.0.0
 
 ### Major Changes
