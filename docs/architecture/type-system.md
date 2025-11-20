@@ -617,6 +617,162 @@ export const validateUser = (value) => {
 - 50% smaller bundle size
 - Zero schema runtime cost
 
+### Analyzer & Validator Generation Performance Model
+
+The type system introduces two performance-critical phases:
+
+#### 1. Analysis Phase (Development/Build Time)
+
+**Performance Characteristics**:
+
+| Operation | Complexity | Target | Notes |
+|-----------|-----------|--------|-------|
+| Single file analysis | O(N types + AST) | < 50ms | Per handler file |
+| Incremental reanalysis | O(changed + deps) | < 100ms | Small edits only |
+| Full project analysis | O(all files) | Seconds | 100-1000+ files |
+| Constraint extraction | O(type depth) | < 10ms | Per type |
+| GType schema generation | O(fields × depth) | < 20ms | Per type |
+
+**Optimization Strategies**:
+- ✅ Use TypeScript language service incremental API
+- ✅ Cache parsed ASTs and resolved types
+- ✅ Perform targeted re-analysis for import-dependent files only
+- ✅ Debounce file change events (500ms default)
+- ✅ Serialize analyzed schemas to binary cache
+- ✅ Offload heavy analysis to worker threads
+
+**Key Performance Indicator**: Incremental analysis for single endpoint edit should complete in **30-150ms** to maintain smooth development experience.
+
+#### 2. Validation Phase (Runtime)
+
+**Performance Characteristics**:
+
+| Type Shape | Fields | Target Latency | Ops/sec |
+|-----------|--------|----------------|---------|
+| Simple object | 3-10 | < 0.1ms | 10,000+ |
+| Nested object | Depth 3-5 | 0.2-1ms | 1,000-5,000 |
+| Large array | 100 items | < 10ms | 100-1,000 |
+| Complex unions | 5-10 branches | 0.5-2ms | 500-2,000 |
+
+**Optimization Strategies**:
+- ✅ Compile validators to imperative code (no reflection)
+- ✅ Inline common checks (type, null, bounds)
+- ✅ Use SIMD-friendly algorithms for unique/dedupe
+- ✅ Provide streaming/chunked validation for huge payloads
+- ✅ Cache compiled validators in memory
+
+**Comparison Baseline**: Gati validators should be **2-5× faster than Zod** for common object shapes while using 50% less memory.
+
+#### 3. Generator Performance
+
+**Artifact Generation Targets**:
+
+| Artifact | Input Size | Target | Notes |
+|----------|-----------|--------|-------|
+| Validator code | Simple type | < 50ms | Per type |
+| Validator code | Complex type | < 200ms | Deep nesting |
+| TypeScript .d.ts | Simple type | < 30ms | Type definitions |
+| OpenAPI schema | Simple type | < 40ms | API documentation |
+| Database schema | Simple type | < 60ms | SQL DDL |
+
+**Critical Path**: Runtime validators must be pre-compiled during build phase - **zero generation cost at request time**.
+
+#### 4. Memory Usage
+
+**Development (Analyzer)**:
+
+- AST cache: ~10-50MB for 100 files
+- Type registry: ~5-20MB for 100 types
+- Total heap: ~100-300MB typical
+- Peak: ~500MB for large monorepos
+
+**Production (Validators)**:
+
+- Compiled validators: ~10-100KB per type
+- In-memory cache: 1-10MB for 100 validators
+- Zero schema metadata in production builds
+
+### Performance Anti-Patterns
+
+#### ❌ DON'T: Over-Complex Types
+
+```typescript
+// ❌ Deep recursive unions slow analysis
+type DeepRecursive = {
+  value: string;
+  nested?: DeepRecursive | DeepRecursive[] | Map<string, DeepRecursive>;
+};
+
+// ✅ Keep type depth reasonable
+type SimpleTree = {
+  value: string;
+  children?: SimpleTree[];
+};
+```
+
+#### ❌ DON'T: Massive Inline Unions
+
+```typescript
+// ❌ Hundreds of literal types slow validation
+type MassiveEnum = 'val1' | 'val2' | /* ...hundreds more */ | 'val999';
+
+// ✅ Use enum arrays or sets
+const VALID_VALUES = new Set(['val1', 'val2', /* ... */]);
+type ValueEnum = string & Brand<"validValue">;
+```
+
+#### ❌ DON'T: Skip Validation Caching
+
+```typescript
+// ❌ Regenerate validator every request
+const validate = (data) => generateValidator(MyType)(data);
+
+// ✅ Cache compiled validators
+const validateOnce = generateValidator(MyType);
+const validate = (data) => validateOnce(data);
+```
+
+### Benchmarking Validator Performance
+
+Use micro-benchmarks to validate performance claims:
+
+```typescript
+import { bench, describe } from 'vitest';
+
+describe('Type System Performance', () => {
+  bench('validate simple user object (Gati)', () => {
+    const data = { id: 'user_123', email: 'test@example.com', age: 25 };
+    validateUser(data);
+  });
+
+  bench('validate simple user object (Zod)', () => {
+    const data = { id: 'user_123', email: 'test@example.com', age: 25 };
+    UserSchema.parse(data);
+  });
+
+  bench('validate nested order (Gati)', () => {
+    const data = {
+      id: 'order_456',
+      user: { id: 'user_123', name: 'John' },
+      items: [
+        { id: 'item_1', price: 29.99, quantity: 2 },
+        { id: 'item_2', price: 49.99, quantity: 1 }
+      ]
+    };
+    validateOrder(data);
+  });
+});
+```
+
+**Acceptance Criteria**:
+- Gati validators must be ≥2× faster than Zod for simple objects
+- Gati validators must be ≥1.5× faster than Zod for nested objects
+- Memory usage must be ≤50% of Zod's schema overhead
+
+See [Benchmarking Guide](../../guides/benchmarking.md) for complete benchmark suite specification.
+
+---
+
 ## Migration Guide
 
 ### From Zod

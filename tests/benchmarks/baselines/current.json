@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "generatedAt": "2025-11-19T00:00:00.000Z",
+    "gitCommit": "baseline",
+    "nodeVersion": "20.x.x",
+    "platform": "win32",
+    "arch": "x64",
+    "cpuModel": "baseline",
+    "description": "Initial baseline for Gati framework benchmarks"
+  },
+  "benchmarks": {
+    "validator": {
+      "simpleObject": {
+        "mean": 0.05,
+        "p95": 0.08,
+        "opsPerSec": 20000,
+        "iterations": 10000
+      },
+      "nestedObject": {
+        "mean": 0.5,
+        "p95": 0.8,
+        "opsPerSec": 2000,
+        "iterations": 1000
+      },
+      "largeArray": {
+        "mean": 5.0,
+        "p95": 8.0,
+        "opsPerSec": 200,
+        "iterations": 100
+      },
+      "complexUnion": {
+        "mean": 1.0,
+        "p95": 1.5,
+        "opsPerSec": 1000,
+        "iterations": 5000
+      }
+    },
+    "routing": {
+      "staticRoute": {
+        "mean": 0.08,
+        "p95": 0.12,
+        "opsPerSec": 12500,
+        "iterations": 100000
+      },
+      "oneParam": {
+        "mean": 0.2,
+        "p95": 0.3,
+        "opsPerSec": 5000,
+        "iterations": 50000
+      },
+      "twoParams": {
+        "mean": 0.25,
+        "p95": 0.35,
+        "opsPerSec": 4000,
+        "iterations": 25000
+      },
+      "notFound": {
+        "mean": 0.4,
+        "p95": 0.6,
+        "opsPerSec": 2500,
+        "iterations": 10000
+      }
+    },
+    "middleware": {
+      "singleLightweight": {
+        "mean": 0.05,
+        "p95": 0.08,
+        "opsPerSec": 20000,
+        "iterations": 10000
+      },
+      "jwtAuth": {
+        "mean": 0.8,
+        "p95": 1.2,
+        "opsPerSec": 1250,
+        "iterations": 1000
+      },
+      "fullStack": {
+        "mean": 3.0,
+        "p95": 4.5,
+        "opsPerSec": 333,
+        "iterations": 1000
+      }
+    },
+    "startup": {
+      "coldStart": {
+        "mean": 150,
+        "p95": 200,
+        "opsPerSec": 6.67,
+        "iterations": 10
+      },
+      "hundredRoutes": {
+        "mean": 300,
+        "p95": 400,
+        "opsPerSec": 3.33,
+        "iterations": 5
+      },
+      "withDatabase": {
+        "mean": 450,
+        "p95": 550,
+        "opsPerSec": 2.22,
+        "iterations": 5
+      }
+    },
+    "analyzer": {
+      "singleFile": {
+        "mean": 40,
+        "p95": 60,
+        "opsPerSec": 25,
+        "iterations": 20
+      },
+      "incrementalEdit": {
+        "mean": 80,
+        "p95": 120,
+        "opsPerSec": 12.5,
+        "iterations": 20
+      },
+      "largeFile": {
+        "mean": 150,
+        "p95": 200,
+        "opsPerSec": 6.67,
+        "iterations": 10
+      }
+    },
+    "rps": {
+      "singleRequest": {
+        "mean": 8,
+        "p95": 12,
+        "opsPerSec": 125,
+        "iterations": 1000
+      },
+      "hundredConcurrent": {
+        "mean": 180,
+        "p95": 250,
+        "opsPerSec": 5.56,
+        "iterations": 20
+      },
+      "thousandConcurrent": {
+        "mean": 4500,
+        "p95": 6000,
+        "opsPerSec": 0.22,
+        "iterations": 5
+      }
+    }
+  },
+  "targets": {
+    "validator": {
+      "simpleObject": "< 0.1ms",
+      "nestedObject": "0.2-1ms",
+      "largeArray": "< 10ms"
+    },
+    "routing": {
+      "overall": "< 0.5ms",
+      "staticRoute": "< 0.1ms",
+      "dynamicRoute": "< 0.3ms"
+    },
+    "middleware": {
+      "single": "< 0.1ms",
+      "fullStack": "< 5ms"
+    },
+    "startup": {
+      "coldStart": "< 200ms",
+      "hundredRoutesWithDB": "< 500ms"
+    },
+    "analyzer": {
+      "singleFile": "< 50ms",
+      "incrementalEdit": "< 100ms"
+    },
+    "rps": {
+      "thousandConcurrent": "< 5000ms"
+    }
+  }
+}

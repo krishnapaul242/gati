@@ -5,6 +5,7 @@ This document provides a comprehensive overview of the Gati framework's architec
 ## Table of Contents
 
 - [Architecture Overview](#architecture-overview)
+- [Layered Architecture Model](#layered-architecture-model)
 - [Core Components](#core-components)
 - [Request Flow](#request-flow)
 - [Component Interactions](#component-interactions)
@@ -53,6 +54,140 @@ graph TB
 3. **Modularity**: Reusable components via dependency injection
 4. **Performance**: Zero-overhead abstractions where possible
 5. **Developer Experience**: Fast feedback, hot reload, great tooling
+
+---
+
+## Layered Architecture Model
+
+Gati is organized into 10 distinct layers, each with specific responsibilities and performance characteristics. This layered model enables systematic optimization and clear separation of concerns.
+
+### Complete Layer Stack
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. Developer Tooling Layer                                 │
+│     (gati dev daemon, VSCode extension, analyzer)           │
+│     Performance: Incremental reanalysis < 100ms             │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  2. File-Based Router & Route Loader                        │
+│     (src/api/**, src/handlers/**, METHOD/ROUTE extraction)  │
+│     Performance: Route lookup < 0.5ms                       │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  3. Gati Analyzer & Type Registry                           │
+│     (ts-morph, AST parsing, GType extraction)               │
+│     Performance: Single file analysis < 50ms                │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  4. Artifact Generators                                     │
+│     (Validators, .d.ts, DB schemas, ORM schemas)            │
+│     Performance: Validator gen < 50ms per type              │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  5. Runtime Protocol Gateways                               │
+│     (HTTP, WebSocket, RPC adapters)                         │
+│     Performance: Protocol overhead 0.5-2ms                  │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  6. Middleware Chain                                        │
+│     (Auth, CORS, rate limiting, tracing)                    │
+│     Performance: Total chain < 5ms                          │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  7. Context Builder (gctx + lctx → ctx)                     │
+│     (Shallow merge, request-scoped augmentation)            │
+│     Performance: Context creation < 0.2ms                   │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  8. Handler Execution Engine                                │
+│     (Handler invocation, validation hooks, error handling)  │
+│     Performance: Invocation overhead < 1ms                  │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  9. Gati Native DB Client & Migration Engine                │
+│     (Type → SQL schema, query builder, migrations)          │
+│     Performance: Query overhead < 2ms (network dominates)   │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│  10. External Systems (Postgres, Redis, S3, etc.)           │
+│      (Network I/O, third-party services)                    │
+│      Performance: Variable (5-100+ ms typical)              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Layer Responsibilities
+
+| Layer | Responsibility | Performance Target | Critical Path |
+|-------|----------------|-------------------|---------------|
+| **1. Developer Tooling** | File watching, hot reload, analyzer orchestration | < 100ms incremental | Dev only |
+| **2. File-Based Router** | Route discovery, METHOD/ROUTE extraction, param inference | < 0.5ms lookup | ✅ Runtime |
+| **3. Gati Analyzer** | AST parsing, type extraction, GType generation | < 50ms single file | Dev/Build |
+| **4. Artifact Generators** | Compile validators, generate .d.ts, DB schemas | < 50ms per type | Build |
+| **5. Protocol Gateways** | HTTP parsing, WebSocket framing, body deserialization | 0.5-2ms | ✅ Runtime |
+| **6. Middleware Chain** | Auth, CORS, rate limit, tracing, logging | < 5ms total | ✅ Runtime |
+| **7. Context Builder** | Merge gctx + lctx, create synthetic ctx for handlers | < 0.2ms | ✅ Runtime |
+| **8. Handler Engine** | Execute handler, validate input/output, error handling | < 1ms overhead | ✅ Runtime |
+| **9. DB Client** | Query building, type safety, migrations | < 2ms overhead | ✅ Runtime |
+| **10. External Systems** | Database I/O, cache lookups, third-party APIs | 5-100+ ms | ✅ Runtime |
+
+**Performance Focus**: Layers 2, 5, 6, 7, 8, 9 are on the critical request path. Combined overhead target: **< 10ms** (excluding Layer 10 network I/O).
+
+### Request Lifecycle Through Layers
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant L5 as Protocol Gateway
+    participant L2 as Router
+    participant L6 as Middleware
+    participant L7 as Context Builder
+    participant L8 as Handler Engine
+    participant L9 as DB Client
+    participant L10 as Database
+    
+    Client->>L5: HTTP Request
+    L5->>L2: Parse & Route
+    L2->>L6: Matched Route + Params
+    L6->>L7: Auth + Tracing
+    L7->>L8: Create ctx (gctx + lctx)
+    L8->>L8: Validate Input
+    L8->>L9: Execute Handler Logic
+    L9->>L10: Query Database
+    L10-->>L9: Result
+    L9-->>L8: Data
+    L8->>L8: Validate Output
+    L8-->>L7: Response
+    L7-->>L6: Serialize
+    L6-->>L5: JSON
+    L5-->>Client: HTTP Response
+```
+
+### Off-Critical-Path Layers
+
+**Layer 1 (Developer Tooling)** and **Layer 3 (Analyzer)** run during development/build time:
+
+- Watch file changes → incremental analysis → regenerate artifacts
+- Full analysis on build → compiled validators/schemas → deployed artifacts
+- No runtime cost in production
+
+**Layer 4 (Artifact Generators)** runs at build time:
+
+- Compiles validators to optimized imperative code
+- Generates TypeScript declaration files
+- Produces database schema migrations
+- No runtime cost (artifacts are pre-compiled)
+
+---
 
 ## Core Components
 

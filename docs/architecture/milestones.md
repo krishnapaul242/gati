@@ -1232,9 +1232,12 @@ None currently identified.
   - [ ] Module tests
   - [ ] Queue tests
 - [ ] Performance benchmarks
-  - [ ] Load testing
-  - [ ] Latency benchmarks
-  - [ ] Resource usage
+  - [ ] Micro-benchmarks (validator, routing, middleware, startup, analyzer, RPS)
+  - [ ] Load testing (Artillery, k6)
+  - [ ] Latency benchmarks (p50, p95, p99)
+  - [ ] Resource usage (memory, CPU, event loop)
+  - [ ] Baseline management and regression detection
+  - [ ] CI integration (nightly benchmarks, PR perf guard)
 - [ ] Security audits
   - [ ] Dependency scanning
   - [ ] Code analysis
@@ -1244,8 +1247,212 @@ None currently identified.
 
 - `tests/e2e/`
 - `tests/integration/`
-- `tests/benchmarks/`
+- `tests/benchmarks/validator.bench.ts`
+- `tests/benchmarks/routing.bench.ts`
+- `tests/benchmarks/middleware.bench.ts`
+- `tests/benchmarks/startup.bench.ts`
+- `tests/benchmarks/analyzer-incremental.bench.ts`
+- `tests/benchmarks/rps-smoke.bench.ts`
+- `tests/benchmarks/baselines/current.json`
+- `.github/workflows/benchmarks.yml`
+- `.github/workflows/perf-guard.yml`
 - `tests/security/`
+
+**See Also:**
+- [Performance Guide](../guides/performance.md) - Latency budgets and SLOs
+- [Benchmarking Guide](../guides/benchmarking.md) - Complete benchmark specifications
+
+---
+
+## 🎯 Phased Delivery Plan
+
+### Phase 1: Foundation & Documentation (Weeks 1-2)
+
+**Goal**: Establish architectural foundation and performance targets
+
+**Deliverables**:
+- ✅ Performance guide with latency budgets per layer
+- ✅ Benchmarking guide with 6 micro-benchmark specifications
+- ✅ Updated architecture documentation with 10-layer model
+- ⏳ Phased delivery plan in milestones
+- ⏳ Performance-aligned roadmap
+
+**Acceptance Criteria**:
+- All documentation cross-referenced and consistent
+- Performance targets validated against existing runtime
+- Team alignment on performance-first approach
+
+**Dependencies**: None
+
+---
+
+### Phase 2: Core Type System & Analyzer (Weeks 3-5)
+
+**Goal**: Implement branded types with runtime validator generation
+
+**Deliverables**:
+- `@gati-framework/types` package with branded types and constraint combinators
+- Type analyzer using ts-morph for AST parsing and GType extraction
+- Validator compiler generating optimized imperative code
+- Benchmark suite for validator performance
+
+**Acceptance Criteria**:
+- Single file analysis: **< 50ms**
+- Incremental reanalysis: **< 100ms**
+- Simple object validation: **< 0.1ms** (10,000+ ops/sec)
+- Nested object validation: **< 1ms** (1,000+ ops/sec)
+- Validator performance ≥2× faster than Zod
+
+**Performance Benchmarks**:
+```typescript
+// tests/benchmarks/validator.bench.ts
+bench('simple object (3-10 fields)', { iterations: 10000 })
+bench('nested object (depth 3-5)', { iterations: 1000 })
+bench('large array (100 items)', { iterations: 100 })
+```
+
+**Dependencies**: Phase 1 complete
+
+---
+
+### Phase 3: File-Based Routing & Handler Engine (Weeks 6-7)
+
+**Goal**: Optimize routing and handler execution with instrumentation
+
+**Deliverables**:
+- Enhanced route-manager.ts with optimized path matching
+- Instrumented handler-engine.ts with timing counters
+- File-based router supporting src/api/** and src/handlers/**
+- Benchmark suite for routing performance
+
+**Acceptance Criteria**:
+- Route lookup: **< 0.5ms**
+- Handler invocation overhead: **< 1ms**
+- Static route match: **< 0.1ms**
+- Dynamic route match (2 params): **< 0.3ms**
+
+**Performance Benchmarks**:
+```typescript
+// tests/benchmarks/routing.bench.ts
+bench('static route (/users)', { iterations: 100000 })
+bench('1 param (/users/:id)', { iterations: 50000 })
+bench('2 params (/users/:userId/posts/:postId)', { iterations: 25000 })
+bench('not found (404)', { iterations: 10000 })
+```
+
+**Dependencies**: Phase 2 complete
+
+---
+
+### Phase 4: Validation & Middleware (Weeks 8-9)
+
+**Goal**: Integrate validators into request/response pipeline with minimal overhead
+
+**Deliverables**:
+- Middleware chain with per-middleware instrumentation
+- Automatic input/output validation in handler engine
+- Context builder optimization (gctx + lctx → ctx)
+- Benchmark suite for middleware performance
+
+**Acceptance Criteria**:
+- Middleware chain total: **< 5ms**
+- Single middleware overhead: **< 0.1ms**
+- Context creation: **< 0.2ms**
+- Input validation: **< 0.5ms** for typical payloads
+- Output validation: **< 0.5ms** for typical responses
+
+**Performance Benchmarks**:
+```typescript
+// tests/benchmarks/middleware.bench.ts
+bench('lightweight middleware (logging)', { iterations: 10000 })
+bench('auth middleware (JWT decode)', { iterations: 1000 })
+bench('full middleware stack (5 middlewares)', { iterations: 1000 })
+```
+
+**Dependencies**: Phase 3 complete
+
+---
+
+### Phase 5: Database Generation & Migration (Weeks 10-12)
+
+**Goal**: Auto-generate database schemas and migrations from types
+
+**Deliverables**:
+- Schema generator (Type → SQL DDL)
+- Migration engine with version tracking
+- Multi-DB support (Postgres, MySQL, SQLite)
+- Type-safe query builder
+- Benchmark suite for DB client overhead
+
+**Acceptance Criteria**:
+- Schema generation: **< 60ms per type**
+- Query builder overhead: **< 2ms** (excluding network I/O)
+- Migration generation: **< 100ms** for 10 table changes
+- Zero N+1 queries in generated code
+
+**Performance Benchmarks**:
+```typescript
+// tests/benchmarks/db-client.bench.ts
+bench('simple query build', { iterations: 10000 })
+bench('complex join build', { iterations: 1000 })
+bench('transaction overhead', { iterations: 100 })
+```
+
+**Dependencies**: Phase 2 complete (types must exist)
+
+---
+
+### Phase 6: End-to-End Integration & CI (Weeks 13-14)
+
+**Goal**: Integrate all components and establish continuous benchmarking
+
+**Deliverables**:
+- Complete request flow validation
+- Baseline benchmark results
+- CI workflows for nightly benchmarks and PR perf guard
+- Observability documentation
+- Runtime instrumentation guide
+
+**Acceptance Criteria**:
+- End-to-end p50: **< 30ms**
+- End-to-end p95: **< 100ms**
+- End-to-end p99: **< 300ms**
+- Analyzer incremental recompile: **< 100ms**
+- Startup time (cold, no routes): **< 200ms**
+- Startup time (100 routes, DB module): **< 500ms**
+
+**Performance Benchmarks**:
+```typescript
+// tests/benchmarks/rps-smoke.bench.ts
+bench('1000 concurrent requests', { timeout: 5000 })
+
+// tests/benchmarks/startup.bench.ts
+bench('cold start (no routes)', { iterations: 10 })
+bench('100 routes + DB module', { iterations: 5 })
+
+// tests/benchmarks/analyzer-incremental.bench.ts
+bench('single file change (small edit)', { iterations: 20 })
+```
+
+**CI Workflows**:
+- `.github/workflows/benchmarks.yml` - Nightly benchmark runs with artifact upload
+- `.github/workflows/perf-guard.yml` - PR regression checks (10% threshold)
+
+**Dependencies**: Phases 2-5 complete
+
+---
+
+### Performance Milestones Summary
+
+| Phase | Focus | Key Metrics | Duration |
+|-------|-------|-------------|----------|
+| **1** | Documentation | Latency budgets, SLOs documented | 2 weeks |
+| **2** | Type System | Validator < 0.1ms, Analyzer < 50ms | 3 weeks |
+| **3** | Routing | Route lookup < 0.5ms, Handler < 1ms | 2 weeks |
+| **4** | Middleware | Chain < 5ms, Context < 0.2ms | 2 weeks |
+| **5** | Database | Schema gen < 60ms, Query < 2ms | 3 weeks |
+| **6** | Integration | E2E p95 < 100ms, RPS smoke test | 2 weeks |
+| **Total** | - | Full framework with benchmarks | **14 weeks** |
 
 ---
 
@@ -1272,16 +1479,34 @@ None currently identified.
 
 ## 📈 Success Metrics & KPIs
 
-| Metric                 | Target           | Measurement Point | Owner          |
-| ---------------------- | ---------------- | ----------------- | -------------- |
-| Dev setup time         | ≤5 min           | M1 completion     | Engineering    |
-| No-downtime deploy     | Every version    | M2-M3             | DevOps         |
-| Auto-generated types   | <200ms per route | M5                | Engineering    |
-| Regional failover      | ≤30s             | M6                | Infrastructure |
-| Logs/metrics coverage  | 100%             | M4                | Observability  |
-| Test coverage          | >80%             | All milestones    | QA             |
-| Documentation coverage | 100% of features | All milestones    | Tech Writing   |
-| Community engagement   | 100+ stars by Q4 | Ongoing           | Community      |
+| Metric                    | Target              | Measurement Point | Owner          |
+| ------------------------- | ------------------- | ----------------- | -------------- |
+| Dev setup time            | ≤5 min              | M1 completion     | Engineering    |
+| No-downtime deploy        | Every version       | M2-M3             | DevOps         |
+| Auto-generated types      | <50ms per type      | M5 / Phase 2      | Engineering    |
+| Validator performance     | 2-5× faster vs Zod  | Phase 2           | Engineering    |
+| Route lookup              | <0.5ms              | Phase 3           | Engineering    |
+| Handler invocation        | <1ms overhead       | Phase 3           | Engineering    |
+| Middleware chain          | <5ms total          | Phase 4           | Engineering    |
+| Input validation          | <0.5ms typical      | Phase 4           | Engineering    |
+| E2E request p50           | <30ms               | Phase 6           | Engineering    |
+| E2E request p95           | <100ms              | Phase 6           | Engineering    |
+| E2E request p99           | <300ms              | Phase 6           | Engineering    |
+| Analyzer incremental      | <100ms              | Phase 2           | Engineering    |
+| Startup (100 routes + DB) | <500ms              | Phase 6           | Engineering    |
+| Regional failover         | ≤30s                | M6                | Infrastructure |
+| Logs/metrics coverage     | 100%                | M4 / Phase 6      | Observability  |
+| Test coverage             | >80%                | All milestones    | QA             |
+| Benchmark regression rate | <5% of PRs flagged  | Phase 6 onward    | Engineering    |
+| Documentation coverage    | 100% of features    | All milestones    | Tech Writing   |
+| Community engagement      | 100+ stars by Q4    | Ongoing           | Community      |
+
+**Performance SLOs** (from [Performance Guide](../guides/performance.md)):
+- Availability: 99.95%
+- Request Success Rate: 99.9%
+- p50 Latency: <30ms
+- p95 Latency: <100ms
+- p99 Latency: <300ms
 
 ---
 

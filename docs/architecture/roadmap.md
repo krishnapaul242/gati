@@ -225,17 +225,71 @@ gati generate         # typed client
 
 ## 8. 🧭 KPIs for Success
 
-| KPI                   | Target           |
-| --------------------- | ---------------- |
-| Dev setup time        | ≤5 min           |
-| No-downtime deploy    | Every version    |
-| Auto-generated types  | <200ms per route |
-| Regional failover     | ≤30s             |
-| Logs, metrics visible | 100% coverage    |
+| KPI                       | Target              | Layer/Phase       |
+| ------------------------- | ------------------- | ----------------- |
+| Dev setup time            | ≤5 min              | M1                |
+| No-downtime deploy        | Every version       | M2-M3             |
+| Auto-generated types      | <50ms per type      | M5 / Phase 2      |
+| Validator performance     | 2-5× faster vs Zod  | Phase 2           |
+| Route lookup              | <0.5ms              | Phase 3           |
+| Handler invocation        | <1ms overhead       | Phase 3           |
+| Middleware chain          | <5ms total          | Phase 4           |
+| E2E request p50           | <30ms               | Phase 6           |
+| E2E request p95           | <100ms              | Phase 6           |
+| E2E request p99           | <300ms              | Phase 6           |
+| Analyzer incremental      | <100ms              | Phase 2           |
+| Startup (100 routes + DB) | <500ms              | Phase 6           |
+| Regional failover         | ≤30s                | M6                |
+| Logs/metrics coverage     | 100%                | M4 / Phase 6      |
+| Benchmark regression rate | <5% of PRs flagged  | Phase 6 onward    |
+
+**Performance SLOs**:
+- Availability: 99.95%
+- Request Success Rate: 99.9%
+- p50 Latency: <30ms
+- p95 Latency: <100ms
+- p99 Latency: <300ms
+
+**See Also**:
+- [Performance Guide](../guides/performance.md) - Complete latency budgets
+- [Benchmarking Guide](../guides/benchmarking.md) - Benchmark specifications
+- [Milestones](./milestones.md) - Phased delivery plan
 
 ---
 
-## 9. 🔒 Out of Scope (for now)
+## 9. 🎯 Performance-First Architecture
+
+### 10-Layer Model
+
+Gati is built on a **performance-first, layered architecture** with specific latency budgets per layer:
+
+| Layer | Responsibility | Target Latency |
+|-------|----------------|----------------|
+| 1. Developer Tooling | File watching, hot reload, analyzer | <100ms incremental |
+| 2. File-Based Router | Route discovery, param extraction | <0.5ms lookup |
+| 3. Gati Analyzer | AST parsing, type extraction, GType | <50ms single file |
+| 4. Artifact Generators | Validators, .d.ts, DB schemas | <50ms per type |
+| 5. Protocol Gateways | HTTP, WebSocket, RPC adapters | 0.5-2ms |
+| 6. Middleware Chain | Auth, CORS, rate limit, tracing | <5ms total |
+| 7. Context Builder | gctx + lctx → ctx merge | <0.2ms |
+| 8. Handler Engine | Invocation, validation, errors | <1ms overhead |
+| 9. DB Client | Query builder, type safety | <2ms overhead |
+| 10. External Systems | Postgres, Redis, S3 | 5-100+ ms (network) |
+
+**Critical Path** (Layers 2, 5-9): Combined overhead target **<10ms** excluding database network I/O.
+
+### Benchmarking Infrastructure
+
+Gati includes comprehensive benchmarking:
+
+- **6 Micro-benchmark Suites**: Validator, routing, middleware, startup, analyzer, RPS
+- **Baseline Management**: Automated regression detection
+- **CI Integration**: Nightly benchmarks + PR performance guards
+- **Load Testing**: Artillery and k6 examples included
+
+---
+
+## 10. 🔒 Out of Scope (for now)
 
 * RPC runtime (future addition)
 * Multi-language module DSL
