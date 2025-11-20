@@ -58,6 +58,15 @@ export async function executeHandler(
   const catchErrors = options?.catchErrors ?? true;
 
   try {
+    // Resolve Timescape version context
+    if (lctx.timescape) {
+      lctx.timescape.resolvedState = lctx.timescape.resolver.resolve({
+        requestId: lctx.requestId,
+        timestamp: lctx.timestamp,
+        actor: lctx.refs.userId || 'anonymous',
+      });
+    }
+
     // Execute handler with timeout
     await executeWithTimeout(
       () => handler(req, res, gctx, lctx),
@@ -134,7 +143,7 @@ function handleExecutionError(error: unknown, res: Response): void {
   if (error instanceof Error) {
     res.status(500).json({
       error: 'Internal server error',
-      ...(isDevelopment && { 
+      ...(isDevelopment && {
         message: error.message,
         stack: error.stack,
       }),

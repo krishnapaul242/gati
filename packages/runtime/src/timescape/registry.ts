@@ -1,4 +1,4 @@
-import { TimescapeArtifact, TSV, VersionRegistryState } from './types.js';
+import type { TimescapeArtifact, TSV, VersionRegistryState } from './types.js';
 
 export class VersionRegistry {
     private state: VersionRegistryState = {

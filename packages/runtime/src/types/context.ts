@@ -6,6 +6,11 @@
 // Note: This interface is compatible with @gati-framework/core types
 // but includes additional runtime-specific properties
 
+import type { VersionRegistry } from '../timescape/registry.js';
+import type { TimelineStore } from '../timescape/timeline-store.js';
+import type { ExecutionContextResolver } from '../timescape/resolver.js';
+import type { TSV, VersionRegistryState } from '../timescape/types.js';
+
 /**
  * Module registry for dependency injection
  * Can be extended via declaration merging
@@ -232,6 +237,14 @@ export interface GlobalContext {
      */
     coordinator?: LifecycleCoordinator;
   };
+
+  /**
+   * Timescape Versioning System
+   */
+  timescape: {
+    registry: VersionRegistry;
+    timeline: TimelineStore;
+  };
 }
 
 /**
@@ -309,7 +322,7 @@ export interface DeviceMetadata {
  */
 export enum RequestPhase {
   RECEIVED = 'received',
-  AUTHENTICATED = 'authenticated', 
+  AUTHENTICATED = 'authenticated',
   AUTHORIZED = 'authorized',
   VALIDATED = 'validated',
   PROCESSING = 'processing',
@@ -392,7 +405,7 @@ export interface LocalContext {
      * Wait for a WebSocket event before proceeding
      */
     waitForEvent: (eventType: string, timeout?: number) => Promise<WebSocketEvent>;
-    
+
     /**
      * Emit a WebSocket event for this request
      */
@@ -446,6 +459,14 @@ export interface LocalContext {
      * Check if request has timed out
      */
     isTimedOut: () => boolean;
+  };
+
+  /**
+   * Timescape Versioning Context
+   */
+  timescape: {
+    resolver: ExecutionContextResolver;
+    resolvedState?: VersionRegistryState;
   };
 }
 

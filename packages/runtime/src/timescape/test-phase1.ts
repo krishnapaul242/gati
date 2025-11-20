@@ -1,6 +1,6 @@
 import { VersionRegistry } from './registry.js';
 import { JSONTimelineStore } from './timeline-store.js';
-import { TSV, ChangeLogItem } from './types.js';
+import type { TSV, ChangeLogItem } from './types.js';
 
 async function runTest() {
     console.log('Starting Phase 1 Verification...');

@@ -1,4 +1,4 @@
-import { Snapshot, VersionRegistryState } from './types.js';
+import type { Snapshot, VersionRegistryState } from './types.js';
 import { VersionRegistry } from './registry.js';
 import fs from 'fs';
 import path from 'path';

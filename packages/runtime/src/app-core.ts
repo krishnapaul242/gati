@@ -21,9 +21,9 @@ import type { LoggerOptions } from './logger.js';
  * Generate instance ID for distributed deployment
  */
 function generateInstanceId(): string {
-  return process.env['INSTANCE_ID'] || 
-         process.env['HOSTNAME'] || 
-         `instance_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return process.env['INSTANCE_ID'] ||
+    process.env['HOSTNAME'] ||
+    `instance_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /**
@@ -139,7 +139,7 @@ export class GatiApp {
   private router: RouteManager;
   private middleware: MiddlewareManager;
   private gctx: GlobalContext;
-  private config: Required<Omit<AppConfig, 'logger' | 'cluster' | 'performance' | 'tracing' | 'services' | 'instance' | 'playground'>> & { 
+  private config: Required<Omit<AppConfig, 'logger' | 'cluster' | 'performance' | 'tracing' | 'services' | 'instance' | 'playground'>> & {
     logger?: LoggerOptions;
     cluster?: AppConfig['cluster'];
     performance?: AppConfig['performance'];
@@ -182,7 +182,7 @@ export class GatiApp {
       config: this.config,
       services: {}, // Will be populated by modules
     });
-    
+
     this.router = createRouteManager();
     this.middleware = createMiddlewareManager();
 
@@ -350,7 +350,7 @@ export class GatiApp {
   ): Promise<{ body: unknown; rawBody: string | Buffer }> {
     return new Promise((resolve, reject) => {
       const chunks: Buffer[] = [];
-      
+
       req.on('data', (chunk: Buffer) => {
         chunks.push(chunk);
       });
@@ -358,7 +358,7 @@ export class GatiApp {
       req.on('end', () => {
         try {
           const rawBody = Buffer.concat(chunks);
-          
+
           // No body content
           if (rawBody.length === 0) {
             resolve({ body: undefined, rawBody: '' });
@@ -366,7 +366,7 @@ export class GatiApp {
           }
 
           const contentType = req.headers['content-type'] || '';
-          
+
           // Parse JSON
           if (contentType.includes('application/json')) {
             const bodyString = rawBody.toString('utf-8');
@@ -432,7 +432,7 @@ export class GatiApp {
       if (!serverResponse.headersSent) {
         serverResponse.statusCode = 408;
         serverResponse.setHeader('Content-Type', 'application/json');
-        serverResponse.end(JSON.stringify({ 
+        serverResponse.end(JSON.stringify({
           error: 'Request Timeout',
           message: 'Request exceeded configured timeout',
         }));
@@ -440,7 +440,7 @@ export class GatiApp {
     }, this.config.timeout);
 
     let lctx: any = null;
-    
+
     try {
       // Parse request body
       const { body, rawBody } = await this.parseRequestBody(incomingMessage);
@@ -458,12 +458,12 @@ export class GatiApp {
       // Extract distributed tracing headers
       const traceId = (incomingMessage.headers['x-trace-id'] as string) || generateTraceId();
       const parentSpanId = incomingMessage.headers['x-parent-span-id'] as string;
-      
+
       // Generate client ID and metadata
       const clientIp = incomingMessage.socket.remoteAddress || 'unknown';
       const userAgent = incomingMessage.headers['user-agent'] || 'unknown';
       const clientIdentifier = `${clientIp}:${userAgent}`;
-      
+
       // Create a consistent client ID using a simple hash
       let hash = 0;
       for (let i = 0; i < clientIdentifier.length; i++) {
@@ -472,15 +472,15 @@ export class GatiApp {
         hash = hash & hash; // Convert to 32-bit integer
       }
       const clientId = `client_${Math.abs(hash).toString(36)}`;
-      
+
       // Extract external references from headers/cookies
-      const sessionId = incomingMessage.headers['x-session-id'] as string || 
-                       this.extractSessionFromCookie(incomingMessage.headers.cookie);
+      const sessionId = incomingMessage.headers['x-session-id'] as string ||
+        this.extractSessionFromCookie(incomingMessage.headers.cookie);
       const userId = incomingMessage.headers['x-user-id'] as string;
       const tenantId = incomingMessage.headers['x-tenant-id'] as string;
 
       // Create lightweight local context for this request
-      lctx = createLocalContext({ 
+      lctx = createLocalContext({
         traceId,
         parentSpanId,
         clientId,
@@ -501,7 +501,7 @@ export class GatiApp {
           method: req.method,
           path: req.path || '/',
         },
-      });
+      }, undefined, this.gctx.timescape.registry);
 
       try {
         // Execute middleware chain and route handler
@@ -543,10 +543,10 @@ export class GatiApp {
           console.error('Request cleanup failed:', cleanupError);
         }
       }
-      
+
       // Clear request timeout
       clearTimeout(requestTimeout);
-      
+
       // Decrement active request counter
       this.activeRequests--;
     }
@@ -630,7 +630,7 @@ export class GatiApp {
    */
   private extractSessionFromCookie(cookieHeader?: string): string | undefined {
     if (!cookieHeader) return undefined;
-    
+
     const cookies = cookieHeader.split(';');
     for (const cookie of cookies) {
       const [name, value] = cookie.trim().split('=');

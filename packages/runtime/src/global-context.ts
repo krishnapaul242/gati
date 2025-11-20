@@ -11,6 +11,8 @@ import { LifecyclePriority } from './types/context.js';
 import type { ModuleLoader } from './module-loader.js';
 import { createModuleLoader } from './module-loader.js';
 import { LifecycleManager } from './lifecycle-manager.js';
+import { VersionRegistry } from './timescape/registry.js';
+import { SQLiteTimelineStore, JSONTimelineStore } from './timescape/timeline-store.js';
 
 /**
  * Extended global context options with module loader and coordinator
@@ -97,6 +99,17 @@ export function createGlobalContext(
       executeShutdown: () => lifecycleManager.executeShutdown(),
       isShuttingDown: () => lifecycleManager.isShuttingDown(),
       coordinator: options.coordinator,
+    },
+    timescape: {
+      registry: new VersionRegistry(),
+      timeline: (() => {
+        try {
+          return new SQLiteTimelineStore('.gati/timeline.db');
+        } catch (e) {
+          console.warn('SQLiteTimelineStore failed to initialize, falling back to JSONTimelineStore:', e);
+          return new JSONTimelineStore('.gati/timeline.json');
+        }
+      })(),
     },
   };
 

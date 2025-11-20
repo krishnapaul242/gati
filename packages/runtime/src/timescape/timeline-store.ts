@@ -1,4 +1,4 @@
-import { ChangeLogItem, TSV, ArtifactType } from './types.js';
+import type { ChangeLogItem, TSV, ArtifactType } from './types.js';
 import fs from 'fs';
 import path from 'path';
 

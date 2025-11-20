@@ -6,6 +6,8 @@
 import type { LocalContext, LocalContextOptions, WebSocketCoordinator, WebSocketEvent } from './types/context.js';
 import { RequestPhase } from './types/context.js';
 import { RequestLifecycleManager } from './lifecycle-manager.js';
+import { ExecutionContextResolver } from './timescape/resolver.js';
+import { VersionRegistry } from './timescape/registry.js';
 
 /**
  * Generates a unique request ID
@@ -53,10 +55,15 @@ function generateTraceId(): string {
  */
 export function createLocalContext(
   options: LocalContextOptions = {},
-  wsCoordinator?: WebSocketCoordinator
+  wsCoordinator?: WebSocketCoordinator,
+  registry?: VersionRegistry
 ): LocalContext {
   const requestLifecycle = new RequestLifecycleManager();
   const lifecycleSymbol = Symbol.for('gati:requestLifecycle');
+
+  // Use provided registry or create a new empty one (for tests/fallback)
+  const versionRegistry = registry || new VersionRegistry();
+  const resolver = new ExecutionContextResolver(versionRegistry);
 
   const lctx: LocalContext = {
     requestId: options.requestId || generateRequestId(),
@@ -123,6 +130,10 @@ export function createLocalContext(
       executeCleanup: () => requestLifecycle.executeCleanup(),
       isCleaningUp: () => requestLifecycle.isCleaningUp(),
       isTimedOut: () => requestLifecycle.isTimedOut(),
+    },
+    timescape: {
+      resolver,
+      resolvedState: undefined, // Will be populated by resolver if needed
     },
   };
 
