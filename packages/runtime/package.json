@@ -69,6 +69,18 @@
     "./types/context": {
       "types": "./dist/types/context.d.ts",
       "import": "./dist/types/context.js"
+    },
+    "./timescape/registry": {
+      "types": "./dist/timescape/registry.d.ts",
+      "import": "./dist/timescape/registry.js"
+    },
+    "./timescape/timeline-store": {
+      "types": "./dist/timescape/timeline-store.d.ts",
+      "import": "./dist/timescape/timeline-store.js"
+    },
+    "./timescape/types": {
+      "types": "./dist/timescape/types.d.ts",
+      "import": "./dist/timescape/types.js"
     }
   },
   "files": [

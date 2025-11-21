@@ -1,0 +1,20 @@
+[33m61be462[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: Implement the core Gati application runtime including request handling, routing, middleware, and context management.
+[33m8c4b2da[m feat: Introduce Timescape diffing and snapshotting, add comprehensive benchmarks, and expand documentation.
+[33m99342df[m feat: update package versions and changelogs for core and cloud packages
+[33m84895d9[m feat: implement extraction cache for incremental type extraction
+[33m3134cd9[m feat(types): Phase 1 - core branded types, registry, and GType schema v1.0
+[33m1312bf7[m fix: add newline at end of config-updated.ts file
+[33m1212155[m Add comprehensive feature registry, core philosophy, and rationale for Gati framework
+[33m4fb2a2f[m _INSTRUCTIONS_IMPLEMENTATION_SUMMARY.md git commit -m "docs(copilot): comprehensive update with vision, timescape, and type system
+[33m40b14d2[m feat: enhance deployment and secret management with improved error handling and config validation
+[33mceed839[m feat(cli): auto-generate manifests on dev start + add generate scripts
+[33ma2f9d66[m fix(cli): generate .js config files and support both .ts/.js in dev command
+[33mb52e2be[m fix: remove workspace dependencies from CLI
+[33mebdf5b2[m chore: bump version to 1.0.8 and update core dependency to ^0.4.3
+[33md06f106[m docs: fix dead links in deployment guides
+[33m5197227[m docs: update package versions to latest (Nov 15, 2025)
+[33m55c4a18[m fix(playground): add newline at end of package.json
+[33md8bfd48[m chore: bump versions - core@0.4.3, cli@1.0.7, playground@1.0.0, gatic@0.1.6
+[33md7559e7[m chore(cloud-aws): update core dependency for npm publish
+[33mf2117cd[m Merge pull request #133 from krishnapaul242/copilot/implement-gati-playground-app
+[33m03227f4[m Merge pull request #130 from krishnapaul242/copilot/complete-multi-cloud-support

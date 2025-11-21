@@ -11,12 +11,45 @@ export type ArtifactType =
     | 'data'
     | 'plugin';
 
+export type VersionStatus = 'hot' | 'warm' | 'cold';
+
 export interface TimescapeArtifact {
     id: string;
     type: ArtifactType;
     version: TSV;
     hash: string; // Content hash for integrity
-    metadata?: Record<string, any>;
+    metadata?: {
+        dbSchema?: {
+            version: string;
+            migrations: string[];
+            rollback: string[];
+            compatibleWith?: string[];
+        };
+        [key: string]: any;
+    };
+}
+
+export interface VersionInfo {
+    tsv: TSV;
+    timestamp: number;
+    hash: string;
+    status: VersionStatus;
+    requestCount: number;
+    lastAccessed: number;
+    tags: string[];
+    dbSchemaVersion?: string;
+}
+
+export interface VersionTimeline {
+    handlerPath: string;
+    versions: VersionInfo[];
+}
+
+export interface VersionTag {
+    label: string;
+    tsv: TSV;
+    createdAt: number;
+    createdBy: string;
 }
 
 export interface ChangeLogItem {
@@ -36,6 +69,10 @@ export interface VersionRegistryState {
     routes: Record<string, TSV>;
     events: Record<string, TSV>;
     effects: Record<string, TSV>;
+    handlers: Record<string, VersionTimeline>;
+    tags: Record<string, VersionTag>;
+    activeVersions: Set<TSV>;
+    coldVersions: Set<TSV>;
 }
 
 export interface Snapshot {

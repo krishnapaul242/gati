@@ -127,6 +127,10 @@ export class JSONTimelineStore implements TimelineStore {
     constructor(filePath?: string) {
         if (filePath) {
             this.filePath = filePath;
+            const dir = path.dirname(filePath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
             if (fs.existsSync(filePath)) {
                 const content = fs.readFileSync(filePath, 'utf-8');
                 this.items = content.trim().split('\n').map(line => JSON.parse(line));
