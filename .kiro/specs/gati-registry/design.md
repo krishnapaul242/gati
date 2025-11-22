@@ -2553,3 +2553,581 @@ describe('Artifact Upload', () => {
 
 This approach makes the Gati Registry a living example of how to build production applications with Gati!
 
+
+
+## Correctness Properties
+
+*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+
+### Property 1: Artifact upload integrity
+*For any* artifact uploaded with a digest, the stored artifact's computed digest should match the provided digest
+**Validates: Requirements 1.1, 1.2**
+
+### Property 2: Signature verification correctness
+*For any* artifact with a signature, the system should correctly verify the signature against the publisher's public key and reject invalid signatures
+**Validates: Requirements 5.1, 5.2**
+
+### Property 3: Namespace permission enforcement
+*For any* publish operation, the system should only allow users with write permissions to the namespace to publish artifacts
+**Validates: Requirements 4.1, 4.4**
+
+### Property 4: Dependency resolution completeness
+*For any* artifact with dependencies, the installation process should recursively fetch all required dependencies in the correct order
+**Validates: Requirements 2.5**
+
+### Property 5: Search result accuracy
+*For any* search query, all returned results should match the query criteria (type, capabilities, keywords) and be ranked by relevance
+**Validates: Requirements 3.1, 3.2**
+
+### Property 6: Vulnerability scan completeness
+*For any* uploaded artifact, the scanning system should detect all known CVEs present in the artifact and its dependencies
+**Validates: Requirements 14.1, 14.2, 14.3**
+
+### Property 7: Version graph consistency
+*For any* artifact with multiple versions, the version graph should correctly represent parent-child relationships and breaking changes
+**Validates: Requirements 11.1, 11.2**
+
+### Property 8: Billing transaction accuracy
+*For any* paid artifact purchase, the system should correctly calculate the amount, apply revenue split, and record the transaction
+**Validates: Requirements 12.1, 12.2, 12.4**
+
+### Property 9: Cache consistency
+*For any* cached metadata, the cache should be invalidated when the underlying data changes and return fresh data on next access
+**Validates: Requirements 2.3**
+
+### Property 10: Download verification
+*For any* artifact download, the system should verify the signature before allowing download and reject artifacts with invalid signatures
+**Validates: Requirements 2.2, 2.3**
+
+### Property 11: Rate limit enforcement
+*For any* API endpoint with rate limits, the system should enforce the limit per user/IP and return 429 status when exceeded
+**Validates: Requirements 1.1**
+
+### Property 12: Namespace uniqueness
+*For any* namespace creation, the system should ensure the namespace is unique and prevent duplicate registrations
+**Validates: Requirements 4.1, 4.2**
+
+### Property 13: Publisher verification consistency
+*For any* verified publisher, all their artifacts should display the verification badge and be prioritized in search results
+**Validates: Requirements 4.5**
+
+### Property 14: Artifact immutability
+*For any* published artifact version, the content should be immutable and any attempt to modify it should be rejected
+**Validates: Requirements 1.4**
+
+### Property 15: Search index synchronization
+*For any* artifact metadata change, the search index should be updated within a bounded time period
+**Validates: Requirements 3.1**
+
+### Property 16: Model artifact validation
+*For any* model artifact, the system should validate that the model format matches the declared format and includes required metadata
+**Validates: Requirements 7.1, 7.2**
+
+### Property 17: Agent capability enforcement
+*For any* agent artifact, the system should enforce declared capabilities at runtime and deny access to undeclared resources
+**Validates: Requirements 8.3**
+
+### Property 18: Template variable substitution
+*For any* template with variables, the system should correctly substitute all variable references with provided values
+**Validates: Requirements 9.4**
+
+### Property 19: Snapshot completeness
+*For any* environment snapshot, the system should capture all modules, plugins, versions, and configuration needed to reproduce the environment
+**Validates: Requirements 20.1, 20.2**
+
+### Property 20: CDN cache invalidation
+*For any* artifact update or deletion, the CDN cache should be invalidated and serve fresh content on next request
+**Validates: Requirements 2.4**
+
+### Property 21: Authentication token validity
+*For any* authenticated request, the system should validate the token signature, expiration, and scopes before allowing access
+**Validates: Requirements 15.1, 15.2**
+
+### Property 22: Artifact layer deduplication
+*For any* set of artifacts sharing common layers, the system should store each unique layer only once
+**Validates: Requirements 16.4**
+
+### Property 23: Health badge accuracy
+*For any* artifact, the health badges should accurately reflect current metrics (downloads, updates, security score)
+**Validates: Requirements 17.1, 17.2**
+
+### Property 24: Private repository isolation
+*For any* private artifact, the system should prevent unauthorized access and only allow namespace members to view/download
+**Validates: Requirements 18.1, 18.2**
+
+### Property 25: Recommendation relevance
+*For any* artifact recommendation, the suggested artifacts should be relevant to the user's current context and dependencies
+**Validates: Requirements 19.1, 19.2**
+
+## Error Handling
+
+### Error Categories
+
+1. **Upload Errors**
+   - Invalid artifact format
+   - Signature verification failure
+   - Digest mismatch
+   - Namespace permission denied
+   - Artifact already exists
+   - Upload size exceeded
+   - Malformed manifest
+
+2. **Download Errors**
+   - Artifact not found
+   - Version not found
+   - Signature verification failure
+   - Permission denied (private artifacts)
+   - Checksum mismatch
+   - Network timeout
+
+3. **Search Errors**
+   - Invalid query syntax
+   - Elasticsearch unavailable
+   - Query timeout
+   - Invalid filter parameters
+
+4. **Authentication Errors**
+   - Invalid credentials
+   - Token expired
+   - Token revoked
+   - Insufficient permissions
+   - OAuth provider unavailable
+
+5. **Scanning Errors**
+   - Scanner unavailable
+   - Scan timeout
+   - Unsupported artifact type
+   - Scan database outdated
+
+6. **Billing Errors**
+   - Payment processing failed
+   - Invalid payment method
+   - Insufficient funds
+   - Stripe API unavailable
+   - Invalid pricing configuration
+
+7. **Timescape Errors**
+   - Version graph corruption
+   - Circular dependency detected
+   - Transformer not found
+   - Breaking change without transformer
+
+8. **Storage Errors**
+   - S3 unavailable
+   - Storage quota exceeded
+   - Upload interrupted
+   - Corrupted artifact data
+
+### Error Response Format
+
+```typescript
+interface RegistryError {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
+  suggestions?: string[];
+  timestamp: string;
+  requestId: string;
+}
+```
+
+### Example Error Responses
+
+```typescript
+// Signature verification failure
+{
+  code: 'SIGNATURE_VERIFICATION_FAILED',
+  message: 'Artifact signature verification failed',
+  details: {
+    artifactName: 'user-auth',
+    version: '1.0.0',
+    providedDigest: 'sha256:abc123...',
+    computedDigest: 'sha256:def456...'
+  },
+  suggestions: [
+    'Ensure the artifact was not modified after signing',
+    'Verify you are using the correct signing key',
+    'Re-sign the artifact and try again'
+  ],
+  timestamp: '2025-11-23T10:00:00Z',
+  requestId: 'req_abc123'
+}
+
+// Permission denied
+{
+  code: 'NAMESPACE_PERMISSION_DENIED',
+  message: 'You do not have permission to publish to this namespace',
+  details: {
+    namespace: 'gati.dev/users/other-user',
+    requiredPermission: 'write',
+    userPermissions: ['read']
+  },
+  suggestions: [
+    'Request write access from the namespace owner',
+    'Publish to your own namespace instead',
+    'Check if you are logged in with the correct account'
+  ],
+  timestamp: '2025-11-23T10:00:00Z',
+  requestId: 'req_def456'
+}
+
+// Vulnerability detected
+{
+  code: 'VULNERABILITIES_DETECTED',
+  message: 'Security vulnerabilities detected in artifact',
+  details: {
+    artifactName: 'my-module',
+    version: '1.0.0',
+    vulnerabilities: [
+      {
+        cveId: 'CVE-2024-1234',
+        severity: 'high',
+        package: 'lodash',
+        fixedVersion: '4.17.21'
+      }
+    ],
+    securityScore: 45
+  },
+  suggestions: [
+    'Update lodash to version 4.17.21 or higher',
+    'Review the security report for details',
+    'Consider using alternative packages'
+  ],
+  timestamp: '2025-11-23T10:00:00Z',
+  requestId: 'req_ghi789'
+}
+```
+
+### Error Handling Strategy
+
+1. **Fail Fast**: Validate inputs early and return errors immediately
+2. **Detailed Messages**: Provide context and actionable suggestions
+3. **Consistent Format**: Use standard error response structure
+4. **Logging**: Log all errors with context for debugging
+5. **Monitoring**: Alert on error rate spikes
+6. **Retry Logic**: Implement exponential backoff for transient errors
+7. **Graceful Degradation**: Continue serving cached data when possible
+
+## Testing Strategy
+
+### Unit Testing
+
+Unit tests will verify individual components in isolation:
+
+**Module Services**
+- Test artifact storage operations (upload, download, delete)
+- Test metadata indexing and querying
+- Test search query parsing and execution
+- Test signature verification logic
+- Test vulnerability scanning integration
+- Test billing calculations and transactions
+
+**Handlers**
+- Test request validation with GTypes
+- Test authentication and authorization
+- Test error handling and responses
+- Test rate limiting enforcement
+
+**Background Workers**
+- Test scan queue processing
+- Test notification delivery
+- Test analytics aggregation
+- Test cache invalidation
+
+### Property-Based Testing
+
+Property-based tests will verify universal properties using **fast-check**:
+
+**Testing Framework**: fast-check
+**Minimum Iterations**: 100 runs per property
+
+Each property-based test will be tagged with:
+```typescript
+// Feature: gati-registry, Property 1: Artifact upload integrity
+test('uploaded artifacts maintain digest integrity', () => {
+  fc.assert(
+    fc.property(
+      artifactArbitrary(),
+      async (artifact) => {
+        const uploadResult = await uploadArtifact(artifact);
+        const downloaded = await downloadArtifact(uploadResult.id);
+        return computeDigest(downloaded) === artifact.digest;
+      }
+    ),
+    { numRuns: 100 }
+  );
+});
+```
+
+**Example Generators**:
+
+```typescript
+// Generate random artifacts
+const artifactArbitrary = () =>
+  fc.record({
+    name: fc.string({ minLength: 1, maxLength: 50 }),
+    version: fc.string({ pattern: /^\d+\.\d+\.\d+$/ }),
+    namespace: fc.string({ pattern: /^gati\.dev\/(users|orgs)\/[a-z0-9-]+$/ }),
+    type: fc.constantFrom('module-node', 'module-wasm', 'plugin', 'model'),
+    data: fc.uint8Array({ minLength: 100, maxLength: 1000 }),
+  });
+
+// Generate search queries
+const searchQueryArbitrary = () =>
+  fc.record({
+    query: fc.string(),
+    type: fc.array(fc.constantFrom('module', 'plugin', 'model')),
+    page: fc.integer({ min: 1, max: 100 }),
+    pageSize: fc.integer({ min: 1, max: 100 }),
+  });
+```
+
+### Integration Testing
+
+Integration tests will verify module interactions:
+
+**Upload Flow**
+- Test complete upload pipeline (upload → sign → scan → index)
+- Test artifact with dependencies
+- Test large artifact chunked upload
+
+**Download Flow**
+- Test download with signature verification
+- Test dependency resolution
+- Test CDN integration
+
+**Search Flow**
+- Test search indexing after publish
+- Test faceted search with filters
+- Test search result ranking
+
+**Billing Flow**
+- Test purchase flow with Stripe
+- Test subscription management
+- Test usage-based billing
+
+### End-to-End Testing
+
+E2E tests will verify complete user workflows:
+
+**Publisher Workflow**
+```typescript
+test('complete publisher workflow', async () => {
+  // 1. Register and verify account
+  const user = await registerUser();
+  await verifyEmail(user);
+  
+  // 2. Create namespace
+  const namespace = await createNamespace(user);
+  
+  // 3. Build and sign artifact
+  const artifact = await buildArtifact();
+  const signature = await signArtifact(artifact);
+  
+  // 4. Upload artifact
+  const uploadResult = await uploadArtifact(artifact, signature);
+  
+  // 5. Wait for scanning
+  await waitForScan(uploadResult.id);
+  
+  // 6. Verify artifact is searchable
+  const searchResults = await search(artifact.name);
+  expect(searchResults).toContainArtifact(artifact);
+  
+  // 7. Download and verify
+  const downloaded = await downloadArtifact(artifact.name);
+  expect(downloaded.digest).toBe(artifact.digest);
+});
+```
+
+**Consumer Workflow**
+```typescript
+test('complete consumer workflow', async () => {
+  // 1. Search for artifact
+  const results = await search('authentication');
+  
+  // 2. View artifact details
+  const artifact = await getArtifact(results[0].name);
+  
+  // 3. Check security score
+  expect(artifact.securityScore).toBeGreaterThan(70);
+  
+  // 4. Install artifact
+  const installed = await installArtifact(artifact.name);
+  
+  // 5. Verify dependencies installed
+  expect(installed.dependencies).toHaveLength(artifact.dependencies.length);
+});
+```
+
+### Performance Testing
+
+Load tests will verify system performance:
+
+**Upload Performance**
+- Test concurrent uploads (100 simultaneous)
+- Test large artifact upload (5GB)
+- Test upload throughput (artifacts/second)
+
+**Download Performance**
+- Test concurrent downloads (1000 simultaneous)
+- Test CDN cache hit rate
+- Test download throughput (GB/second)
+
+**Search Performance**
+- Test search latency (p50, p95, p99)
+- Test complex queries with multiple filters
+- Test search under load (1000 queries/second)
+
+### Test Organization
+
+```
+apps/gati-registry/tests/
+├── unit/
+│   ├── modules/
+│   │   ├── artifacts.test.ts
+│   │   ├── metadata.test.ts
+│   │   ├── search.test.ts
+│   │   ├── auth.test.ts
+│   │   ├── signing.test.ts
+│   │   ├── scanning.test.ts
+│   │   └── billing.test.ts
+│   └── shared/
+│       └── types.test.ts
+├── property/
+│   ├── artifact-integrity.property.test.ts
+│   ├── signature-verification.property.test.ts
+│   ├── search-accuracy.property.test.ts
+│   └── billing-accuracy.property.test.ts
+├── integration/
+│   ├── upload-flow.integration.test.ts
+│   ├── download-flow.integration.test.ts
+│   ├── search-flow.integration.test.ts
+│   └── billing-flow.integration.test.ts
+├── e2e/
+│   ├── publisher-workflow.e2e.test.ts
+│   ├── consumer-workflow.e2e.test.ts
+│   └── marketplace-workflow.e2e.test.ts
+└── performance/
+    ├── upload-load.perf.test.ts
+    ├── download-load.perf.test.ts
+    └── search-load.perf.test.ts
+```
+
+## Implementation Notes
+
+### Development Phases
+
+**Phase 1: Core Infrastructure (Weeks 1-4)**
+- Set up project structure
+- Implement artifacts module (upload/download)
+- Implement metadata module (indexing)
+- Basic authentication
+- PostgreSQL schema and migrations
+
+**Phase 2: Search & Discovery (Weeks 5-6)**
+- Elasticsearch integration
+- Search module implementation
+- Faceted search and filters
+- Search result ranking
+
+**Phase 3: Security (Weeks 7-8)**
+- Signature verification (Cosign)
+- Vulnerability scanning (Trivy)
+- Security scoring
+- Publisher verification
+
+**Phase 4: Marketplace (Weeks 9-10)**
+- Stripe integration
+- Billing module
+- Purchase flow
+- Subscription management
+- Revenue split
+
+**Phase 5: Timescape Integration (Weeks 11-12)**
+- Version graph storage
+- Breaking change detection
+- Transformer distribution
+- Migration guides
+
+**Phase 6: Advanced Features (Weeks 13-14)**
+- Model artifacts
+- Agent artifacts
+- Template artifacts
+- Environment snapshots
+
+**Phase 7: Polish & Launch (Weeks 15-16)**
+- Web UI
+- Documentation
+- Performance optimization
+- Security audit
+- Beta launch
+
+### Technology Stack
+
+**Backend**
+- Gati Framework (TypeScript)
+- PostgreSQL 14+ (metadata)
+- Redis 7+ (caching)
+- Elasticsearch 8+ (search)
+- AWS S3 (artifact storage)
+
+**Security**
+- Cosign (artifact signing)
+- Trivy (vulnerability scanning)
+- JWT (authentication)
+- OAuth 2.0 (GitHub, Google)
+
+**Billing**
+- Stripe (payment processing)
+
+**Infrastructure**
+- Kubernetes (orchestration)
+- Docker (containers)
+- Terraform (IaC)
+- GitHub Actions (CI/CD)
+
+**Observability**
+- Prometheus (metrics)
+- Grafana (dashboards)
+- Loki (logs)
+- Tempo (traces)
+
+### Performance Targets
+
+- **Upload**: < 5s for 100MB artifact
+- **Download**: < 2s for 100MB artifact (CDN cached)
+- **Search**: < 100ms p95 latency
+- **API**: < 200ms p95 latency
+- **Availability**: 99.9% uptime
+- **Throughput**: 1000 requests/second
+
+### Security Considerations
+
+- All artifacts must be signed
+- Vulnerability scanning on every upload
+- Rate limiting on all endpoints
+- HTTPS only (TLS 1.3)
+- Secrets in environment variables
+- Regular security audits
+- Penetration testing before launch
+
+### Monitoring & Alerts
+
+**Key Metrics**
+- Upload/download success rate
+- Search query latency
+- Vulnerability scan duration
+- Payment processing success rate
+- Storage usage
+- Database connection pool
+- Cache hit rate
+
+**Alerts**
+- Error rate > 1%
+- Latency p95 > 500ms
+- Storage > 80% capacity
+- Database CPU > 80%
+- Failed payments > 5%
+- Vulnerability scan failures
+

@@ -1,9 +1,6 @@
-Below is a polished, inspiring, visionary document that captures **the essence of what Gati is**, and **why it will radically simplify backend development for millions of developers**.
-This can be used for your website, documentation, GitHub README, or investor materials.
+# 🌟 Gati — The Backend That Builds, Scales, and Evolves Itself
 
----
-
-# 🌟 **Gati — The Backend That Builds, Scales, and Evolves Itself**
+> A polished, inspiring vision document that captures the essence of what Gati is, and why it will radically simplify backend development for millions of developers.
 
 Modern backend development is powerful, but painful.
 Developers spend more time fighting infrastructure, debugging version conflicts, rewriting old APIs, stitching services together, and wrestling with DevOps than building features.

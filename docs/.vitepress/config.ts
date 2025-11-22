@@ -67,6 +67,7 @@ export default defineConfig({
           items: [
             { text: 'Why Gati?', link: '/vision/why-gati' },
             { text: 'Core Philosophy', link: '/vision/philosophy' },
+            { text: 'Vision Document', link: '/vision/vision-document' },
             { text: 'Feature Registry', link: '/vision/features' },
           ]
         }
@@ -182,6 +183,14 @@ export default defineConfig({
             { text: 'Release Guide', link: '/contributing/release-guide' },
             { text: 'CI/CD Pipeline', link: '/contributing/ci-cd' },
             { text: 'Codebase Structure', link: '/contributing/codebase-structure' }
+          ]
+        }
+      ],
+      '/project-docs/': [
+        {
+          text: 'Project Documentation',
+          items: [
+            { text: 'Feature Registry', link: '/project-docs/feature-registry' }
           ]
         }
       ]

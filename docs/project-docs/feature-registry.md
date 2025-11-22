@@ -34,7 +34,7 @@ This is effectively the **Gati Master Feature Index (v1)**.
 ### **2.1 Gati Native Types**
 
 * Extended TS primitives (EmailString, UUID, PositiveNumber, etc.)
-* Constraint combinators (MinLen<N>, Max<N>, etc.)
+* Constraint combinators (MinLen\<N\>, Max\<N\>, etc.)
 * Branded primitive types
 
 ### **2.2 Gati Validation Engine**
