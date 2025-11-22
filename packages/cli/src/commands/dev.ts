@@ -197,29 +197,51 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
         // Initialize file watcher for hot reloading (only if watch enabled)
         if (options.watch) {
           const { FileWatcher } = await import('../analyzer/file-watcher.js');
-          new FileWatcher(cwd, async (manifest) => {
-            // Clear existing routes and reload all
-            gatiApp.getRouteManager().clear();
-            
-            // Update routes when manifest changes
-            for (const handler of manifest.handlers) {
-              try {
-                const jsPath = handler.filePath
-                  .replace(/\.ts$/, '.js')
-                  .replace(/[\\/]src[\\/]/, '/dist/src/')
-                  .replace(/\\/g, '/');
-                
-                const handlerModule = await import(`file://${jsPath}?t=${Date.now()}`);
-                const handlerFn = handlerModule[handler.exportName];
-                if (handlerFn) {
-                  gatiApp.registerRoute(handler.method || 'GET', handler.route, handlerFn);
-                  console.log(`🔄 Reloaded ${handler.method} ${handler.route}`);
+          
+          // Check if Timescape is enabled in config
+          const timescapeEnabled = config.timescape?.enabled !== false;
+          
+          new FileWatcher(
+            cwd, 
+            async (manifest) => {
+              // Clear existing routes and reload all
+              gatiApp.getRouteManager().clear();
+              
+              // Update routes when manifest changes
+              for (const handler of manifest.handlers) {
+                try {
+                  const jsPath = handler.filePath
+                    .replace(/\.ts$/, '.js')
+                    .replace(/[\\/]src[\\/]/, '/dist/src/')
+                    .replace(/\\/g, '/');
+                  
+                  const handlerModule = await import(`file://${jsPath}?t=${Date.now()}`);
+                  const handlerFn = handlerModule[handler.exportName];
+                  if (handlerFn) {
+                    gatiApp.registerRoute(handler.method || 'GET', handler.route, handlerFn);
+                    console.log(`🔄 Reloaded ${handler.method} ${handler.route}`);
                 }
               } catch (error) {
                 console.warn(`Failed to reload handler ${handler.route}:`, error);
               }
             }
-          }).start();
+          },
+          {
+            enableVersioning: timescapeEnabled,
+            onVersionChange: (change) => {
+              // Version change notification is already handled in FileWatcher
+              // Here we could trigger additional actions like:
+              // - Generate transformer stubs
+              // - Send notifications
+              // - Update documentation
+              
+              if (change.breaking && timescapeEnabled) {
+                console.log(chalk.yellow('\n💡 Tip: Implement the transformer to maintain backward compatibility'));
+                console.log(chalk.gray('   Run: gati timescape generate-transformer ' + change.newVersion));
+              }
+            }
+          }
+        ).start();
         }
         
         return gatiApp;
