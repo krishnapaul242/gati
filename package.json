@@ -39,7 +39,7 @@
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "release:version": "changeset version",
     "release:publish": "changeset publish",
-    "release": "pnpm -r build && pnpm exec changeset publish",
+    "release": "pnpm --filter @gati-framework/core --filter @gati-framework/types build && pnpm exec changeset publish",
     "version-packages": "changeset version",
     "test": "vitest",
     "test:watch": "vitest watch",
