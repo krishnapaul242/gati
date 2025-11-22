@@ -116,7 +116,9 @@
   "homepage": "https://github.com/krishnapaul242/gati#readme",
   "dependencies": {
     "@gati-framework/core": "^0.4.1",
-    "pino": "^9.5.0",
+    "pino": "^9.5.0"
+  },
+  "optionalDependencies": {
     "better-sqlite3": "^9.0.0"
   },
   "devDependencies": {
