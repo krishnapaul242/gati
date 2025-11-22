@@ -61,3 +61,52 @@ export type { WebSocketCoordinator as WSCoordinator, WebSocketEvent as WSEvent }
 // Type schema system
 export { generateTypes } from './types/schema.js';
 export type { TypeSchema, StateSchema, ModuleSchema } from './types/schema.js';
+
+// GType validation system
+export {
+  // Schema builders
+  primitive,
+  literal,
+  object,
+  array,
+  tuple,
+  union,
+  intersection,
+  enumType,
+  GTypes,
+  // Validator
+  validate,
+  // Error utilities
+  createValidationError,
+  formatValidationErrors,
+  formatPath,
+  formatValue,
+  validResult,
+  invalidResult,
+  mergeResults,
+  ValidationException,
+} from './gtype/index.js';
+
+export type {
+  // Schema types
+  GType,
+  GTypeKind,
+  GTypePrimitive,
+  GTypeLiteral,
+  GTypeObject,
+  GTypeArray,
+  GTypeTuple,
+  GTypeUnion,
+  GTypeIntersection,
+  GTypeEnum,
+  GTypeBase,
+  GTypeSchema,
+  GTypeRef,
+  PrimitiveKind,
+  Validator,
+  ValidatorType,
+  // Error types
+  ValidationError,
+  ValidationResult,
+  PathSegment,
+} from './gtype/index.js';

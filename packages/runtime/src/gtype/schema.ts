@@ -152,7 +152,7 @@ export interface GTypeSchema {
  */
 export function primitive(
   primitiveType: PrimitiveKind,
-  options?: Partial<GTypeBase>
+  options?: Partial<Omit<GTypePrimitive, 'kind' | 'primitiveType'>>
 ): GTypePrimitive {
   return {
     kind: 'primitive',
@@ -166,7 +166,7 @@ export function primitive(
  */
 export function literal(
   value: string | number | boolean | null,
-  options?: Partial<GTypeBase>
+  options?: Partial<Omit<GTypeLiteral, 'kind' | 'value'>>
 ): GTypeLiteral {
   return {
     kind: 'literal',
@@ -208,7 +208,7 @@ export function array(
  */
 export function tuple(
   items: GType[],
-  options?: Partial<GTypeBase>
+  options?: Partial<Omit<GTypeTuple, 'kind' | 'items'>>
 ): GTypeTuple {
   return {
     kind: 'tuple',
@@ -222,7 +222,7 @@ export function tuple(
  */
 export function union(
   types: GType[],
-  options?: Partial<GTypeBase>
+  options?: Partial<Omit<GTypeUnion, 'kind' | 'types'>>
 ): GTypeUnion {
   return {
     kind: 'union',
@@ -236,7 +236,7 @@ export function union(
  */
 export function intersection(
   types: GType[],
-  options?: Partial<GTypeBase>
+  options?: Partial<Omit<GTypeIntersection, 'kind' | 'types'>>
 ): GTypeIntersection {
   return {
     kind: 'intersection',
@@ -250,7 +250,7 @@ export function intersection(
  */
 export function enumType(
   values: (string | number)[],
-  options?: Partial<GTypeBase>
+  options?: Partial<Omit<GTypeEnum, 'kind' | 'values'>>
 ): GTypeEnum {
   return {
     kind: 'enum',
