@@ -13,8 +13,8 @@ hero:
       text: Quick Start
       link: /onboarding/quick-start
     - theme: alt
-      text: Why Gati?
-      link: /vision/why-gati
+      text: Read the Blog
+      link: /blog/
     - theme: alt
       text: View on GitHub
       link: https://github.com/krishnapaul242/gati
@@ -205,6 +205,18 @@ Gati is currently a solo project by Krishna Paul. I'm actively looking for:
 - 🎨 UI/UX designers (Module Registry & Control Panel)
 
 [Join the journey →](/contributing/README)
+
+## Latest from the Blog
+
+### [Introducing Gati: The Backend That Builds, Scales, and Evolves Itself](/blog/introducing-gati)
+
+**November 22, 2025** • *Krishna Paul*
+
+A revolutionary TypeScript framework that eliminates infrastructure complexity. M1 and M2 are complete, and we're now live on npm! Learn about Gati's vision, current features, and what's coming next.
+
+[Read the announcement →](/blog/introducing-gati)
+
+---
 
 ## Community
 
