@@ -46,6 +46,29 @@ The Registry is composed of the following Gati modules:
 - Elasticsearch 8+
 - AWS S3 or MinIO
 
+### Optional Security Tools
+
+For enhanced security scanning (install separately as system binaries):
+
+- **[Trivy](https://github.com/aquasecurity/trivy)** - Vulnerability scanner
+- **[Cosign](https://github.com/sigstore/cosign)** - Container signing and verification
+
+```bash
+# Install Trivy (macOS)
+brew install trivy
+
+# Install Trivy (Linux)
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update
+sudo apt-get install trivy
+
+# Install Cosign
+go install github.com/sigstore/cosign/v2/cmd/cosign@latest
+```
+
+**Note:** These tools are optional and will be called as system commands when available.
+
 ### Installation
 
 ```bash

@@ -23,9 +23,7 @@
     "@elastic/elasticsearch": "^8.11.0",
     "pg": "^8.11.3",
     "redis": "^4.6.11",
-    "stripe": "^14.7.0",
-    "cosign": "^2.2.0",
-    "trivy": "^0.48.0"
+    "stripe": "^14.7.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
