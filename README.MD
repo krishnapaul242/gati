@@ -24,8 +24,8 @@ Gati eliminates infrastructure complexity so you can **focus on business logic**
 
 ```typescript
 // That's it—just write your handler
-export const handler: Handler = async (req, res) => {
-  const user = await db.users.findById(req.params.id);
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const user = await gctx.modules['db'].users.findById(req.params.id);
   res.json({ user });
 };
 
@@ -73,11 +73,11 @@ pnpm build
 // src/handlers/users/[id].ts
 import type { Handler } from '@gati-framework/runtime';
 
-export const handler: Handler = async (req, res) => {
+export const handler: Handler = async (req, res, gctx, lctx) => {
   const userId = req.params.id;
   
   // Your business logic here
-  const user = await database.users.findById(userId);
+  const user = await gctx.modules['db'].users.findById(userId);
   
   res.json({ user });
 };
@@ -159,7 +159,7 @@ export const handler: Handler = async (req, res) => {
 // src/handlers/hello.ts
 import type { Handler } from '@gati-framework/runtime';
 
-export const handler: Handler = (req, res) => {
+export const handler: Handler = (req, res, gctx, lctx) => {
   const name = req.query.name || 'World';
   res.json({ message: `Hello, ${name}!` });
 };
@@ -173,11 +173,11 @@ export const handler: Handler = (req, res) => {
 // src/handlers/users/[id].ts
 import type { Handler } from '@gati-framework/runtime';
 
-export const handler: Handler = async (req, res, gctx) => {
+export const handler: Handler = async (req, res, gctx, lctx) => {
   const userId = req.params.id;
   
   // Access database module from global context
-  const user = await gctx.modules.db.users.findById(userId);
+  const user = await gctx.modules['db'].users.findById(userId);
   
   if (!user) {
     return res.status(404).json({ error: 'User not found' });

@@ -36,8 +36,8 @@ Gati (Sanskrit: गति, meaning "motion" or "progress") is a TypeScript frame
 
 ```typescript
 // That's it—just write your handler
-export const handler: Handler = async (req, res) => {
-  const user = await db.users.findById(req.params.id);
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const user = await gctx.modules['db'].users.findById(req.params.id);
   res.json({ user });
 };
 
@@ -60,8 +60,8 @@ No more infrastructure code. No Docker files. No Kubernetes manifests. No CI/CD 
 
 ```typescript
 // src/handlers/posts/[id].ts
-export const handler: Handler = async (req, res) => {
-  const post = await db.posts.findById(req.params.id);
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const post = await gctx.modules['db'].posts.findById(req.params.id);
   res.json({ post });
 };
 ```
@@ -210,7 +210,7 @@ Your API is now running at `http://localhost:3000` 🎉
 // src/handlers/hello.ts
 import type { Handler } from '@gati-framework/runtime';
 
-export const handler: Handler = (req, res) => {
+export const handler: Handler = (req, res, gctx, lctx) => {
   const name = req.query.name || 'World';
   res.json({ message: `Hello, ${name}!` });
 };
@@ -312,14 +312,14 @@ Here's a complete user management API:
 
 ```typescript
 // src/handlers/users/index.ts
-export const handler: Handler = async (req, res) => {
-  const users = await db.users.findAll();
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const users = await gctx.modules['db'].users.findAll();
   res.json({ users });
 };
 
 // src/handlers/users/[id].ts
-export const handler: Handler = async (req, res) => {
-  const user = await db.users.findById(req.params.id);
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const user = await gctx.modules['db'].users.findById(req.params.id);
   
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
@@ -329,8 +329,8 @@ export const handler: Handler = async (req, res) => {
 };
 
 // src/handlers/users/create.ts
-export const handler: Handler = async (req, res) => {
-  const user = await db.users.create(req.body);
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const user = await gctx.modules['db'].users.create(req.body);
   res.status(201).json({ user });
 };
 ```
