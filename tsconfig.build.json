@@ -16,6 +16,9 @@
     "tests",
     "**/*.spec.ts",
     "**/*.test.ts",
+    "**/*test*.ts",
+    "**/*example*.ts",
+    "**/__fixtures__/**",
     "examples",
     "docs",
     "scripts"
