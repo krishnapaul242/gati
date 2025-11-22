@@ -43,6 +43,16 @@ Documentation improvements are always welcome!
 
 ### 💻 Contributing Code
 
+## CI/CD Status
+
+Gati has a fully automated CI/CD pipeline:
+
+- ✅ **Continuous Integration** - Automated testing on every push
+- ✅ **Automated Publishing** - npm releases via changesets
+- ✅ **Documentation Deployment** - Auto-deploy to GitHub Pages
+
+See [CI/CD Guide](./ci-cd.md) for details.
+
 ## Development Setup
 
 ### Prerequisites

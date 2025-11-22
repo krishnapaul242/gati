@@ -5,6 +5,9 @@ packages:
   # Core framework packages
   - 'packages/*'
   
+  # Production applications built with Gati
+  - 'apps/*'
+  
   # Example applications
   - 'examples/*'
   

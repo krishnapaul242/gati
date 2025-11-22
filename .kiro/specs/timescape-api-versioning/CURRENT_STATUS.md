@@ -1,348 +1,356 @@
 # Timescape API Versioning - Current Status
 
-**Last Updated:** 2025-11-22  
-**Overall Progress:** 86% Complete (6/7 ACs fully implemented)
+> 🚧 **Status**: Planned for M3 (Q1 2026)  
+> This feature is currently in the design and planning phase.
 
-## Quick Summary
+## Overview
 
-✅ **Production Ready:** Yes (for programmatic API usage)  
-✅ **CLI Ready:** Yes (version and tag management)  
-⏳ **Dev Server Integration:** Pending (automatic version creation)
+Timescape is Gati's revolutionary API versioning system that enables:
+- Timestamp-based version routing
+- Automatic schema diffing
+- Bidirectional data transformers
+- Parallel version execution
+- Zero-downtime version deployments
 
-## Completed Work
+## Current Status
 
-### Phase 1: Core Infrastructure ✅ COMPLETE
-- Version Registry with timeline support
-- Diff Engine for schema comparison
-- Snapshot Manager for version metadata
-- Semantic version tagging system
-- **Completion Date:** 2025-11-21
+### ✅ Completed (Design Phase)
 
-### Phase 2: Transformer System ✅ COMPLETE
-- Transformer interface and engine
-- Bidirectional transformation (forward + backward)
-- Immutable transformer pairs
-- Code generation for transformer stubs
-- **Completion Date:** 2025-11-21
+- [x] Architecture design documented
+- [x] Core concepts defined
+- [x] Use cases identified
+- [x] Example scenarios created
+- [x] Documentation structure planned
 
-### Phase 3: Request Routing ✅ COMPLETE
-- Version resolution (timestamps, tags, TSV)
-- Integration layer for request/response handling
-- Transformer chain execution
-- Error handling
-- **Completion Date:** 2025-11-22
+### 🚧 In Progress
 
-### Phase 4: Lifecycle Management ✅ COMPLETE
-- Usage tracking (hot/warm/cold classification)
-- Auto-deactivation system
-- Protected tags
-- Prometheus metrics
-- **Completion Date:** 2025-11-21
+- [ ] Detailed technical specification
+- [ ] Transformer API design
+- [ ] Migration strategy design
+- [ ] Performance benchmarking plan
 
-### Phase 5: Database Schema Versioning ✅ COMPLETE
-- Schema registration and tracking
-- Migration execution
-- Smart rollback
-- Schema compatibility checking
-- **Completion Date:** 2025-11-22
+### ⏳ Planned (M3 - Q1 2026)
 
-### Phase 6: CLI Integration ⏳ PARTIAL (50% Complete)
-**Completed:**
-- ✅ Version management commands (list, status, deactivate)
-- ✅ Tag management commands (tag, tags, untag)
-- ✅ CLI test suite
-- **Completion Date:** 2025-11-22
+#### Phase 1: Core Infrastructure
+- [ ] Version manifest system
+- [ ] Schema diff engine
+- [ ] Version routing middleware
+- [ ] Transformer runtime
 
-**Pending:**
-- ⏳ Dev server integration (automatic version creation)
+#### Phase 2: Developer Experience
+- [ ] CLI commands for version management
+- [ ] Transformer generator
+- [ ] Version testing utilities
+- [ ] Migration tools
 
-### Phase 8: Example Applications ⏳ PARTIAL (33% Complete)
-**Completed:**
-- ✅ Beginner example (simple blog API)
-- **Completion Date:** 2025-11-22
+#### Phase 3: Advanced Features
+- [ ] Parallel version execution
+- [ ] Hot/warm/cold version states
+- [ ] Automatic version deactivation
+- [ ] Version analytics
 
-**Pending:**
-- ⏳ Intermediate example (e-commerce with breaking changes)
-- ⏳ Advanced example (multi-service microservices)
+## Architecture Overview
 
-## Acceptance Criteria Status
+### Version Manifest
 
-| AC | Title | Status | Completion |
-|----|-------|--------|------------|
-| AC-1 | Automatic Version Creation | ⏳ Partial | 50% |
-| AC-2 | Flexible Version Routing | ✅ Complete | 100% |
-| AC-3 | Schema Diffing | ✅ Complete | 100% |
-| AC-4 | Automatic Transformer Generation | ✅ Complete | 100% |
-| AC-5 | Version Lifecycle Management | ✅ Complete | 100% |
-| AC-6 | Semantic Version Tagging | ✅ Complete | 100% |
-| AC-7 | Database Schema Versioning | ✅ Complete | 100% |
-
-**Overall:** 6/7 ACs fully complete (86%)
-
-## Test Coverage
-
-| Component | Test Suites | Tests | Status |
-|-----------|-------------|-------|--------|
-| Version Registry | 10 | 34 | ✅ Pass |
-| Diff Engine | 8 | 32 | ✅ Pass |
-| Snapshot Manager | 10 | 31 | ✅ Pass |
-| Transformer Engine | 9 | 27 | ✅ Pass |
-| Transformer Generator | 7 | 21 | ✅ Pass |
-| Version Resolver | 15 | ~40 | ✅ Pass |
-| Integration Layer | 15 | ~35 | ✅ Pass |
-| Lifecycle Manager | 23 | ~50 | ✅ Pass |
-| Metrics | 9 | ~20 | ✅ Pass |
-| DB Schema Manager | 19 | 29 | ✅ Pass |
-| CLI Commands | 8 | 20+ | ✅ Pass |
-| **Total** | **133+** | **~340** | **✅ 100%** |
-
-## Available CLI Commands
-
-### Version Management
-```bash
-# List all versions
-gati timescape list [--handler <path>] [--status <status>] [--tags]
-
-# Show version status
-gati timescape status <version> [--handler <path>]
-
-# Deactivate version
-gati timescape deactivate <version> [--handler <path>] [--force]
+```typescript
+interface VersionManifest {
+  version: string;              // ISO timestamp
+  description: string;
+  breaking: boolean;
+  handlers: HandlerManifest[];
+  schemas: SchemaManifest[];
+  transformers: TransformerManifest[];
+  migrations: MigrationManifest[];
+}
 ```
 
-### Tag Management
-```bash
-# Create tag
-gati timescape tag <tsv> <label> [--created-by <name>]
+### Schema Diff Engine
 
-# List all tags
-gati timescape tags
-
-# List tags for version
-gati timescape tags <tsv>
-
-# Remove tag
-gati timescape untag <label>
+```typescript
+interface SchemaDiff {
+  type: 'field_added' | 'field_removed' | 'field_type_changed' | 'field_renamed';
+  path: string;
+  oldValue?: any;
+  newValue?: any;
+  breaking: boolean;
+}
 ```
 
-### Legacy Commands
-```bash
-# View change history
-gati timescape log [-n <number>]
+### Transformer System
 
-# Show change details
-gati timescape diff <id>
+```typescript
+interface Transformer<From, To> {
+  from: string;                 // Source version
+  to: string;                   // Target version
+  forward: (data: From) => To;
+  backward: (data: To) => From;
+}
 ```
 
-## Example Application
+## Implementation Plan
 
-### Beginner Example: Simple Blog API ✅
-**Location:** `examples/timescape-beginner/`
+### Milestone 3 (Q1 2026)
 
-**Features:**
-- V1: Basic post structure (id, title, content)
-- V2: Added optional author field
-- Bidirectional transformer
-- 9 test scenarios
-- Comprehensive tutorial
+**Week 1-2: Core Infrastructure**
+- Implement version manifest system
+- Build schema diff engine
+- Create version storage layer
 
-**Run:**
+**Week 3-4: Routing & Transformers**
+- Implement version routing middleware
+- Build transformer runtime
+- Add transformer registration
+
+**Week 5-6: CLI & Tooling**
+- Add version management commands
+- Create transformer generator
+- Build version testing utilities
+
+**Week 7-8: Testing & Documentation**
+- Comprehensive test suite
+- Example applications
+- User documentation
+- Migration guides
+
+## Technical Challenges
+
+### 1. Performance
+
+**Challenge**: Transforming data on every request could be slow
+
+**Solutions**:
+- Cache transformed responses
+- Lazy transformation (only when needed)
+- Parallel transformation for bulk operations
+- Hot/warm/cold version states
+
+### 2. Data Consistency
+
+**Challenge**: Ensuring data consistency across versions
+
+**Solutions**:
+- Atomic version deployments
+- Transaction support in transformers
+- Rollback mechanisms
+- Version validation
+
+### 3. Complexity
+
+**Challenge**: Managing many versions and transformers
+
+**Solutions**:
+- Automatic transformer generation
+- Version deprecation policies
+- Visual version timeline
+- Transformer composition
+
+## API Design (Draft)
+
+### CLI Commands
+
 ```bash
-cd examples/timescape-beginner
-pnpm install
-pnpm dev
-pnpm test
+# Create new version
+gati version:create "Added user email field"
+
+# List versions
+gati version:list
+
+# Show version diff
+gati version:diff v1 v2
+
+# Generate transformer
+gati transformer:generate user v1 v2
+
+# Test transformer
+gati transformer:test user v1 v2
+
+# Deploy version
+gati version:deploy v2
+
+# Rollback version
+gati version:rollback v2
 ```
 
-## Remaining Work
+### Configuration
 
-### Phase 6: Dev Server Integration (Task 6.2)
-**Estimated Effort:** 3 days
+```typescript
+// gati.config.ts
+export default {
+  timescape: {
+    enabled: true,
+    versionFormat: 'timestamp',  // or 'semantic'
+    defaultVersion: 'latest',
+    transformerDir: './transformers',
+    cacheStrategy: 'memory',     // or 'redis'
+    deprecationPolicy: {
+      warningPeriod: '90d',
+      removalPeriod: '180d'
+    }
+  }
+};
+```
 
-**Tasks:**
-- [ ] Modify dev server to detect handler changes
-- [ ] Trigger version creation on file save
-- [ ] Show version creation notifications
-- [ ] Generate transformer stubs for breaking changes
-- [ ] Prevent modification of old transformers
+### Handler API
 
-**Files to modify:**
-- `packages/cli/src/commands/dev.ts`
-- `packages/cli/src/analyzer/handler-analyzer.ts`
+```typescript
+// Handlers work with any version automatically
+export const handler: Handler = async (req, res) => {
+  // Timescape handles version routing
+  const user = await db.users.findById(req.params.id);
+  
+  // Response automatically transformed to requested version
+  res.json({ user });
+};
+```
 
-### Phase 7: Testing & Documentation
-**Estimated Effort:** 10 days
+## Examples
 
-**Tasks:**
-- [ ] Integration tests with real database
-- [ ] Performance benchmarks (10,000 req/s target)
-- [ ] User documentation
-- [ ] Migration guide from manual versioning
-- [ ] API reference documentation
+### Non-Breaking Change
 
-### Phase 8: Example Applications (Remaining)
-**Estimated Effort:** 11 days
+```typescript
+// v1: User without email
+interface UserV1 {
+  id: string;
+  name: string;
+}
 
-**Tasks:**
-- [ ] Intermediate example (e-commerce API) - 4 days
-- [ ] Advanced example (multi-service microservices) - 6 days
-- [ ] Example documentation - 1 day
+// v2: User with optional email (non-breaking)
+interface UserV2 {
+  id: string;
+  name: string;
+  email?: string;
+}
 
-## Key Features Implemented
+// No transformer needed - backward compatible
+```
 
-### 1. Automatic Version Management ✅
-- TSV format (Timescape Version)
-- Timeline-based version tracking
-- Binary search for fast lookups
+### Breaking Change
 
-### 2. Semantic Version Tags ✅
-- Human-readable labels (v1.0.0, stable, production)
-- Multiple tags per version
-- Tag → TSV resolution
-- CLI commands for tag management
+```typescript
+// v1: Age as string
+interface UserV1 {
+  age: string;
+}
 
-### 3. Schema Diffing ✅
-- Automatic breaking change detection
-- Nested object comparison
-- Diff caching by hash
+// v2: Age as number (breaking)
+interface UserV2 {
+  age: number;
+}
 
-### 4. Bidirectional Transformers ✅
-- Forward transformation (old → new)
-- Backward transformation (new → old)
-- Immutable once created
-- Linear chain execution
+// Transformer required
+export const userV1toV2: Transformer<UserV1, UserV2> = {
+  from: '2024-01-01',
+  to: '2024-02-01',
+  forward: (user) => ({
+    ...user,
+    age: parseInt(user.age, 10)
+  }),
+  backward: (user) => ({
+    ...user,
+    age: user.age.toString()
+  })
+};
+```
 
-### 5. Version Lifecycle ✅
-- Hot/warm/cold classification
-- Auto-deactivation
-- Protected tags
-- Manual overrides
+## Testing Strategy
 
-### 6. Database Schema Versioning ✅
-- Schema tracking per TSV
-- Migration execution
-- Smart rollback
-- Shared schemas
+### Unit Tests
+- Schema diff engine
+- Transformer runtime
+- Version routing logic
 
-### 7. Request Routing ✅
-- Query parameter: `?version=v1.0.0`
-- Header: `X-Gati-Version: v1.0.0`
-- Timestamp: `?version=2025-11-21T10:00:00Z`
-- Direct TSV: `?version=tsv:1732197600-users-002`
+### Integration Tests
+- End-to-end version flows
+- Multi-version scenarios
+- Rollback scenarios
 
-### 8. CLI Interface ✅
-- Version listing and filtering
-- Version status queries
-- Manual deactivation
-- Tag management
-- Color-coded output
+### Performance Tests
+- Transformation overhead
+- Cache effectiveness
+- Concurrent version handling
 
-## Performance Characteristics
+## Documentation Plan
 
-### Version Resolution
-- **Lookup:** O(log n) binary search
-- **Overhead:** < 5ms per request
-- **Caching:** LRU cache for resolved versions
+### User Documentation
+- [x] Architecture overview
+- [x] Concept explanations
+- [ ] Getting started guide
+- [ ] API reference
+- [ ] Best practices
+- [ ] Migration guide
 
-### Transformer Execution
-- **Single hop:** ~5-10ms
-- **Max chain:** 10 hops (configurable)
-- **Timeout:** 5000ms (configurable)
+### Examples
+- [ ] Beginner: Simple blog API
+- [ ] Intermediate: E-commerce API
+- [ ] Advanced: Complex transformations
 
-### Schema Diffing
-- **Computation:** < 100ms
-- **Caching:** By schema hash
-- **Deterministic:** Same input → same output
+### Developer Documentation
+- [ ] Implementation guide
+- [ ] Transformer development
+- [ ] Testing guide
+- [ ] Performance optimization
 
-## Production Readiness
+## Dependencies
 
-### ✅ Ready for Production
-- Core versioning system
-- Version resolution
-- Transformer execution
-- Lifecycle management
-- Database schema versioning
-- CLI commands
+### Required Packages
+- Schema validation library (Zod or similar)
+- Diff algorithm library
+- Cache layer (Redis optional)
+- Migration tool integration
 
-### ⏳ Pending for Full Production
-- Dev server integration (automatic version creation)
-- Performance benchmarks
-- Production documentation
-- Migration guide
+### Gati Components
+- Manifest system (existing)
+- Handler engine (existing)
+- Module system (existing)
+- CLI framework (existing)
 
-## Next Steps
+## Success Criteria
 
-### Immediate (Phase 6, Task 6.2)
-1. Implement dev server integration
-2. Automatic version creation on handler changes
-3. Transformer stub generation
-4. Version creation notifications
+### Functional
+- ✅ Support timestamp-based versioning
+- ✅ Automatic schema diffing
+- ✅ Bidirectional transformers
+- ✅ Zero-downtime deployments
+- ✅ Version rollback support
 
-### Short-term (Phase 7)
-1. Integration tests
-2. Performance benchmarks
-3. User documentation
-4. Migration guide
+### Performance
+- ✅ <10ms transformation overhead
+- ✅ 99.9% cache hit rate
+- ✅ Support 1000+ concurrent versions
+- ✅ <100ms version routing
 
-### Medium-term (Phase 8)
-1. Intermediate example
-2. Advanced example
-3. Example documentation
+### Developer Experience
+- ✅ Automatic transformer generation
+- ✅ Clear error messages
+- ✅ Visual version timeline
+- ✅ Comprehensive testing tools
 
-## Documentation
+## Related Documentation
 
-### Available Documentation
-- ✅ Requirements (`requirements.md`)
-- ✅ Design (`design.md`)
-- ✅ Tasks (`tasks.md`)
-- ✅ Acceptance Criteria Status (`ACCEPTANCE_CRITERIA_STATUS.md`)
-- ✅ Phase Summaries (PHASE1-5)
-- ✅ Completion Reports (PHASE5, PHASE6_TASK1, PHASE8_TASK1)
-- ✅ Beginner Example README
-- ✅ Design Decisions (`DECISIONS.md`)
+- [Timescape Architecture](../../../docs/architecture/timescape.md)
+- [Type System](../../../docs/architecture/type-system.md)
+- [Manifest System](../../../docs/guides/manifest-system.md)
+- [Beginner Example](../../../examples/timescape-beginner/README.md)
+- [Intermediate Example](../../../examples/timescape-intermediate/README.md)
 
-### Pending Documentation
-- ⏳ User guide
-- ⏳ API reference
-- ⏳ Migration guide
-- ⏳ Performance guide
-- ⏳ Troubleshooting guide
+## Contributing
 
-## Metrics
+Interested in contributing to Timescape? We'd love your help!
 
-### Code Metrics
-- **Runtime Code:** ~3,000 lines
-- **CLI Code:** ~600 lines
-- **Test Code:** ~2,500 lines
-- **Documentation:** ~3,000 lines
-- **Total:** ~9,100 lines
+- [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions)
+- [Issue Tracker](https://github.com/krishnapaul242/gati/issues)
+- [Contributing Guide](../../../docs/contributing/README.md)
 
-### Time Metrics
-- **Estimated Total:** 65 days
-- **Actual Completed:** ~10 days
-- **Efficiency:** 6.5x faster than estimated
-- **Remaining:** ~24 days (estimated)
+## Questions?
 
-### Quality Metrics
-- **Test Coverage:** 100% of public APIs
-- **TypeScript Errors:** 0 (after fixes)
-- **Linting Warnings:** Minimal (console statements in CLI)
-- **Documentation Coverage:** Comprehensive
-
-## Conclusion
-
-The Timescape API Versioning system is **86% complete** and **production-ready** for programmatic usage. The core functionality is fully implemented and tested, with comprehensive CLI commands for version and tag management.
-
-The remaining work focuses on:
-1. **Dev server integration** for automatic version creation
-2. **Documentation** for end users
-3. **Example applications** for learning
-
-The system is ready to be used in production applications with manual version creation, and will be fully automated once dev server integration is complete.
+Have questions about Timescape? Ask in:
+- [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions)
+- [Discord Community](https://discord.gg/gati) (coming soon)
 
 ---
 
-**Status:** ✅ 86% Complete  
-**Production Ready:** Yes (with manual version creation)  
-**CLI Ready:** Yes (version and tag management)  
-**Next Milestone:** Dev server integration (Phase 6, Task 6.2)
+**Status**: 🚧 In Planning  
+**Target Release**: M3 (Q1 2026)  
+**Last Updated**: November 22, 2025  
+**Next Review**: December 15, 2025

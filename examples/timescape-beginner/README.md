@@ -1,306 +1,192 @@
 # Timescape Beginner Example: Simple Blog API
 
-This example demonstrates the basics of Timescape API versioning with a simple blog API that evolves from V1 to V2.
+> 🚧 **Status**: Planned for M3 (Q1 2026)  
+> This example will be created once Timescape versioning is implemented.
+
+## Overview
+
+This example demonstrates Timescape's API versioning with a simple blog API, focusing on non-breaking changes like adding optional fields.
 
 ## What You'll Learn
 
-- How Timescape automatically manages API versions
-- How to add optional fields without breaking old clients
-- How to use semantic version tags (v1.0.0, v1.1.0)
-- How to request specific versions using timestamps or tags
-- How transformers convert data between versions
+- Creating versioned API handlers
+- Adding optional fields without breaking existing clients
+- Using Timescape CLI to manage versions
+- Testing multiple API versions simultaneously
+- Viewing version history and diffs
 
-## The Scenario
-
-You're building a blog API. Initially, posts have just `id`, `title`, and `content`. Later, you want to add an `author` field.
-
-**Without Timescape:** You'd need to:
-- Create a new endpoint like `/v2/posts`
-- Maintain both endpoints
-- Manually handle backward compatibility
-- Risk breaking old clients
-
-**With Timescape:** You just:
-- Add the `author` field to your handler
-- Timescape automatically creates a new version
-- Old clients continue to work without changes
-- New clients get the enhanced data
-
-## Project Structure
+## Planned Structure
 
 ```
-timescape-beginner/
+examples/timescape-beginner/
 ├── src/
 │   ├── handlers/
-│   │   ├── posts.ts          # V1: Basic post structure
-│   │   └── posts-v2.ts        # V2: Added author field
-│   └── transformers/
-│       └── posts-v1-v2.ts     # Transforms between V1 ↔ V2
-├── gati.config.ts             # Timescape configuration
+│   │   ├── posts/
+│   │   │   ├── index.ts          # GET /api/posts
+│   │   │   ├── [id].ts           # GET /api/posts/:id
+│   │   │   └── create.ts         # POST /api/posts
+│   │   └── health.ts
+│   └── index.ts
+├── versions/
+│   ├── v1-2024-01-01.json        # Initial version
+│   └── v2-2024-01-15.json        # Added optional fields
 ├── package.json
-├── test-requests.js           # Test script
-└── README.md                  # This file
+├── gati.config.ts
+└── README.md
 ```
 
-## Version Timeline
+## Example Scenario
 
-```
-2025-11-20T10:00:00Z  →  V1 Created (tsv:1732104000-posts-001)
-                         Tagged as: v1.0.0
-                         Fields: id, title, content
+### Version 1 (2024-01-01)
 
-2025-11-21T14:00:00Z  →  V2 Created (tsv:1732197600-posts-002)
-                         Tagged as: v1.1.0
-                         Fields: id, title, content, author (optional)
-```
-
-## Step-by-Step Tutorial
-
-### Step 1: Understanding V1 (Initial Version)
-
-**File:** `src/handlers/posts.ts`
+Initial blog API with basic post structure:
 
 ```typescript
-export interface PostV1 {
+// GET /api/posts/:id
+interface Post {
   id: string;
   title: string;
   content: string;
+  createdAt: string;
 }
 ```
 
-This is your initial API. Simple and straightforward.
+### Version 2 (2024-01-15)
 
-### Step 2: Adding the Author Field (V2)
-
-**File:** `src/handlers/posts-v2.ts`
+Added optional author and tags (non-breaking):
 
 ```typescript
-export interface PostV2 {
+// GET /api/posts/:id
+interface Post {
   id: string;
   title: string;
   content: string;
-  author?: string;  // NEW: Optional field
+  createdAt: string;
+  author?: string;      // New optional field
+  tags?: string[];      // New optional field
 }
 ```
 
-Notice the `author` field is **optional** (`?`). This makes it a non-breaking change.
-
-### Step 3: The Transformer
-
-**File:** `src/transformers/posts-v1-v2.ts`
-
-The transformer handles conversion between versions:
-
-**Forward (V1 → V2):**
-- No transformation needed (V2 is backward compatible)
-
-**Backward (V2 → V1):**
-- Remove the `author` field from responses
-- This ensures old clients don't see unexpected fields
-
-```typescript
-backward: {
-  transformResponse: (data: PostV2 | PostV2[]) => {
-    // Remove 'author' field for V1 clients
-    if (Array.isArray(data)) {
-      return data.map(post => ({
-        id: post.id,
-        title: post.title,
-        content: post.content
-        // author is omitted
-      }));
-    }
-    // ... same for single post
-  }
-}
-```
-
-### Step 4: Requesting Different Versions
-
-Clients can request specific versions in multiple ways:
-
-#### Option 1: Semantic Version Tags
-```bash
-# V1 (no author field)
-GET /posts?version=v1.0.0
-
-# V2 (with author field)
-GET /posts?version=v1.1.0
-```
-
-#### Option 2: Timestamps
-```bash
-# Request as it was on Nov 20, 2025
-GET /posts?version=2025-11-20T12:00:00Z
-
-# Request as it is on Nov 21, 2025
-GET /posts?version=2025-11-21T15:00:00Z
-```
-
-#### Option 3: Direct TSV
-```bash
-# V1 using TSV
-GET /posts?version=tsv:1732104000-posts-001
-
-# V2 using TSV
-GET /posts?version=tsv:1732197600-posts-002
-```
-
-#### Option 4: Headers
-```bash
-# Using X-Gati-Version header
-curl -H "X-Gati-Version: v1.0.0" http://localhost:3000/posts
-```
-
-#### Option 5: No Version (Latest)
-```bash
-# Always gets the latest version (V2)
-GET /posts
-```
-
-## Running the Example
-
-### 1. Install Dependencies
+## Planned Commands
 
 ```bash
-cd examples/timescape-beginner
-pnpm install
-```
+# Create the example project
+npx gatic create blog-api --template timescape-beginner
 
-### 2. Start the Dev Server
-
-```bash
+# Start development server
+cd blog-api
 pnpm dev
-```
 
-The server will start on `http://localhost:3000`
+# Create a new version
+gati version:create "Added author and tags"
 
-### 3. Run Test Requests
+# View version history
+gati version:list
 
-In another terminal:
+# Test specific version
+curl http://localhost:3000/api/posts/1?version=2024-01-01
+curl http://localhost:3000/api/posts/1?version=2024-01-15
 
-```bash
-pnpm test
-```
-
-This will run a series of test requests demonstrating different versioning scenarios.
-
-### 4. Manual Testing
-
-You can also test manually with curl:
-
-```bash
-# Get all posts with V1 (no author)
-curl "http://localhost:3000/posts?version=v1.0.0"
-
-# Get all posts with V2 (with author)
-curl "http://localhost:3000/posts?version=v1.1.0"
-
-# Get specific post with V1
-curl "http://localhost:3000/posts/1?version=v1.0.0"
-
-# Get specific post with V2
-curl "http://localhost:3000/posts/1?version=v1.1.0"
-```
-
-## Expected Output
-
-### V1 Response (no author):
-```json
-[
-  {
-    "id": "1",
-    "title": "Introduction to Timescape",
-    "content": "Timescape is a revolutionary API versioning system..."
-  },
-  {
-    "id": "2",
-    "title": "Getting Started with Gati",
-    "content": "Gati is a modern TypeScript framework..."
-  }
-]
-```
-
-### V2 Response (with author):
-```json
-[
-  {
-    "id": "1",
-    "title": "Introduction to Timescape",
-    "content": "Timescape is a revolutionary API versioning system...",
-    "author": "Alice Johnson"
-  },
-  {
-    "id": "2",
-    "title": "Getting Started with Gati",
-    "content": "Gati is a modern TypeScript framework...",
-    "author": "Bob Smith"
-  }
-]
+# View version diff
+gati version:diff v1 v2
 ```
 
 ## Key Concepts Demonstrated
 
-### 1. Automatic Version Creation
-- Timescape detects when you change your handler
-- Creates a new version with a timestamp identifier (TSV)
-- Old version remains accessible
+### 1. Non-Breaking Changes
 
-### 2. Semantic Version Tags
-- Human-readable labels (v1.0.0, v1.1.0)
-- Map to internal TSV identifiers
-- Multiple tags can point to same version
+Adding optional fields that don't affect existing clients:
 
-### 3. Backward Compatibility
-- Old clients continue to work without changes
-- Transformers handle data conversion automatically
-- Optional fields don't break existing clients
+```typescript
+// v1 clients still work with v2 API
+const post = await fetch('/api/posts/1?version=2024-01-01');
+// Returns: { id, title, content, createdAt }
 
-### 4. Time-Travel Queries
-- Request API as it was at any point in time
-- Useful for debugging and auditing
-- Consistent behavior across time
-
-### 5. Immutable Transformers
-- Once created, transformers cannot be modified
-- Ensures consistency and reliability
-- API evolution is forward-only
-
-## What's Next?
-
-This example showed a simple, non-breaking change (adding an optional field). For more complex scenarios, check out:
-
-- **Intermediate Example:** Breaking changes, type conversions, database migrations
-- **Advanced Example:** Multi-service coordination, complex transformer chains
-
-## Troubleshooting
-
-### Issue: "Version not found"
-**Solution:** Make sure you're using the correct version identifier. Check available versions with:
-```bash
-gati timescape list
+// v2 clients get new fields
+const post = await fetch('/api/posts/1?version=2024-01-15');
+// Returns: { id, title, content, createdAt, author, tags }
 ```
 
-### Issue: "Transformer failed"
-**Solution:** Check the transformer implementation in `src/transformers/posts-v1-v2.ts`. Ensure it handles both single objects and arrays.
+### 2. Automatic Version Routing
 
-### Issue: "Port already in use"
-**Solution:** Stop any other processes using port 3000, or change the port in `gati.config.ts`.
+Timescape automatically routes requests to the correct version:
 
-## Learn More
+```typescript
+// No code changes needed in handlers
+// Timescape handles version routing automatically
+export const handler: Handler = async (req, res) => {
+  const post = await db.posts.findById(req.params.id);
+  res.json({ post });
+};
+```
 
-- [Timescape Documentation](../../docs/guides/timescape.md)
-- [API Reference](../../docs/api-reference/timescape.md)
-- [Intermediate Example](../timescape-intermediate/README.md)
-- [Advanced Example](../timescape-advanced/README.md)
+### 3. Version Metadata
 
-## Summary
+Each version includes metadata:
 
-This beginner example demonstrates:
-- ✅ Adding optional fields without breaking changes
-- ✅ Using semantic version tags
-- ✅ Requesting specific versions
-- ✅ Automatic data transformation
-- ✅ Time-travel queries
+```json
+{
+  "version": "2024-01-15T10:00:00Z",
+  "description": "Added author and tags",
+  "breaking": false,
+  "changes": [
+    {
+      "type": "field_added",
+      "path": "Post.author",
+      "optional": true
+    },
+    {
+      "type": "field_added",
+      "path": "Post.tags",
+      "optional": true
+    }
+  ]
+}
+```
 
-**Key Takeaway:** With Timescape, you can evolve your API confidently without breaking existing clients. The system handles versioning automatically, so you can focus on building features.
+## Expected Learning Outcomes
+
+After completing this example, you'll understand:
+
+- ✅ How to create and manage API versions
+- ✅ How Timescape handles non-breaking changes
+- ✅ How to test multiple versions simultaneously
+- ✅ How version routing works automatically
+- ✅ How to view version history and diffs
+
+## Prerequisites
+
+- Node.js >= 18.0.0
+- Basic TypeScript knowledge
+- Understanding of REST APIs
+- Gati CLI installed (`npm install -g @gati-framework/cli`)
+
+## Estimated Time
+
+**30 minutes** to complete the tutorial
+
+## Related Examples
+
+- [Intermediate Example](../timescape-intermediate/README.md) - E-commerce API with breaking changes
+- [Advanced Example](../timescape-advanced/README.md) - Complex versioning scenarios
+
+## Documentation
+
+- [Timescape Architecture](../../docs/architecture/timescape.md)
+- [Timescape CLI Guide](../../docs/guides/timescape-cli.md)
+- [API Versioning Best Practices](../../docs/guides/versioning-best-practices.md)
+
+## Contributing
+
+Want to help create this example? Check out:
+
+- [Contributing Guide](../../docs/contributing/README.md)
+- [GitHub Issues](https://github.com/krishnapaul242/gati/issues)
+
+---
+
+**Status**: 🚧 Planned  
+**Target Release**: M3 (Q1 2026)  
+**Difficulty**: Beginner  
+**Duration**: 30 minutes  
+**Last Updated**: November 22, 2025

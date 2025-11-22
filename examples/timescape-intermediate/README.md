@@ -1,463 +1,312 @@
 # Timescape Intermediate Example: E-commerce API
 
-This example demonstrates advanced Timescape features with an e-commerce API that undergoes breaking changes, type conversions, and database migrations.
+> 🚧 **Status**: Planned for M3 (Q1 2026)  
+> This example will be created once Timescape versioning is implemented.
+
+## Overview
+
+This example demonstrates advanced Timescape features with an e-commerce API, including breaking changes, type conversions, and database migrations.
 
 ## What You'll Learn
 
-- How to handle breaking changes (field rename + type change)
-- How to implement type conversions in transformers
-- How to coordinate database schema migrations with API versions
-- How multi-hop transformer chains work (V1 → V2 → V3)
-- How to manage backward compatibility with breaking changes
+- Handling breaking changes with transformers
+- Type conversions (string → number, etc.)
+- Database schema migrations
+- Backward and forward compatibility
+- Testing version transformations
+- Rollback strategies
 
-## The Scenario
-
-You're building an e-commerce API. Initially, prices are stored as strings ("19.99"). Later, you realize this is problematic for calculations and decide to switch to integers in cents (1999). This is a **breaking change** that requires careful handling.
-
-**The Problem:**
-- Old clients expect: `{price: "19.99"}`
-- New API returns: `{priceInCents: 1999}`
-- Field name changed: `price` → `priceInCents`
-- Type changed: `string` → `number`
-- Value format changed: `"19.99"` → `1999`
-
-**Without Timescape:** You'd need to:
-- Maintain two separate endpoints
-- Write complex migration logic
-- Risk breaking old clients
-- Coordinate database changes manually
-
-**With Timescape:** You just:
-- Update your handler with the new format
-- Timescape generates transformer stubs
-- Implement the conversion logic
-- Database migrations run automatically
-- Old clients continue to work seamlessly
-
-## Project Structure
+## Planned Structure
 
 ```
-timescape-intermediate/
+examples/timescape-intermediate/
 ├── src/
 │   ├── handlers/
-│   │   ├── products.ts          # V1: String price
-│   │   ├── products-v2.ts        # V2: Integer priceInCents (BREAKING)
-│   │   └── products-v3.ts        # V3: Added currency and stock
+│   │   ├── products/
+│   │   │   ├── index.ts          # GET /api/products
+│   │   │   ├── [id].ts           # GET /api/products/:id
+│   │   │   └── create.ts         # POST /api/products
+│   │   ├── orders/
+│   │   │   ├── index.ts          # GET /api/orders
+│   │   │   ├── [id].ts           # GET /api/orders/:id
+│   │   │   └── create.ts         # POST /api/orders
+│   │   └── health.ts
 │   ├── transformers/
-│   │   ├── products-v1-v2.ts     # Breaking change transformer
-│   │   └── products-v2-v3.ts     # Non-breaking transformer
-│   └── modules/
-│       └── database.ts           # Database module with schema versioning
-├── migrations/
-│   ├── 001_initial_schema.sql
-│   ├── 002_price_to_cents.sql
-│   ├── 002_price_to_cents_rollback.sql
-│   ├── 003_add_currency_and_stock.sql
-│   └── 003_add_currency_and_stock_rollback.sql
-├── gati.config.ts
+│   │   ├── product-v1-to-v2.ts   # Price string → number
+│   │   └── order-v2-to-v3.ts     # Status enum change
+│   ├── migrations/
+│   │   ├── 001-add-product-price.ts
+│   │   └── 002-change-order-status.ts
+│   └── index.ts
+├── versions/
+│   ├── v1-2024-01-01.json        # Initial version
+│   ├── v2-2024-02-01.json        # Price type change (breaking)
+│   └── v3-2024-03-01.json        # Order status enum change (breaking)
 ├── package.json
-├── test-requests.js
+├── gati.config.ts
 └── README.md
 ```
 
-## Version Timeline
+## Example Scenarios
 
-```
-2025-11-20T10:00:00Z  →  V1 Created (tsv:1732104000-products-001)
-                         Tagged as: v1.0.0
-                         DB Schema: schema_v1
-                         Format: {id, name, price: string, description}
+### Version 1 (2024-01-01) - Initial Release
 
-2025-11-21T10:00:00Z  →  V2 Created (tsv:1732183200-products-002)
-                         Tagged as: v2.0.0
-                         DB Schema: schema_v2 (MIGRATION REQUIRED)
-                         Format: {id, name, priceInCents: number, description}
-                         BREAKING CHANGE: price → priceInCents
+Basic e-commerce API:
 
-2025-11-22T10:00:00Z  →  V3 Created (tsv:1732269600-products-003)
-                         Tagged as: v3.0.0
-                         DB Schema: schema_v3 (MIGRATION REQUIRED)
-                         Format: {id, name, priceInCents, currency, description, inStock}
-                         NON-BREAKING: Added currency and inStock fields
-```
-
-## Step-by-Step Tutorial
-
-### Step 1: Understanding the Breaking Change
-
-**V1 Format (String):**
-```json
-{
-  "id": "1",
-  "name": "Wireless Mouse",
-  "price": "29.99",
-  "description": "Ergonomic wireless mouse"
-}
-```
-
-**V2 Format (Integer in Cents):**
-```json
-{
-  "id": "1",
-  "name": "Wireless Mouse",
-  "priceInCents": 2999,
-  "description": "Ergonomic wireless mouse"
-}
-```
-
-**Why This is Breaking:**
-1. Field renamed: `price` → `priceInCents`
-2. Type changed: `string` → `number`
-3. Value format: `"29.99"` → `2999` (cents)
-
-### Step 2: The Transformer (V1 ↔ V2)
-
-**File:** `src/transformers/products-v1-v2.ts`
-
-The transformer handles bidirectional conversion:
-
-**Forward (V1 → V2):**
 ```typescript
-// Client sends V1 format, handler expects V2
-transformResponse: (data) => {
-  // Already in V2 format from handler
-  return data;
+interface Product {
+  id: string;
+  name: string;
+  price: string;        // Price as string (e.g., "19.99")
+  stock: number;
+}
+
+interface Order {
+  id: string;
+  productId: string;
+  quantity: number;
+  status: 'pending' | 'shipped' | 'delivered';
 }
 ```
 
-**Backward (V2 → V1):**
+### Version 2 (2024-02-01) - Price Type Change (Breaking)
+
+Changed price from string to number:
+
 ```typescript
-// Handler returns V2, client expects V1
-transformResponse: (data) => {
-  return {
-    id: data.id,
-    name: data.name,
-    price: (data.priceInCents / 100).toFixed(2), // 2999 → "29.99"
-    description: data.description
-  };
+interface Product {
+  id: string;
+  name: string;
+  price: number;        // Changed: string → number (BREAKING)
+  stock: number;
+  currency: string;     // Added: currency code
 }
+
+// Transformer required for v1 → v2
+export const transformProductV1toV2 = (product: ProductV1): ProductV2 => ({
+  ...product,
+  price: parseFloat(product.price),
+  currency: 'USD'
+});
 ```
 
-**Helper Functions:**
+### Version 3 (2024-03-01) - Order Status Change (Breaking)
+
+Changed order status enum:
+
 ```typescript
-// String to cents: "29.99" → 2999
-function priceToCents(priceStr: string): number {
-  return Math.round(parseFloat(priceStr) * 100);
+interface Order {
+  id: string;
+  productId: string;
+  quantity: number;
+  status: 'created' | 'processing' | 'shipped' | 'completed' | 'cancelled';
+  // Changed: More granular status values (BREAKING)
 }
 
-// Cents to string: 2999 → "29.99"
-function centsToPrice(cents: number): string {
-  return (cents / 100).toFixed(2);
-}
+// Transformer required for v2 → v3
+export const transformOrderV2toV3 = (order: OrderV2): OrderV3 => ({
+  ...order,
+  status: mapOldStatusToNew(order.status)
+});
 ```
 
-### Step 3: Database Migration
-
-**Migration:** `migrations/002_price_to_cents.sql`
-
-```sql
--- Add new column
-ALTER TABLE products ADD COLUMN price_in_cents INTEGER;
-
--- Migrate data
-UPDATE products 
-SET price_in_cents = CAST(ROUND(CAST(price AS REAL) * 100) AS INTEGER);
-
--- Recreate table with new schema (SQLite limitation)
-CREATE TABLE products_new (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  price_in_cents INTEGER NOT NULL,
-  description TEXT NOT NULL
-);
-
--- Copy data
-INSERT INTO products_new SELECT id, name, price_in_cents, description FROM products;
-
--- Swap tables
-DROP TABLE products;
-ALTER TABLE products_new RENAME TO products;
-```
-
-**Rollback:** `migrations/002_price_to_cents_rollback.sql`
-
-```sql
--- Convert back to string format
-INSERT INTO products_v1 (id, name, price, description)
-SELECT 
-  id, 
-  name, 
-  PRINTF('%.2f', CAST(price_in_cents AS REAL) / 100.0) as price,
-  description
-FROM products;
-```
-
-### Step 4: Multi-Hop Transformation
-
-When a V1 client requests data from a V3 handler, Timescape chains transformers:
-
-```
-V1 Client Request
-  ↓
-Forward: V1 → V2 (convert price string to cents)
-  ↓
-Forward: V2 → V3 (add currency and stock defaults)
-  ↓
-V3 Handler Execution
-  ↓
-V3 Response
-  ↓
-Backward: V3 → V2 (remove currency and stock)
-  ↓
-Backward: V2 → V1 (convert cents to price string)
-  ↓
-V1 Client Response
-```
-
-**Example:**
-```bash
-# Client requests V1 format
-GET /products?version=v1.0.0
-
-# But handler is at V3
-# Timescape automatically:
-# 1. Transforms request: V1 → V2 → V3
-# 2. Executes V3 handler
-# 3. Transforms response: V3 → V2 → V1
-# 4. Returns V1 format to client
-```
-
-## Running the Example
-
-### 1. Install Dependencies
+## Planned Commands
 
 ```bash
-cd examples/timescape-intermediate
-pnpm install
-```
+# Create the example project
+npx gatic create ecommerce-api --template timescape-intermediate
 
-### 2. Run Database Migrations
-
-```bash
-pnpm migrate
-```
-
-This will:
-- Create initial schema (V1)
-- Migrate to V2 (price → priceInCents)
-- Migrate to V3 (add currency and stock)
-
-### 3. Start the Dev Server
-
-```bash
+# Start development server
+cd ecommerce-api
 pnpm dev
-```
 
-The server will start on `http://localhost:3000`
+# Create a new version with breaking changes
+gati version:create "Changed price to number" --breaking
 
-### 4. Run Test Requests
+# Generate transformer stub
+gati transformer:generate product v1 v2
 
-In another terminal:
+# Run migrations
+gati migrate:up
 
-```bash
-pnpm test
-```
+# Test transformations
+gati version:test v1 v2
 
-This will run 15+ test scenarios demonstrating:
-- Version-specific requests
-- Timestamp-based requests
-- Direct TSV requests
-- Multi-hop transformations
-- Single product retrieval
-- Latest version (no version specified)
+# View breaking changes
+gati version:diff v1 v2 --breaking-only
 
-### 5. Manual Testing
-
-```bash
-# V1 format (string price)
-curl "http://localhost:3000/products?version=v1.0.0"
-
-# V2 format (integer priceInCents)
-curl "http://localhost:3000/products?version=v2.0.0"
-
-# V3 format (with currency and stock)
-curl "http://localhost:3000/products?version=v3.0.0"
-
-# Multi-hop: V1 request → V3 handler → V1 response
-curl "http://localhost:3000/products?version=v1.0.0"
-# (assuming V3 is the latest handler)
-```
-
-## Expected Output
-
-### V1 Response (String Price):
-```json
-[
-  {
-    "id": "1",
-    "name": "Wireless Mouse",
-    "price": "29.99",
-    "description": "Ergonomic wireless mouse with USB receiver"
-  }
-]
-```
-
-### V2 Response (Integer Cents):
-```json
-[
-  {
-    "id": "1",
-    "name": "Wireless Mouse",
-    "priceInCents": 2999,
-    "description": "Ergonomic wireless mouse with USB receiver"
-  }
-]
-```
-
-### V3 Response (With Currency and Stock):
-```json
-[
-  {
-    "id": "1",
-    "name": "Wireless Mouse",
-    "priceInCents": 2999,
-    "currency": "USD",
-    "description": "Ergonomic wireless mouse with USB receiver",
-    "inStock": true
-  }
-]
+# Rollback to previous version
+gati version:rollback v2
 ```
 
 ## Key Concepts Demonstrated
 
-### 1. Breaking Changes
-- Field rename: `price` → `priceInCents`
-- Type change: `string` → `number`
-- Value format: `"29.99"` → `2999`
-- Handled transparently by transformers
+### 1. Breaking Changes with Transformers
 
-### 2. Type Conversions
-- String to number: `parseFloat()` + multiply by 100
-- Number to string: divide by 100 + `toFixed(2)`
-- Precision handling: `Math.round()` for cents
+Automatic data transformation between versions:
 
-### 3. Database Migrations
-- Schema versioning alongside API versions
-- Forward migrations (V1 → V2 → V3)
-- Rollback scripts (V3 → V2 → V1)
-- Data transformation during migration
+```typescript
+// v1 client requesting v2 data
+const product = await fetch('/api/products/1?version=2024-01-01');
+// Timescape automatically transforms v2 → v1:
+// { price: 19.99 } → { price: "19.99" }
 
-### 4. Multi-Hop Chains
-- V1 → V2 → V3 (forward)
-- V3 → V2 → V1 (backward)
-- Automatic chain execution
-- Configurable max chain length
-
-### 5. Non-Breaking Changes
-- V2 → V3: Added `currency` and `inStock`
-- Default values provided
-- Old clients unaffected
-- Simpler transformers
-
-## Database Schema Evolution
-
-### Schema V1 (Initial)
-```sql
-CREATE TABLE products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  price TEXT NOT NULL,  -- String: "29.99"
-  description TEXT NOT NULL
-);
+// v2 client requesting v1 data
+const product = await fetch('/api/products/1?version=2024-02-01');
+// Timescape automatically transforms v1 → v2:
+// { price: "19.99" } → { price: 19.99, currency: "USD" }
 ```
 
-### Schema V2 (Breaking Change)
-```sql
-CREATE TABLE products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  price_in_cents INTEGER NOT NULL,  -- Integer: 2999
-  description TEXT NOT NULL
-);
+### 2. Database Migrations
+
+Schema changes with data transformations:
+
+```typescript
+// Migration: Change price column type
+export default defineMigration({
+  version: '2024-02-01',
+  up: async (db) => {
+    // Add new column
+    await db.schema.alterTable('products', (table) => {
+      table.decimal('price_new', 10, 2);
+    });
+    
+    // Transform data
+    await db.raw(`
+      UPDATE products 
+      SET price_new = CAST(price AS DECIMAL(10,2))
+    `);
+    
+    // Drop old column, rename new
+    await db.schema.alterTable('products', (table) => {
+      table.dropColumn('price');
+      table.renameColumn('price_new', 'price');
+    });
+  },
+  down: async (db) => {
+    // Rollback logic
+  }
+});
 ```
 
-### Schema V3 (Non-Breaking)
-```sql
-CREATE TABLE products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  price_in_cents INTEGER NOT NULL,
-  currency TEXT NOT NULL DEFAULT 'USD',  -- New
-  description TEXT NOT NULL,
-  in_stock INTEGER NOT NULL DEFAULT 1    -- New
-);
+### 3. Bidirectional Transformers
+
+Support both forward and backward transformations:
+
+```typescript
+// Forward: v1 → v2
+export const forward = (data: V1): V2 => ({
+  ...data,
+  price: parseFloat(data.price),
+  currency: 'USD'
+});
+
+// Backward: v2 → v1
+export const backward = (data: V2): V1 => ({
+  ...data,
+  price: data.price.toFixed(2)
+  // currency is dropped
+});
 ```
 
-## Performance Considerations
+### 4. Version Testing
 
-### Transformer Overhead
-- Single hop: ~5-10ms
-- Two hops (V1 → V3): ~10-20ms
-- Acceptable for most use cases
-- Cached per request
+Automated testing of transformations:
 
-### Database Migration Time
-- V1 → V2: ~100ms (data conversion)
-- V2 → V3: ~50ms (add columns)
-- Runs once per version activation
-- Rollback available if needed
+```typescript
+// Test transformer correctness
+describe('Product v1 → v2 transformer', () => {
+  it('should convert price string to number', () => {
+    const v1Product = { id: '1', name: 'Widget', price: '19.99' };
+    const v2Product = transformV1toV2(v1Product);
+    
+    expect(v2Product.price).toBe(19.99);
+    expect(v2Product.currency).toBe('USD');
+  });
+  
+  it('should be reversible', () => {
+    const original = { id: '1', name: 'Widget', price: '19.99' };
+    const transformed = transformV1toV2(original);
+    const reversed = transformV2toV1(transformed);
+    
+    expect(reversed).toEqual(original);
+  });
+});
+```
+
+## Expected Learning Outcomes
+
+After completing this example, you'll understand:
+
+- ✅ How to handle breaking changes safely
+- ✅ How to write bidirectional transformers
+- ✅ How to manage database migrations with versions
+- ✅ How to test version transformations
+- ✅ How to rollback breaking changes
+- ✅ Best practices for API evolution
+
+## Prerequisites
+
+- Completed [Beginner Example](../timescape-beginner/README.md)
+- Understanding of TypeScript generics
+- Basic database knowledge (SQL)
+- Familiarity with API versioning concepts
+
+## Estimated Time
+
+**60 minutes** to complete the tutorial
+
+## Challenges
+
+Try these additional challenges:
+
+1. **Add a new breaking change**: Change `quantity` from number to object with `value` and `unit`
+2. **Complex transformation**: Merge two fields into one
+3. **Conditional migration**: Apply different transformations based on data
+4. **Performance optimization**: Batch transform large datasets
+
+## Related Examples
+
+- [Beginner Example](../timescape-beginner/README.md) - Simple blog API
+- [Advanced Example](../timescape-advanced/README.md) - Complex versioning scenarios
+
+## Documentation
+
+- [Timescape Architecture](../../docs/architecture/timescape.md)
+- [Database Migrations](../../docs/guides/database-migrations.md)
+- [Transformer Guide](../../docs/guides/transformers.md)
+- [Timescape CLI](../../docs/guides/timescape-cli.md)
 
 ## Troubleshooting
 
-### Issue: "Type mismatch in transformer"
-**Cause:** Transformer expects different data structure  
-**Solution:** Check transformer handles both single objects and arrays
+### Common Issues
 
-### Issue: "Migration failed"
-**Cause:** Database schema conflict  
-**Solution:** Run rollback script and retry migration
+**Transformer not applied:**
+- Check transformer is registered in `gati.config.ts`
+- Verify version numbers match exactly
+- Check transformer function signature
 
-### Issue: "Multi-hop chain too long"
-**Cause:** Exceeded `maxTransformerChain` limit  
-**Solution:** Increase limit in `gati.config.ts` or reduce version gap
+**Migration fails:**
+- Ensure database connection is configured
+- Check migration order (dependencies)
+- Verify data transformation logic
 
-### Issue: "Price conversion precision error"
-**Cause:** Floating point arithmetic  
-**Solution:** Use `Math.round()` when converting to cents
+**Version routing incorrect:**
+- Clear version cache: `gati cache:clear`
+- Rebuild manifests: `gati build`
+- Check version timestamps
 
-## Comparison with Beginner Example
+## Contributing
 
-| Feature | Beginner | Intermediate |
-|---------|----------|--------------|
-| Change Type | Non-breaking | Breaking |
-| Field Changes | Added optional | Renamed + type change |
-| Transformers | Simple (remove field) | Complex (type conversion) |
-| DB Migrations | None | Required |
-| Transformer Hops | 1 | 2 |
-| Complexity | Low | Medium |
+Want to help create this example? Check out:
 
-## What's Next?
+- [Contributing Guide](../../docs/contributing/README.md)
+- [GitHub Issues](https://github.com/krishnapaul242/gati/issues)
 
-This example showed breaking changes and database migrations. For even more complex scenarios, check out:
+---
 
-- **Advanced Example:** Multi-service coordination, complex chains (5+ hops), performance optimization
-
-## Learn More
-
-- [Timescape Documentation](../../docs/guides/timescape.md)
-- [Transformer Guide](../../docs/guides/transformers.md)
-- [Database Migrations](../../docs/guides/db-migrations.md)
-- [Beginner Example](../timescape-beginner/README.md)
-- [Advanced Example](../timescape-advanced/README.md)
-
-## Summary
-
-This intermediate example demonstrates:
-- ✅ Breaking changes (field rename + type change)
-- ✅ Type conversions (string ↔ number)
-- ✅ Database schema migrations
-- ✅ Multi-hop transformer chains
-- ✅ Rollback scripts
-- ✅ Non-breaking changes (V2 → V3)
-
-**Key Takeaway:** Even breaking changes can be handled gracefully with Timescape. Old clients continue to work while new clients benefit from improved data structures. The system handles all the complexity of version coordination and data transformation automatically.
+**Status**: 🚧 Planned  
+**Target Release**: M3 (Q1 2026)  
+**Difficulty**: Intermediate  
+**Duration**: 60 minutes  
+**Last Updated**: November 22, 2025

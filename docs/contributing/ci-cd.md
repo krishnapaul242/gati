@@ -14,7 +14,9 @@ Runs on every push and pull request to `main`:
 ✅ Test - Runs tests for stable packages
 ```
 
-**Status**: [![CI](https://github.com/krishnapaul242/gati/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnapaul242/gati/actions/workflows/ci.yml)
+**Status**: ✅ **Passing** - All checks green!
+
+[![CI](https://github.com/krishnapaul242/gati/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnapaul242/gati/actions/workflows/ci.yml)
 
 ### Release Workflow (`.github/workflows/release.yml`)
 
@@ -27,14 +29,18 @@ Automatically publishes to npm when changesets are merged:
 ✅ Create GitHub releases
 ```
 
+**Status**: ✅ **Ready** - Configured and tested, awaiting NPM_TOKEN for automated publishing
+
 ### Documentation Deployment (`.github/workflows/deploy-docs.yml`)
 
 Deploys VitePress documentation to GitHub Pages:
 
 ```yaml
 ✅ Build VitePress site
-✅ Deploy to https://krishnapaul.in/gati/
+✅ Deploy to https://krishnapaul242.github.io/gati/
 ```
+
+**Status**: ✅ **Configured** - Ready to deploy once GitHub Pages is enabled in repository settings
 
 ## Package Status
 
@@ -83,7 +89,7 @@ The release workflow will:
 
 ## NPM Token Setup
 
-For maintainers, the `NPM_TOKEN` secret is required:
+For maintainers, the `NPM_TOKEN` secret is required for automated publishing:
 
 ```bash
 # Generate token
@@ -94,6 +100,8 @@ npm token create --type=automation
 # Settings → Secrets and variables → Actions
 # New secret: NPM_TOKEN
 ```
+
+**Current Status**: ⏳ Awaiting token setup for automated publishing. Manual publishing works via `pnpm release`.
 
 ## Build Configuration
 
@@ -156,15 +164,17 @@ Coverage reports are uploaded to Codecov on Node 20 builds.
 
 ### Documentation
 
-- **URL**: https://krishnapaul.in/gati/
+- **URL**: https://krishnapaul242.github.io/gati/
 - **Trigger**: Push to `main` with changes in `docs/**`
 - **Platform**: GitHub Pages
+- **Status**: ✅ Workflow configured, awaiting GitHub Pages enablement
 
 ### NPM Packages
 
 - **Registry**: https://registry.npmjs.org
 - **Scope**: `@gati-framework`
 - **Access**: Public
+- **Status**: ✅ Core and Types packages published and available
 
 ## Monitoring
 

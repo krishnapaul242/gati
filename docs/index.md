@@ -161,37 +161,40 @@ One command to deploy anywhere. Gati handles containers, manifests, scaling, SSL
 
 | Component | Version | Status | NPM | Description |
 |-----------|---------|--------|-----|-------------|
-| Core Framework | 1.0.0 | ✅ **Ready** | 🚀 **Publishing Soon** | Core runtime, handler engine, contexts |
-| Type Definitions | 1.0.0 | ✅ **Ready** | 🚀 **Publishing Soon** | TypeScript types and interfaces |
-| CLI Tools | 1.0.13 | 🚧 **In Progress** | - | Dev server, build, deployment commands |
-| Runtime Engine | 2.0.3 | 🚧 **In Progress** | - | Timescape, lifecycle management |
-| AWS EKS Plugin | 1.0.0 | 🚧 **In Progress** | - | AWS deployment automation |
-| Playground | 1.0.0 | 🚧 **In Progress** | - | Visual debugging (3-mode) |
+| Core Framework | 0.4.3 | ✅ **Stable** | ✅ **Published** | Core runtime, handler engine, contexts |
+| Type Definitions | 0.4.3 | ✅ **Stable** | ✅ **Published** | TypeScript types and interfaces |
+| Runtime Engine | 2.0.3 | ✅ **Stable** | ✅ **Published** | Handler execution, lifecycle management |
+| CLI Tools | 1.0.7 | ✅ **Stable** | ✅ **Published** | Dev server, build, deployment commands |
+| GatiC | 0.1.6 | ✅ **Stable** | ✅ **Published** | Project scaffolding tool |
+| AWS EKS Plugin | 1.0.0 | ✅ **Stable** | ✅ **Published** | AWS deployment automation |
+| Playground | 1.0.0 | ✅ **Stable** | ✅ **Published** | Visual debugging (3-mode) |
 | Type System | - | 📅 **M2 Priority** | - | Branded types, constraint combinators |
 | Timescape | - | 📅 **M2 Priority** | - | Version management, schema diffing |
 | GCP/Azure | - | 📅 **M2 Planned** | - | Multi-cloud deployment |
 | SDK Generation | - | 📅 **M5 Planned** | - | Auto-generated typed clients |
 | Control Panel | - | 📅 **M4 Planned** | - | Web UI for monitoring |
 
-### 🎉 First NPM Release Coming Soon!
+### 🎉 M1 Complete — Now on NPM!
 
-The core packages (`@gati-framework/core` and `@gati-framework/types`) are **production-ready** and will be published to npm shortly. CI/CD pipeline is configured and passing!
+All core packages are **published to npm** and production-ready! CI/CD pipeline is passing with automated testing and releases.
 
-### Production-Ready Features (✅)
+### Production-Ready Features (✅ M1 Complete)
 
 - **Core Runtime** — Handler engine, modules, middleware, contexts
 - **Development** — Hot reload (50-200ms), manifest system, file-based routing
 - **Deployment** — Local K8s (kind), AWS EKS, Docker, HPA, Ingress
 - **Observability** — Structured logging (Pino), request tracing, health checks
 - **Debugging** — Playground with API/Network/Tracking visualization modes
+- **CI/CD** — Automated testing, building, and npm publishing
+- **Project Scaffolding** — GatiC CLI for instant project creation
 
-### Coming Soon (🚧)
+### Roadmap
 
-**M2 (Q2 2025)** — Type System & Timescape foundations  
-**M3 (Q3 2025)** — Multi-cloud deployment (GCP, Azure)  
-**M4 (Q3 2025)** — Control Panel (read-only monitoring UI)  
-**M5 (Q3 2025)** — SDK generation from handler signatures  
-**M6 (Q4 2025)** — CDN integration, SSL automation
+**M2 (Q1 2026)** — Type System & Timescape foundations  
+**M3 (Q1 2026)** — Multi-cloud deployment (GCP, Azure)  
+**M4 (Q2 2026)** — Control Panel (read-only monitoring UI)  
+**M5 (Q2 2026)** — SDK generation from handler signatures  
+**M6 (Q3 2026)** — CDN integration, SSL automation
 
 ## Community
 

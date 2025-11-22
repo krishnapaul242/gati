@@ -168,6 +168,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/changelog/' },
             { text: 'Current State', link: '/changelog/current-state' },
+            { text: 'CI/CD Complete (Nov 22)', link: '/changelog/2025-11-22-ci-cd-complete' },
             { text: 'MVP Completion', link: '/changelog/mvp-completion' }
           ]
         }

@@ -2,14 +2,17 @@
 
 ## Package Versions
 
-| Package | Version | Status | Published |
-|---------|---------|--------|-----------||
-| `@gati-framework/core` | 0.4.3 | ✅ Stable | ✅ npm |
-| `@gati-framework/runtime` | 2.0.3 | ✅ Stable | ✅ npm |
-| `@gati-framework/cli` | 1.0.7 | ✅ Stable | ✅ npm |
-| `gatic` | 0.1.6 | ✅ Stable | ✅ npm |
-| `@gati-framework/cloud-aws` | 1.0.0 | ✅ Stable | ✅ npm |
-| `@gati-framework/playground` | 1.0.0 | ✅ Stable | ✅ npm |
+| Package | Version | Status | Published | CI/CD |
+|---------|---------|--------|-----------|-------|
+| `@gati-framework/core` | 0.4.3 | ✅ Stable | ✅ npm | ✅ Passing |
+| `@gati-framework/types` | 0.4.3 | ✅ Stable | ✅ npm | ✅ Passing |
+| `@gati-framework/runtime` | 2.0.3 | ✅ Stable | ✅ npm | 🚧 Excluded |
+| `@gati-framework/cli` | 1.0.7 | ✅ Stable | ✅ npm | 🚧 Excluded |
+| `gatic` | 0.1.6 | ✅ Stable | ✅ npm | 🚧 Excluded |
+| `@gati-framework/cloud-aws` | 1.0.0 | ✅ Stable | ✅ npm | 🚧 Excluded |
+| `@gati-framework/playground` | 1.0.0 | ✅ Stable | ✅ npm | 🚧 Excluded |
+
+**Note:** Only core and types packages are currently in CI/CD. Other packages are excluded due to TypeScript strict mode issues but are functional and published.
 
 ## What's Working Now
 
@@ -235,6 +238,29 @@ my-app/
    - Package versions
    - Updated examples
    - Accurate feature status
+
+## CI/CD Status
+
+### ✅ What's Working
+
+- **Build Pipeline** — Core and Types packages build successfully
+- **Test Pipeline** — All tests passing for stable packages
+- **Lint Pipeline** — Running but non-blocking (1660 errors to fix gradually)
+- **Release Pipeline** — Automated npm publishing with changesets
+- **Documentation** — VitePress site deployment configured
+
+### 🚧 Known Issues
+
+- **TypeScript Strict Mode** — Runtime, CLI, and cloud packages have strict mode errors
+- **Excluded from CI** — Non-core packages temporarily excluded until strict mode issues resolved
+- **Lint Warnings** — 1660 errors, 403 warnings (non-blocking, can be fixed incrementally)
+
+### 📦 Publishing Process
+
+1. Create changeset: `pnpm changeset`
+2. Version packages: `pnpm changeset version`
+3. Commit and push to trigger release workflow
+4. Automated publishing to npm with GitHub releases
 
 ## What's Next (In Progress)
 

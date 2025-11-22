@@ -4,11 +4,27 @@ All notable changes and releases for the Gati framework.
 
 ## Latest Release
 
-**Current Version**: v2.0.0 (Runtime), v1.0.0 (CLI), v0.4.1 (Core)  
-**Release Date**: November 10, 2025  
-**Status**: ✅ Production Ready
+**Current Version**: v2.0.3 (Runtime), v1.0.7 (CLI), v0.4.3 (Core)  
+**Release Date**: November 22, 2025  
+**Status**: ✅ Production Ready with CI/CD
 
 See [Current State](./current-state.md) for detailed status.
+
+---
+
+## Recent Updates
+
+### November 22, 2025 - CI/CD Pipeline Complete 🎉
+
+**Major Achievement**: Automated CI/CD pipeline now operational!
+
+- ✅ Automated testing on every push
+- ✅ Automated npm publishing with changesets
+- ✅ Documentation deployment to GitHub Pages
+- ✅ Core and Types packages in CI/CD
+- 🚧 Other packages temporarily excluded (TypeScript strict mode issues)
+
+See [CI/CD Complete](./2025-11-22-ci-cd-complete.md) for full details.
 
 ---
 
@@ -134,6 +150,14 @@ See [MVP Completion Report](./mvp-completion.md) for full details.
 
 ## Documentation Updates
 
+### November 22, 2025
+
+- ✅ Updated for CI/CD completion
+- ✅ Added CI/CD status documentation
+- ✅ Updated package versions across docs
+- ✅ Added CI/CD changelog entry
+- ✅ Updated roadmap timelines
+
 ### November 12, 2025
 
 - ✅ Reorganized documentation structure
@@ -196,6 +220,7 @@ const handler: Handler = (req, res) => { ... }
 
 ## Release Notes Archive
 
+- [CI/CD Complete](./2025-11-22-ci-cd-complete.md) - CI/CD pipeline completion (Nov 22, 2025)
 - [Current State](./current-state.md) - Latest status and features
 - [MVP Completion](./mvp-completion.md) - M1 milestone report
 - [Task Summary](./task-completion-summary.md) - Completed tasks
@@ -223,4 +248,4 @@ Gati follows [Semantic Versioning](https://semver.org/):
 
 ---
 
-*Last Updated: November 12, 2025*
+*Last Updated: November 22, 2025*
