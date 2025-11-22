@@ -190,17 +190,31 @@ All core packages are **published to npm** and production-ready! CI/CD pipeline 
 
 ### Roadmap
 
-**M2 (Q1 2026)** — Type System & Timescape foundations  
-**M3 (Q1 2026)** — Multi-cloud deployment (GCP, Azure)  
-**M4 (Q2 2026)** — Control Panel (read-only monitoring UI)  
-**M5 (Q2 2026)** — SDK generation from handler signatures  
-**M6 (Q3 2026)** — CDN integration, SSL automation
+**M3 (November 2025)** — 🚧 IN PROGRESS - Timescape versioning, module system, type system  
+**M4 (Q1 2026)** — Control Panel (monitoring and configuration UI)  
+**M5 (Q1 2026)** — SDK generation from handler signatures  
+**M6 (Q2 2026)** — CDN integration, SSL automation
+
+### Looking for Contributors!
+
+Gati is currently a solo project by Krishna Paul. I'm actively looking for:
+- 🧪 Beta testers
+- 👨‍💻 Contributors (especially for M3 features)
+- 📚 Technical writers
+- 🎨 UI/UX designers
+
+[Join the journey →](/contributing/)
 
 ## Community
+
+Gati is built by Krishna Paul as a solo project, and I'm looking for contributors!
 
 - 💬 [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions) — Ask questions, share ideas
 - 🐛 [Issue Tracker](https://github.com/krishnapaul242/gati/issues) — Report bugs, request features
 - 📖 [Contributing Guide](/contributing/README) — Help build Gati
+- 🧪 [Beta Testing](https://github.com/krishnapaul242/gati/discussions) — Try M3 features
+
+**Want to contribute?** I'm especially looking for help with M3 (Timescape, modules, types)!
 
 ## License
 

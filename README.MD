@@ -104,10 +104,10 @@ export const handler: Handler = async (req, res, gctx, lctx) => {
 |-----------|--------|--------|-------------|
 | **M1** — Foundation & Core Runtime | ✅ Complete | Q4 2025 | Handler engine, CLI, Kubernetes deployment |
 | **M2** — Cloud Infrastructure | ✅ Complete | Q4 2025 | AWS/GCP/Azure plugins, auto-scaling, CI/CD |
-| **M3** — API Versioning | ⏳ Planned | Q1 2026 | Timescape: Timestamp-based routing for backward compatibility |
-| **M4** — Control Panel | ⏳ Planned | Q2 2026 | Live monitoring and configuration dashboard |
-| **M5** — SDK Generation | ⏳ Planned | Q2 2026 | Auto-generate typed clients for any platform |
-| **M6** — CDN & SSL | ⏳ Planned | Q3 2026 | Global CDN, automatic SSL, multi-region support |
+| **M3** — Timescape & Type System | 🚧 In Progress | Nov 2025 | API versioning, module system, type system, contracts |
+| **M4** — Control Panel | ⏳ Planned | Q1 2026 | Live monitoring and configuration dashboard |
+| **M5** — SDK Generation | ⏳ Planned | Q1 2026 | Auto-generate typed clients for any platform |
+| **M6** — CDN & SSL | ⏳ Planned | Q2 2026 | Global CDN, automatic SSL, multi-region support |
 
 **📋 Detailed roadmap:** [docs/architecture/milestones.md](./docs/architecture/milestones.md)
 
@@ -291,12 +291,24 @@ gati/
 
 ## 🤝 Contributing
 
-We welcome contributions! Whether you're fixing bugs, improving docs, or proposing new features:
+Gati is currently a **solo project** by Krishna Paul, and I'm actively looking for **contributors and testers**!
 
-- 🐞 **Found a bug?** [Open an issue](https://github.com/krishnapaul242/gati/issues/new)
-- 💡 **Have an idea?** [Start a discussion](https://github.com/krishnapaul242/gati/discussions/new)
-- 📝 **Improve docs?** Submit a pull request
-- 🚀 **Add a feature?** Check the [contributing guide](./docs/contributing/README.md)
+Whether you're interested in:
+- 🐞 **Testing** - Try Gati and report bugs
+- 💡 **Ideas** - Share your thoughts and suggestions
+- 📝 **Documentation** - Help improve the docs
+- 🚀 **Features** - Contribute code and new capabilities
+- 🎨 **Design** - Help with UI/UX for the Control Panel
+
+**Your contributions are welcome!**
+
+### How to Get Involved
+
+1. ⭐ **Star the repo** to show support
+2. 💬 **Join discussions** - Share your ideas
+3. 🐛 **Report bugs** - Help me improve quality
+4. 📖 **Improve docs** - Make Gati easier to use
+5. 🔧 **Submit PRs** - Add features or fix issues
 
 ### Development Workflow
 
@@ -308,6 +320,14 @@ We welcome contributions! Whether you're fixing bugs, improving docs, or proposi
 6. Push and create a pull request
 
 **Contributing guide:** [docs/contributing/README.md](./docs/contributing/README.md)
+
+### Looking For
+
+- 🧪 **Beta Testers** - Try Gati in real projects
+- 👨‍💻 **Contributors** - Help build features
+- 📚 **Technical Writers** - Improve documentation
+- 🎨 **Designers** - UI/UX for Control Panel
+- 🌍 **Community Builders** - Help grow the community
 
 ## 🌟 Why Gati?
 
@@ -335,7 +355,7 @@ We welcome contributions! Whether you're fixing bugs, improving docs, or proposi
 
 ## 🎯 Vision
 
-Gati aims to be the **backend framework that builds, scales, and evolves itself**:
+My goal is to build the **backend framework that builds, scales, and evolves itself**:
 
 1. **Let Developers Write Business Logic** — Framework handles everything else
 2. **APIs That Never Break** — Timescape enables fearless shipping
@@ -344,6 +364,16 @@ Gati aims to be the **backend framework that builds, scales, and evolves itself*
 5. **Zero-Ops Deployment** — One command to deploy anywhere
 
 **Read more:** [docs/vision/why-gati.md](./docs/vision/why-gati.md)
+
+### Current Focus (November 2025)
+
+I'm currently working on **M3 - Timescape & Type System**:
+- 🔄 Timescape API versioning
+- 📦 Enhanced module system
+- 🏷️ Type system with contracts
+- 🔌 Module registry and marketplace
+
+**Want to help?** These are great areas for contributors!
 
 ## 📄 License
 

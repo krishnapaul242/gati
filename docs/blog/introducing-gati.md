@@ -234,19 +234,32 @@ That's it. You're production-ready.
 
 ## What's Coming Next?
 
-### 🚧 M3 - Timescape Versioning (Q1 2026)
+### 🚧 M3 - Timescape & Type System (November 2025) - IN PROGRESS
 
-Revolutionary API versioning system:
+I'm currently working on the revolutionary API versioning and type system:
 
+**Timescape Versioning:**
 - Timestamp-based version routing
 - Automatic schema diffing
 - Bidirectional data transformers
 - Parallel version execution
 - Zero-downtime version deployments
 
+**Module System:**
+- Enhanced module registry
+- Module marketplace
+- Dependency management
+- Isolated module execution
+
+**Type System:**
+- Branded types with constraints
+- Contract-based validation
+- Runtime type checking
+- Schema generation
+
 **Ship breaking changes without fear.**
 
-### 📊 M4 - Control Panel (Q2 2026)
+### 📊 M4 - Control Panel (Q1 2026)
 
 Live monitoring and configuration dashboard:
 
@@ -258,7 +271,7 @@ Live monitoring and configuration dashboard:
 
 **Observe and control your backend visually.**
 
-### 🛠️ M5 - SDK Generation (Q2 2026)
+### 🛠️ M5 - SDK Generation (Q1 2026)
 
 Auto-generated typed clients:
 
@@ -270,7 +283,7 @@ gati generate sdk --platform go
 
 **Type-safe clients for any platform, automatically.**
 
-### ☁️ M6 - CDN & SSL (Q3 2026)
+### ☁️ M6 - CDN & SSL (Q2 2026)
 
 Global distribution and security:
 
@@ -284,19 +297,19 @@ Global distribution and security:
 
 ---
 
-## Why We Built Gati
+## Why I Built Gati
 
-As developers, we were tired of:
+As a developer, I was tired of:
 
-- Spending 70% of our time on infrastructure
+- Spending 70% of my time on infrastructure
 - Fearing API changes that might break production
 - Writing the same boilerplate over and over
 - Fighting with Docker, Kubernetes, and cloud providers
 - Maintaining complex CI/CD pipelines
 
-**We wanted to focus on building features, not fighting infrastructure.**
+**I wanted to focus on building features, not fighting infrastructure.**
 
-Gati is our answer. A framework that:
+Gati is my answer. A framework that:
 
 1. **Understands your code** and generates everything else
 2. **Handles versioning** so you can ship fearlessly
@@ -350,7 +363,9 @@ Gati automatically provides:
 
 ## Community & Open Source
 
-Gati is **MIT licensed** and open source. We believe in:
+Gati is **MIT licensed** and open source. As a solo developer, I'm building this in the open and **actively looking for contributors and testers**!
+
+### I Believe In
 
 - 🌍 **Community-driven development**
 - 📖 **Comprehensive documentation**
@@ -358,30 +373,50 @@ Gati is **MIT licensed** and open source. We believe in:
 - 🚀 **Rapid iteration**
 - 💡 **Transparent roadmap**
 
+### How You Can Help
+
+**I'm looking for:**
+
+- 🧪 **Beta Testers** - Try Gati in your projects and share feedback
+- 👨‍💻 **Contributors** - Help build M3 features (Timescape, modules, types)
+- 📚 **Technical Writers** - Improve documentation and tutorials
+- 🎨 **Designers** - UI/UX for the upcoming Control Panel
+- 🌍 **Community Builders** - Help spread the word
+
 ### Get Involved
 
-- ⭐ [Star us on GitHub](https://github.com/krishnapaul242/gati)
-- 📖 [Read the documentation](https://krishnapaul242.github.io/gati/)
-- 💬 [Join discussions](https://github.com/krishnapaul242/gati/discussions)
-- 🐛 [Report issues](https://github.com/krishnapaul242/gati/issues)
-- 🤝 [Contribute](https://krishnapaul242.github.io/gati/contributing/)
+- ⭐ [Star on GitHub](https://github.com/krishnapaul242/gati) - Show your support
+- 📖 [Read the docs](https://krishnapaul242.github.io/gati/) - Learn how to use Gati
+- 💬 [Join discussions](https://github.com/krishnapaul242/gati/discussions) - Share ideas
+- 🐛 [Report issues](https://github.com/krishnapaul242/gati/issues) - Help improve quality
+- 🤝 [Contribute](https://krishnapaul242.github.io/gati/contributing/) - Build with me
+
+**Every contribution matters!** Whether it's code, docs, testing, or just spreading the word - I appreciate all help.
 
 ---
 
 ## The Vision
 
-Gati aims to be **the backend framework that builds, scales, and evolves itself**.
+My goal is to make Gati **the backend framework that builds, scales, and evolves itself**.
 
-We're building a future where:
+I'm building a future where:
 
 - ✅ Developers write only business logic
-- ✅ APIs never break (Timescape)
+- ✅ APIs never break (Timescape - coming Nov 2025)
 - ✅ Deployment is one command
 - ✅ Scaling is automatic
 - ✅ Monitoring is visual
 - ✅ Infrastructure is invisible
 
 **Backend development should be about solving problems, not fighting tools.**
+
+### Current Progress
+
+- ✅ **M1 Complete** - Core runtime and handler engine
+- ✅ **M2 Complete** - Cloud deployment and CI/CD
+- 🚧 **M3 In Progress** - Timescape, modules, and type system (Nov 2025)
+
+**Want to be part of this journey?** I'm looking for contributors!
 
 ---
 
@@ -424,21 +459,36 @@ gati deploy dev --local
 
 ---
 
-## Join the Movement
+## Join Me on This Journey
 
 Backend development is changing. Infrastructure is becoming invisible. Deployment is becoming automatic. APIs are becoming unbreakable.
 
-**Gati is leading this transformation.**
+**I'm building Gati to lead this transformation.**
 
-We're just getting started, and we'd love for you to be part of this journey.
+As a solo developer, I'm just getting started, and I'd love for you to be part of this journey.
 
-- 🚀 Try Gati today
-- ⭐ Star us on GitHub
-- 💬 Share your feedback
-- 🤝 Contribute to the project
-- 📢 Spread the word
+### How to Get Started
 
-Together, we're building the future of backend development.
+- 🚀 **Try Gati** - Build something with it
+- ⭐ **Star on GitHub** - Show your support
+- 💬 **Share feedback** - Tell me what you think
+- 🤝 **Contribute** - Help build features
+- 📢 **Spread the word** - Tell other developers
+- 🧪 **Beta test** - Try M3 features when ready
+
+**Together, we can build the future of backend development.**
+
+### Special Call for Contributors
+
+I'm actively working on **M3 (Timescape & Type System)** and would love help with:
+
+- Testing Timescape versioning features
+- Building module system components
+- Implementing type system contracts
+- Writing documentation and examples
+- Designing the Control Panel UI
+
+**Interested?** Reach out via [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions)!
 
 ---
 
