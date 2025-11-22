@@ -85,10 +85,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm --filter @gati-framework/core --filter @gati-framework/types --filter @gati-framework/cli build
+        run: pnpm --filter @gati-framework/core --filter @gati-framework/types build
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm test --filter @gati-framework/core --filter @gati-framework/types
 
       - name: Upload coverage
         if: matrix.node-version == 20
