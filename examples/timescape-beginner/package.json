@@ -1,0 +1,18 @@
+{
+  "name": "@gati-examples/timescape-beginner",
+  "version": "1.0.0",
+  "description": "Beginner example for Timescape API versioning - Simple blog API",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "gati dev",
+    "build": "gati build",
+    "test": "node test-requests.js"
+  },
+  "dependencies": {
+    "@gati-framework/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
