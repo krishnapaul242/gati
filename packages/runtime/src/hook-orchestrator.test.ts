@@ -1,0 +1,1116 @@
+/**
+ * @module runtime/hook-orchestrator.test
+ * @description Tests for hook orchestration system
+ * 
+ * Tests Task 5: LCC Lifecycle Orchestration
+ * - Property 25: Hook execution order
+ * - Property 6: Error isolation
+ * - Property 8: Timeout cleanup
+ * - Property 20: Lifecycle event emission
+ * - Property 10: Request validation
+ * - Property 11: Response validation
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fc } from '@fast-check/vitest';
+import { HookOrchestrator, type Hook, type LifecycleEvent } from './hook-orchestrator.js';
+import type { LocalContext, GlobalContext } from './types/context.js';
+import type { Request } from './types/index.js';
+import { g } from './gtype/index.js';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import { createLocalContext } from './local-context.js';
+import { object } from 'fast-check';
+import { createLocalContext } from './local-context.js';
+import { object } from 'fast-check';
+import events from 'events';
+import { createLocalContext } from './local-context.js';
+import { object } from 'fast-check';
+import { createLocalContext } from './local-context.js';
+import { object } from 'fast-check';
+import { createLocalContext } from './local-context.js';
+import { object } from 'fast-check';
+import events from 'events';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import events from 'events';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import events from 'events';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import events from 'events';
+import events from 'events';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import { createGlobalContext } from './global-context.js';
+import { createLocalContext } from './local-context.js';
+import { createGlobalContext } from './global-context.js';
+
+// Mock contexts
+const createMockLocalContext = (requestId = 'test-request'): LocalContext => ({
+  requestId,
+  get: vi.fn(),
+  set: vi.fn(),
+  delete: vi.fn(),
+  clean: vi.fn(),
+  publish: vi.fn(),
+  metadata: {
+    requestId,
+    path: '/test',
+    version: '1.0.0',
+    flags: [],
+  },
+});
+
+const createMockGlobalContext = (): GlobalContext => ({
+  getModule: vi.fn(),
+  secrets: {
+    get: vi.fn(),
+  },
+  metrics: {
+    counter: vi.fn(),
+    gauge: vi.fn(),
+    histogram: vi.fn(),
+  },
+  publish: vi.fn(),
+  config: {},
+  timescape: {
+    resolveVersion: vi.fn(),
+    getManifest: vi.fn(),
+  },
+});
+
+describe('HookOrchestrator', () => {
+  let orchestrator: HookOrchestrator;
+  let lctx: LocalContext;
+  let gctx: GlobalContext;
+  let events: LifecycleEvent[];
+
+  beforeEach(() => {
+    events = [];
+    orchestrator = new HookOrchestrator({
+      emitEvents: true,
+      onEvent: (event) => events.push(event),
+    });
+    lctx = createMockLocalContext();
+    gctx = createMockGlobalContext();
+  });
+
+  describe('Hook Registration', () => {
+    it('should register before hooks', () => {
+      orchestrator.registerBefore({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      const hooks = orchestrator.getHooks();
+      expect(hooks.before).toHaveLength(1);
+      expect(hooks.before[0].id).toBe('test-hook');
+    });
+
+    it('should register after hooks', () => {
+      orchestrator.registerAfter({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      const hooks = orchestrator.getHooks();
+      expect(hooks.after).toHaveLength(1);
+      expect(hooks.after[0].id).toBe('test-hook');
+    });
+
+    it('should register catch hooks', () => {
+      orchestrator.registerCatch({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      const hooks = orchestrator.getHooks();
+      expect(hooks.catch).toHaveLength(1);
+      expect(hooks.catch[0].id).toBe('test-hook');
+    });
+
+    it('should clear all hooks', () => {
+      orchestrator.registerBefore({ id: 'hook1', fn: () => {}, level: 'global' });
+      orchestrator.registerAfter({ id: 'hook2', fn: () => {}, level: 'global' });
+      orchestrator.registerCatch({ id: 'hook3', fn: () => {}, level: 'global' });
+
+      orchestrator.clear();
+
+      const hooks = orchestrator.getHooks();
+      expect(hooks.before).toHaveLength(0);
+      expect(hooks.after).toHaveLength(0);
+      expect(hooks.catch).toHaveLength(0);
+    });
+  });
+
+  describe('Property 25: Hook Execution Order', () => {
+    it('should execute before hooks in order: global → route → local', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerBefore({
+        id: 'local-hook',
+        fn: () => executionOrder.push('local'),
+        level: 'local',
+      });
+
+      orchestrator.registerBefore({
+        id: 'global-hook',
+        fn: () => executionOrder.push('global'),
+        level: 'global',
+      });
+
+      orchestrator.registerBefore({
+        id: 'route-hook',
+        fn: () => executionOrder.push('route'),
+        level: 'route',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+
+      expect(executionOrder).toEqual(['global', 'route', 'local']);
+    });
+
+    it('should execute after hooks in reverse order: local → route → global', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerAfter({
+        id: 'local-hook',
+        fn: () => executionOrder.push('local'),
+        level: 'local',
+      });
+
+      orchestrator.registerAfter({
+        id: 'global-hook',
+        fn: () => executionOrder.push('global'),
+        level: 'global',
+      });
+
+      orchestrator.registerAfter({
+        id: 'route-hook',
+        fn: () => executionOrder.push('route'),
+        level: 'route',
+      });
+
+      await orchestrator.executeAfter(lctx, gctx);
+
+      expect(executionOrder).toEqual(['local', 'route', 'global']);
+    });
+
+    it('should execute catch hooks in reverse order: local → route → global', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerCatch({
+        id: 'local-hook',
+        fn: () => executionOrder.push('local'),
+        level: 'local',
+      });
+
+      orchestrator.registerCatch({
+        id: 'global-hook',
+        fn: () => executionOrder.push('global'),
+        level: 'global',
+      });
+
+      orchestrator.registerCatch({
+        id: 'route-hook',
+        fn: () => executionOrder.push('route'),
+        level: 'route',
+      });
+
+      await orchestrator.executeCatch(new Error('test'), lctx, gctx);
+
+      expect(executionOrder).toEqual(['local', 'route', 'global']);
+    });
+
+    it.prop([
+      fc.array(
+        fc.record({
+          id: fc.string({ minLength: 1 }),
+          level: fc.constantFrom('global', 'route', 'local'),
+        }),
+        { minLength: 1, maxLength: 10 }
+      ),
+    ])('should always execute hooks in correct order', async (hookConfigs) => {
+      const executionOrder: string[] = [];
+      
+      // Clear hooks before test
+      orchestrator.clear();
+
+      for (const config of hookConfigs) {
+        orchestrator.registerBefore({
+          id: config.id,
+          fn: () => executionOrder.push(config.level),
+          level: config.level as 'global' | 'route' | 'local',
+        });
+      }
+
+      await orchestrator.executeBefore(lctx, gctx);
+
+      // Verify order: all globals, then all routes, then all locals
+      const globalCount = executionOrder.filter((l) => l === 'global').length;
+      const routeCount = executionOrder.filter((l) => l === 'route').length;
+      const localCount = executionOrder.filter((l) => l === 'local').length;
+
+      const firstRoute = executionOrder.indexOf('route');
+      const firstLocal = executionOrder.indexOf('local');
+
+      if (firstRoute !== -1) {
+        expect(firstRoute).toBeGreaterThanOrEqual(globalCount);
+      }
+      if (firstLocal !== -1) {
+        expect(firstLocal).toBeGreaterThanOrEqual(globalCount + routeCount);
+      }
+      
+      return true;
+    });
+  });
+
+  describe('Property 6: Error Isolation', () => {
+    it('should stop execution when a before hook throws', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerBefore({
+        id: 'hook1',
+        fn: () => executionOrder.push('hook1'),
+        level: 'global',
+      });
+
+      orchestrator.registerBefore({
+        id: 'hook2',
+        fn: () => {
+          executionOrder.push('hook2');
+          throw new Error('Hook failed');
+        },
+        level: 'global',
+      });
+
+      orchestrator.registerBefore({
+        id: 'hook3',
+        fn: () => executionOrder.push('hook3'),
+        level: 'global',
+      });
+
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow('Hook failed');
+      expect(executionOrder).toEqual(['hook1', 'hook2']);
+    });
+
+    it('should not throw when catch hooks fail', async () => {
+      orchestrator.registerCatch({
+        id: 'catch-hook',
+        fn: () => {
+          throw new Error('Catch hook failed');
+        },
+        level: 'global',
+      });
+
+      // Should not throw
+      await expect(
+        orchestrator.executeCatch(new Error('original'), lctx, gctx)
+      ).resolves.toBeUndefined();
+    });
+
+    it.prop([fc.integer({ min: 0, max: 10 })])(
+      'should isolate errors and not affect other requests',
+      async (failAtIndex) => {
+        const hooks: Array<{ id: string; shouldFail: boolean }> = Array.from(
+          { length: 10 },
+          (_, i) => ({
+            id: `hook-${i}`,
+            shouldFail: i === failAtIndex,
+          })
+        );
+
+        for (const hook of hooks) {
+          orchestrator.registerBefore({
+            id: hook.id,
+            fn: () => {
+              if (hook.shouldFail) {
+                throw new Error(`Hook ${hook.id} failed`);
+              }
+            },
+            level: 'global',
+          });
+        }
+
+        await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow();
+
+        // Create new context for second request
+        const lctx2 = createMockLocalContext('request-2');
+
+        // Clear and register non-failing hooks
+        orchestrator.clear();
+        for (const hook of hooks) {
+          orchestrator.registerBefore({
+            id: hook.id,
+            fn: () => {},
+            level: 'global',
+          });
+        }
+
+        // Should succeed
+        await expect(orchestrator.executeBefore(lctx2, gctx)).resolves.toBeUndefined();
+      }
+    );
+  });
+
+  describe('Property 8: Timeout Cleanup', () => {
+    it('should timeout hooks that exceed timeout', async () => {
+      orchestrator.registerBefore({
+        id: 'slow-hook',
+        fn: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        },
+        level: 'global',
+        timeout: 50,
+      });
+
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow(/timeout/i);
+    });
+
+    it('should not timeout hooks that complete in time', async () => {
+      orchestrator.registerBefore({
+        id: 'fast-hook',
+        fn: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        },
+        level: 'global',
+        timeout: 100,
+      });
+
+      await expect(orchestrator.executeBefore(lctx, gctx)).resolves.toBeUndefined();
+    });
+
+    it('should retry hooks on timeout', async () => {
+      let attempts = 0;
+
+      orchestrator.registerBefore({
+        id: 'retry-hook',
+        fn: async () => {
+          attempts++;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        },
+        level: 'global',
+        timeout: 50,
+        retries: 2,
+      });
+
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow(/timeout/i);
+      expect(attempts).toBe(3); // 1 initial + 2 retries
+    });
+
+    it.prop([fc.integer({ min: 10, max: 100 }), fc.integer({ min: 0, max: 3 })])(
+      'should respect timeout and retry configuration',
+      async (timeout, retries) => {
+        let attempts = 0;
+
+        orchestrator.registerBefore({
+          id: 'test-hook',
+          fn: async () => {
+            attempts++;
+            await new Promise((resolve) => setTimeout(resolve, timeout + 10));
+          },
+          level: 'global',
+          timeout,
+          retries,
+        });
+
+        await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow();
+        expect(attempts).toBe(retries + 1);
+      }
+    );
+  });
+
+  describe('Property 20: Lifecycle Event Emission', () => {
+    it('should emit hook:start and hook:end events', async () => {
+      orchestrator.registerBefore({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+
+      const startEvents = events.filter((e) => e.type === 'hook:start');
+      const endEvents = events.filter((e) => e.type === 'hook:end');
+
+      expect(startEvents).toHaveLength(1);
+      expect(endEvents).toHaveLength(1);
+      expect(startEvents[0].hookId).toBe('test-hook');
+      expect(endEvents[0].hookId).toBe('test-hook');
+      expect(endEvents[0].duration).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should emit hook:error events on failure', async () => {
+      orchestrator.registerBefore({
+        id: 'failing-hook',
+        fn: () => {
+          throw new Error('Hook failed');
+        },
+        level: 'global',
+      });
+
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow();
+
+      const errorEvents = events.filter((e) => e.type === 'hook:error');
+      expect(errorEvents).toHaveLength(1);
+      expect(errorEvents[0].hookId).toBe('failing-hook');
+      expect(errorEvents[0].error).toBeDefined();
+    });
+
+    it('should emit hook:retry events on retry', async () => {
+      let attempts = 0;
+
+      orchestrator.registerBefore({
+        id: 'retry-hook',
+        fn: () => {
+          attempts++;
+          if (attempts < 3) {
+            throw new Error('Not yet');
+          }
+        },
+        level: 'global',
+        retries: 2,
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+
+      const retryEvents = events.filter((e) => e.type === 'hook:retry');
+      expect(retryEvents).toHaveLength(2);
+    });
+
+    it.prop([fc.integer({ min: 1, max: 5 })])(
+      'should emit events for all hooks',
+      async (hookCount) => {
+        // Clear hooks and events before test
+        orchestrator.clear();
+        events.length = 0;
+        
+        for (let i = 0; i < hookCount; i++) {
+          orchestrator.registerBefore({
+            id: `hook-${i}`,
+            fn: () => {},
+            level: 'global',
+          });
+        }
+
+        await orchestrator.executeBefore(lctx, gctx);
+
+        const startEvents = events.filter((e) => e.type === 'hook:start');
+        const endEvents = events.filter((e) => e.type === 'hook:end');
+
+        expect(startEvents).toHaveLength(hookCount);
+        expect(endEvents).toHaveLength(hookCount);
+        
+        return true;
+      }
+    );
+  });
+
+  describe('Property 10: Request Validation', () => {
+    it('should validate request body against schema', () => {
+      const schema = g.object({
+        name: g.string(),
+        age: g.number(),
+      });
+
+      const req: Request = {
+        path: '/test',
+        method: 'POST',
+        headers: {},
+        body: { name: 'John', age: 30 },
+        params: {},
+        query: {},
+      };
+
+      expect(() => orchestrator.validateRequest(req, schema, lctx)).not.toThrow();
+    });
+
+    it('should throw on invalid request body', () => {
+      const schema = g.object({
+        name: g.string(),
+        age: g.number(),
+      });
+
+      const req: Request = {
+        path: '/test',
+        method: 'POST',
+        headers: {},
+        body: { name: 'John', age: 'thirty' }, // Invalid: age should be number
+        params: {},
+        query: {},
+      };
+
+      expect(() => orchestrator.validateRequest(req, schema, lctx)).toThrow(/validation failed/i);
+    });
+
+    it('should emit validation events', () => {
+      const schema = g.object({
+        name: g.string(),
+      });
+
+      const req: Request = {
+        path: '/test',
+        method: 'POST',
+        headers: {},
+        body: { name: 'John' },
+        params: {},
+        query: {},
+      };
+
+      orchestrator.validateRequest(req, schema, lctx);
+
+      const validationEvents = events.filter((e) => e.type.startsWith('validation:'));
+      expect(validationEvents.length).toBeGreaterThan(0);
+    });
+
+    it.prop([
+      fc.record({
+        name: fc.string(),
+        age: fc.integer({ min: 0, max: 120 }),
+        email: fc.emailAddress(),
+      }),
+    ])('should validate any valid request body', (body) => {
+      const schema = g.object({
+        name: g.string(),
+        age: g.number(),
+        email: g.string(),
+      });
+
+      const req: Request = {
+        path: '/test',
+        method: 'POST',
+        headers: {},
+        body,
+        params: {},
+        query: {},
+      };
+
+      expect(() => orchestrator.validateRequest(req, schema, lctx)).not.toThrow();
+    });
+  });
+
+  describe('Property 11: Response Validation', () => {
+    it('should validate response data against schema', () => {
+      const schema = g.object({
+        id: g.string(),
+        status: g.string(),
+      });
+
+      const data = { id: '123', status: 'success' };
+
+      expect(() => orchestrator.validateResponse(data, schema, lctx)).not.toThrow();
+    });
+
+    it('should throw on invalid response data', () => {
+      const schema = g.object({
+        id: g.string(),
+        status: g.string(),
+      });
+
+      const data = { id: 123, status: 'success' }; // Invalid: id should be string
+
+      expect(() => orchestrator.validateResponse(data, schema, lctx)).toThrow(/validation failed/i);
+    });
+
+    it('should emit validation events for response', () => {
+      const schema = g.object({
+        result: g.string(),
+      });
+
+      const data = { result: 'ok' };
+
+      orchestrator.validateResponse(data, schema, lctx);
+
+      const validationEvents = events.filter(
+        (e) => e.type.startsWith('validation:') && e.metadata?.phase === 'response'
+      );
+      expect(validationEvents.length).toBeGreaterThan(0);
+    });
+
+    it.prop([
+      fc.record({
+        id: fc.uuid(),
+        value: fc.integer(),
+        tags: fc.array(fc.string()),
+      }),
+    ])('should validate any valid response data', (data) => {
+      const schema = g.object({
+        id: g.string(),
+        value: g.number(),
+        tags: g.array(g.string()),
+      });
+
+      expect(() => orchestrator.validateResponse(data, schema, lctx)).not.toThrow();
+    });
+  });
+
+  describe('Async Hook Support', () => {
+    it('should handle async hooks', async () => {
+      let executed = false;
+
+      orchestrator.registerBefore({
+        id: 'async-hook',
+        fn: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          executed = true;
+        },
+        level: 'global',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+      expect(executed).toBe(true);
+    });
+
+    it('should handle sync hooks', async () => {
+      let executed = false;
+
+      orchestrator.registerBefore({
+        id: 'sync-hook',
+        fn: () => {
+          executed = true;
+        },
+        level: 'global',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+      expect(executed).toBe(true);
+    });
+
+    it('should handle mixed sync and async hooks', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerBefore({
+        id: 'sync-hook',
+        fn: () => executionOrder.push('sync'),
+        level: 'global',
+      });
+
+      orchestrator.registerBefore({
+        id: 'async-hook',
+        fn: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          executionOrder.push('async');
+        },
+        level: 'route',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+      expect(executionOrder).toEqual(['sync', 'async']);
+    });
+  });
+
+  describe('Configuration', () => {
+    it('should use default timeout when not specified', async () => {
+      const customOrchestrator = new HookOrchestrator({
+        defaultTimeout: 50,
+      });
+
+      customOrchestrator.registerBefore({
+        id: 'slow-hook',
+        fn: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        },
+        level: 'global',
+      });
+
+      await expect(
+        customOrchestrator.executeBefore(lctx, gctx)
+      ).rejects.toThrow(/timeout/i);
+    });
+
+    it('should use default retries when not specified', async () => {
+      let attempts = 0;
+
+      const customOrchestrator = new HookOrchestrator({
+        defaultRetries: 2,
+      });
+
+      customOrchestrator.registerBefore({
+        id: 'failing-hook',
+        fn: () => {
+          attempts++;
+          throw new Error('Always fails');
+        },
+        level: 'global',
+      });
+
+      await expect(customOrchestrator.executeBefore(lctx, gctx)).rejects.toThrow();
+      expect(attempts).toBe(3); // 1 initial + 2 retries
+    });
+
+    it('should not emit events when disabled', async () => {
+      const customEvents: LifecycleEvent[] = [];
+      const customOrchestrator = new HookOrchestrator({
+        emitEvents: false,
+        onEvent: (event) => customEvents.push(event),
+      });
+
+      customOrchestrator.registerBefore({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      await customOrchestrator.executeBefore(lctx, gctx);
+      expect(customEvents).toHaveLength(0);
+    });
+  });
+});
+;
+      const gctx = createGlobalContext();
+      
+      await expect(fastOrchestrator.executeBefore(lctx, gctx)).rejects.toThrow('timeout');
+    });
+  });
+  
+  describe('hook retry', () => {
+    it('should retry failed hooks', async () => {
+      let attempts = 0;
+      
+      orchestrator.registerBefore({
+        id: 'flaky-hook',
+        fn: () => {
+          attempts++;
+          if (attempts < 3) {
+            throw new Error('Temporary failure');
+          }
+        },
+        level: 'global',
+        retries: 2,
+      });
+      
+      const lctx = createLocalContext();
+      const gctx = createGlobalContext();
+      
+      await orchestrator.executeBefore(lctx, gctx);
+      
+      expect(attempts).toBe(3);
+    });
+    
+    it('should fail after max retries', async () => {
+      let attempts = 0;
+      
+      orchestrator.registerBefore({
+        id: 'always-failing-hook',
+        fn: () => {
+          attempts++;
+          throw new Error('Always fails');
+        },
+        level: 'global',
+        retries: 2,
+      });
+      
+      const lctx = createLocalContext();
+      const gctx = createGlobalContext();
+      
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow('Always fails');
+      expect(attempts).toBe(3); // 1 initial + 2 retries
+    });
+  });
+  
+  describe('lifecycle events', () => {
+    it('should emit hook:start and hook:end events', async () => {
+      orchestrator.registerBefore({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+      
+      const lctx = createLocalContext();
+      const gctx = createGlobalContext();
+      
+      await orchestrator.executeBefore(lctx, gctx);
+      
+      const startEvents = events.filter(e => e.type === 'hook:start');
+      const endEvents = events.filter(e => e.type === 'hook:end');
+      
+      expect(startEvents).toHaveLength(1);
+      expect(endEvents).toHaveLength(1);
+      expect(startEvents[0].hookId).toBe('test-hook');
+      expect(endEvents[0].hookId).toBe('test-hook');
+    });
+    
+    it('should emit hook:error events on failure', async () => {
+      orchestrator.registerBefore({
+        id: 'failing-hook',
+        fn: () => {
+          throw new Error('Test error');
+        },
+        level: 'global',
+      });
+      
+      const lctx = createLocalContext();
+      const gctx = createGlobalContext();
+      
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow();
+      
+      const errorEvents = events.filter(e => e.type === 'hook:error');
+      expect(errorEvents).toHaveLength(1);
+      expect(errorEvents[0].error?.message).toBe('Test error');
+    });
+    
+    it('should emit hook:retry events', async () => {
+      let attempts = 0;
+      
+      orchestrator.registerBefore({
+        id: 'flaky-hook',
+        fn: () => {
+          attempts++;
+          if (attempts < 2) {
+            throw new Error('Retry me');
+          }
+        },
+        level: 'global',
+        retries: 2,
+      });
+      
+      const lctx = createLocalContext();
+      const gctx = createGlobalContext();
+      
+      await orchestrator.executeBefore(lctx, gctx);
+      
+      const retryEvents = events.filter(e => e.type === 'hook:retry');
+      expect(retryEvents).toHaveLength(1);
+    });
+    
+    it('should include duration in events', async () => {
+      orchestrator.registerBefore({
+        id: 'timed-hook',
+        fn: async () => {
+          await new Promise(resolve => setTimeout(resolve, 10));
+        },
+        level: 'global',
+      });
+      
+      const lctx = createLocalContext();
+      const gctx = createGlobalContext();
+      
+      await orchestrator.executeBefore(lctx, gctx);
+      
+      const endEvents = events.filter(e => e.type === 'hook:end');
+      expect(endEvents[0].duration).toBeGreaterThan(0);
+    });
+  });
+  
+  describe('request validation', () => {
+    it('should validate request body against schema', () => {
+      const schema = object({
+        name: primitive('string'),
+        age: primitive('number'),
+      });
+      
+      const req = {
+        body: { name: 'John', age: 30 },
+      } as any;
+      
+      const lctx = createLocalContext();
+      
+      expect(() => orchestrator.validateRequest(req, schema, lctx)).not.toThrow();
+    });
+    
+    it('should throw ValidationException for invalid request', () => {
+      const schema = object({
+        name: primitive('string'),
+        age: primitive('number'),
+      });
+      
+      const req = {
+        body: { name: 'John', age: 'thirty' }, // Invalid: age should be number
+      } as any;
+      
+      const lctx = createLocalContext();
+      
+      expect(() => orchestrator.validateRequest(req, schema, lctx)).toThrow('Request validation failed');
+    });
+    
+    it('should emit validation events', () => {
+      const schema = object({
+        name: primitive('string'),
+      });
+      
+      const req = {
+        body: { name: 'John' },
+      } as any;
+      
+      const lctx = createLocalContext();
+      
+      orchestrator.validateRequest(req, schema, lctx);
+      
+      const validationEvents = events.filter(e => e.type.startsWith('validation:'));
+      expect(validationEvents.length).toBeGreaterThan(0);
+    });
+  });
+  
+  describe('response validation', () => {
+    it('should validate response data against schema', () => {
+      const schema = object({
+        id: primitive('string'),
+        message: primitive('string'),
+      });
+      
+      const data = { id: '123', message: 'Success' };
+      const lctx = createLocalContext();
+      
+      expect(() => orchestrator.validateResponse(data, schema, lctx)).not.toThrow();
+    });
+    
+    it('should throw ValidationException for invalid response', () => {
+      const schema = object({
+        id: primitive('string'),
+        message: primitive('string'),
+      });
+      
+      const data = { id: 123, message: 'Success' }; // Invalid: id should be string
+      const lctx = createLocalContext();
+      
+      expect(() => orchestrator.validateResponse(data, schema, lctx)).toThrow('Response validation failed');
+    });
+  });
+  
+  describe('catch hooks', () => {
+    it('should not throw if catch hook fails', async () => {
+      orchestrator.registerCatch({
+        id: 'failing-catch',
+        fn: () => {
+          throw new Error('Catch hook failed');
+        },
+        level: 'global',
+      });
+      
+      const lctx = createLocalContext();
+      const gctx = createGlobalContext();
+      
+      // Should not throw
+      await expect(orchestrator.executeCatch(new Error('Original error'), lctx, gctx)).resolves.toBeUndefined();
+    });
+  });
+  
+  describe('clear hooks', () => {
+    it('should clear all registered hooks', () => {
+      orchestrator.registerBefore({ id: 'hook1', fn: () => {}, level: 'global' });
+      orchestrator.registerAfter({ id: 'hook2', fn: () => {}, level: 'global' });
+      orchestrator.registerCatch({ id: 'hook3', fn: () => {}, level: 'global' });
+      
+      orchestrator.clear();
+      
+      const hooks = orchestrator.getHooks();
+      expect(hooks.before).toHaveLength(0);
+      expect(hooks.after).toHaveLength(0);
+      expect(hooks.catch).toHaveLength(0);
+    });
+  });
+});
+
+// Feature: runtime-architecture, Property 25: Hook execution order
+describe('Property 25: Hook execution order', () => {
+  it('should execute hooks in correct order for any combination of levels', () => {
+    fc.assert(
+      fc.property(
+        fc.array(
+          fc.record({
+            id: fc.string({ minLength: 1, maxLength: 20 }),
+            level: fc.constantFrom('global', 'route', 'local') as fc.Arbitrary<'global' | 'route' | 'local'>,
+          }),
+          { minLength: 1, maxLength: 10 }
+        ),
+        async (hookConfigs) => {
+          const orchestrator = new HookOrchestrator();
+          const executionOrder: string[] = [];
+          
+          // Register hooks
+          for (const config of hookConfigs) {
+            orchestrator.registerBefore({
+              ...config,
+              fn: () => { executionOrder.push(`${config.level}-${config.id}`); },
+            });
+          }
+          
+          const lctx = createLocalContext();
+          const gctx = createGlobalContext();
+          
+          await orchestrator.executeBefore(lctx, gctx);
+          
+          // Verify order: all global before route before local
+          const globalIndices = executionOrder
+            .map((id, idx) => id.startsWith('global-') ? idx : -1)
+            .filter(idx => idx >= 0);
+          const routeIndices = executionOrder
+            .map((id, idx) => id.startsWith('route-') ? idx : -1)
+            .filter(idx => idx >= 0);
+          const localIndices = executionOrder
+            .map((id, idx) => id.startsWith('local-') ? idx : -1)
+            .filter(idx => idx >= 0);
+          
+          // All global hooks should come before all route hooks
+          if (globalIndices.length > 0 && routeIndices.length > 0) {
+            expect(Math.max(...globalIndices)).toBeLessThan(Math.min(...routeIndices));
+          }
+          
+          // All route hooks should come before all local hooks
+          if (routeIndices.length > 0 && localIndices.length > 0) {
+            expect(Math.max(...routeIndices)).toBeLessThan(Math.min(...localIndices));
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
+
+// Feature: runtime-architecture, Property 20: Lifecycle event emission
+describe('Property 20: Lifecycle event emission', () => {
+  it('should emit structured events for all lifecycle stages', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 5 }),
+        async (hookCount) => {
+          const events: LifecycleEvent[] = [];
+          const orchestrator = new HookOrchestrator({
+            emitEvents: true,
+            onEvent: (event) => events.push(event),
+          });
+          
+          // Register hooks
+          for (let i = 0; i < hookCount; i++) {
+            orchestrator.registerBefore({
+              id: `hook-${i}`,
+              fn: () => {},
+              level: 'global',
+            });
+          }
+          
+          const lctx = createLocalContext();
+          const gctx = createGlobalContext();
+          
+          await orchestrator.executeBefore(lctx, gctx);
+          
+          // Should have start and end events for each hook
+          const startEvents = events.filter(e => e.type === 'hook:start');
+          const endEvents = events.filter(e => e.type === 'hook:end');
+          
+          expect(startEvents).toHaveLength(hookCount);
+          expect(endEvents).toHaveLength(hookCount);
+          
+          // All events should have required fields
+          for (const event of events) {
+            expect(event).toHaveProperty('type');
+            expect(event).toHaveProperty('timestamp');
+            expect(event).toHaveProperty('requestId');
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});

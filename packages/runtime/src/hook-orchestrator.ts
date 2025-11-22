@@ -10,8 +10,8 @@
  */
 
 import type { LocalContext, GlobalContext } from './types/context.js';
-import type { Request, Response } from './types/index.js';
-import type { GType, ValidationResult } from './gtype/index.js';
+import type { Request } from './types/index.js';
+import type { GType } from './gtype/index.js';
 import { validate, ValidationException } from './gtype/index.js';
 
 /**
@@ -195,7 +195,7 @@ export class HookOrchestrator {
    * Execute catch hooks
    */
   async executeCatch(
-    error: Error,
+    _error: Error,
     lctx: LocalContext,
     gctx: GlobalContext
   ): Promise<void> {
@@ -212,11 +212,11 @@ export class HookOrchestrator {
   /**
    * Validate request against schema
    */
-  async validateRequest(
+  validateRequest(
     req: Request,
     schema: GType,
     lctx: LocalContext
-  ): Promise<void> {
+  ): void {
     this.emitEvent({
       type: 'validation:start',
       timestamp: Date.now(),
@@ -252,11 +252,11 @@ export class HookOrchestrator {
   /**
    * Validate response against schema
    */
-  async validateResponse(
+  validateResponse(
     data: unknown,
     schema: GType,
     lctx: LocalContext
-  ): Promise<void> {
+  ): void {
     this.emitEvent({
       type: 'validation:start',
       timestamp: Date.now(),
@@ -324,7 +324,7 @@ export class HookOrchestrator {
       try {
         await this.executeWithTimeout(
           () => hook.fn(lctx, gctx),
-          hook.timeout!
+          hook.timeout || this.config.defaultTimeout
         );
         
         const duration = Date.now() - start;
@@ -360,7 +360,8 @@ export class HookOrchestrator {
       }
     }
     
-    throw lastError!;
+    // This should never be reached, but TypeScript needs it
+    throw lastError ?? new Error('Hook execution failed');
   }
   
   /**
