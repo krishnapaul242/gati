@@ -52,6 +52,9 @@ export interface VersionTag {
     createdBy: string;
 }
 
+// Re-export transformer types
+export type { TransformerPair, TransformFunction, TransformResult, ChainOptions } from './transformer.js';
+
 export interface ChangeLogItem {
     id: TSV;
     timestamp: number;

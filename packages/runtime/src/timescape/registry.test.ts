@@ -387,3 +387,324 @@ describe('VersionRegistry', () => {
         });
     });
 });
+
+describe('Version Classification', () => {
+    describe('Hot/Warm/Cold Classification', () => {
+        it('should classify version as hot with high request count', () => {
+            const registry = new VersionRegistry(undefined, {
+                hotThresholdRequests: 100,
+                warmThresholdRequests: 10,
+                coldThresholdMs: 7 * 24 * 60 * 60 * 1000,
+                classificationWindowMs: 24 * 60 * 60 * 1000,
+            });
+
+            const tsv: TSV = 'tsv:1732186200-users-001';
+            registry.registerVersion('/api/users', tsv, { 
+                hash: 'a', 
+                status: 'warm',
+                requestCount: 0,
+            });
+
+            // Simulate 150 requests
+            for (let i = 0; i < 150; i++) {
+                registry.recordRequest(tsv);
+            }
+
+            const info = registry.getVersionInfo(tsv);
+            expect(info?.status).toBe('hot');
+        });
+
+        it('should classify version as warm with moderate request count', () => {
+            const registry = new VersionRegistry(undefined, {
+                hotThresholdRequests: 100,
+                warmThresholdRequests: 10,
+                coldThresholdMs: 7 * 24 * 60 * 60 * 1000,
+                classificationWindowMs: 24 * 60 * 60 * 1000,
+            });
+
+            const tsv: TSV = 'tsv:1732186200-users-001';
+            registry.registerVersion('/api/users', tsv, { 
+                hash: 'a', 
+                status: 'cold',
+                requestCount: 0,
+            });
+
+            // Simulate 50 requests (between warm and hot threshold)
+            for (let i = 0; i < 50; i++) {
+                registry.recordRequest(tsv);
+            }
+
+            const info = registry.getVersionInfo(tsv);
+            expect(info?.status).toBe('warm');
+        });
+
+        it('should classify version as cold after inactivity period', () => {
+            const coldThresholdMs = 1000; // 1 second for testing
+            const registry = new VersionRegistry(undefined, {
+                hotThresholdRequests: 100,
+                warmThresholdRequests: 10,
+                coldThresholdMs,
+                classificationWindowMs: 24 * 60 * 60 * 1000,
+            });
+
+            const tsv: TSV = 'tsv:1732186200-users-001';
+            const oldTimestamp = Date.now() - coldThresholdMs - 1000;
+            
+            registry.registerVersion('/api/users', tsv, { 
+                hash: 'a', 
+                status: 'hot',
+                requestCount: 100,
+                lastAccessed: oldTimestamp,
+            });
+
+            // Reclassify
+            registry.reclassifyAllVersions();
+
+            const info = registry.getVersionInfo(tsv);
+            expect(info?.status).toBe('cold');
+        });
+
+        it('should reclassify all versions', () => {
+            const coldThresholdMs = 1000;
+            const registry = new VersionRegistry(undefined, {
+                hotThresholdRequests: 100,
+                warmThresholdRequests: 10,
+                coldThresholdMs,
+                classificationWindowMs: 24 * 60 * 60 * 1000,
+            });
+
+            const tsv1: TSV = 'tsv:1732186200-users-001';
+            const tsv2: TSV = 'tsv:1732186300-users-002';
+            const tsv3: TSV = 'tsv:1732186400-users-003';
+
+            const oldTimestamp = Date.now() - coldThresholdMs - 1000;
+
+            registry.registerVersion('/api/users', tsv1, { 
+                hash: 'a', 
+                status: 'hot',
+                requestCount: 100,
+                lastAccessed: oldTimestamp,
+            });
+
+            registry.registerVersion('/api/users', tsv2, { 
+                hash: 'b', 
+                status: 'warm',
+                requestCount: 50,
+                lastAccessed: Date.now(),
+            });
+
+            registry.registerVersion('/api/users', tsv3, { 
+                hash: 'c', 
+                status: 'hot',
+                requestCount: 200,
+                lastAccessed: Date.now(),
+            });
+
+            registry.reclassifyAllVersions();
+
+            const info1 = registry.getVersionInfo(tsv1);
+            const info2 = registry.getVersionInfo(tsv2);
+            const info3 = registry.getVersionInfo(tsv3);
+
+            expect(info1?.status).toBe('cold');
+            expect(info2?.status).toBe('warm');
+            expect(info3?.status).toBe('hot');
+        });
+    });
+
+    describe('getVersionsByStatus', () => {
+        beforeEach(() => {
+            registry.registerVersion('/api/users', 'tsv:1732186200-users-001' as TSV, { 
+                hash: 'a', 
+                status: 'hot' 
+            });
+            registry.registerVersion('/api/users', 'tsv:1732186300-users-002' as TSV, { 
+                hash: 'b', 
+                status: 'warm' 
+            });
+            registry.registerVersion('/api/posts', 'tsv:1732186400-posts-001' as TSV, { 
+                hash: 'c', 
+                status: 'cold' 
+            });
+        });
+
+        it('should get hot versions for specific handler', () => {
+            const hotVersions = registry.getVersionsByStatus('hot', '/api/users');
+            expect(hotVersions).toHaveLength(1);
+            expect(hotVersions[0].tsv).toBe('tsv:1732186200-users-001');
+        });
+
+        it('should get warm versions for specific handler', () => {
+            const warmVersions = registry.getVersionsByStatus('warm', '/api/users');
+            expect(warmVersions).toHaveLength(1);
+            expect(warmVersions[0].tsv).toBe('tsv:1732186300-users-002');
+        });
+
+        it('should get cold versions across all handlers', () => {
+            const coldVersions = registry.getVersionsByStatus('cold');
+            expect(coldVersions).toHaveLength(1);
+            expect(coldVersions[0].tsv).toBe('tsv:1732186400-posts-001');
+        });
+
+        it('should get all hot versions across handlers', () => {
+            registry.registerVersion('/api/posts', 'tsv:1732186500-posts-002' as TSV, { 
+                hash: 'd', 
+                status: 'hot' 
+            });
+
+            const hotVersions = registry.getVersionsByStatus('hot');
+            expect(hotVersions).toHaveLength(2);
+        });
+    });
+
+    describe('getUsageStats', () => {
+        beforeEach(() => {
+            registry.registerVersion('/api/users', 'tsv:1732186200-users-001' as TSV, { 
+                hash: 'a', 
+                status: 'hot',
+                requestCount: 100,
+            });
+            registry.registerVersion('/api/users', 'tsv:1732186300-users-002' as TSV, { 
+                hash: 'b', 
+                status: 'warm',
+                requestCount: 50,
+            });
+            registry.registerVersion('/api/posts', 'tsv:1732186400-posts-001' as TSV, { 
+                hash: 'c', 
+                status: 'cold',
+                requestCount: 5,
+            });
+        });
+
+        it('should get usage stats for specific handler', () => {
+            const stats = registry.getUsageStats('/api/users');
+            
+            expect(stats.hot).toBe(1);
+            expect(stats.warm).toBe(1);
+            expect(stats.cold).toBe(0);
+            expect(stats.totalRequests).toBe(150);
+            expect(stats.totalVersions).toBe(2);
+        });
+
+        it('should get global usage stats', () => {
+            const stats = registry.getUsageStats();
+            
+            expect(stats.hot).toBe(1);
+            expect(stats.warm).toBe(1);
+            expect(stats.cold).toBe(1);
+            expect(stats.totalRequests).toBe(155);
+            expect(stats.totalVersions).toBe(3);
+        });
+
+        it('should return zero stats for non-existent handler', () => {
+            const stats = registry.getUsageStats('/api/comments');
+            
+            expect(stats.hot).toBe(0);
+            expect(stats.warm).toBe(0);
+            expect(stats.cold).toBe(0);
+            expect(stats.totalRequests).toBe(0);
+            expect(stats.totalVersions).toBe(0);
+        });
+    });
+
+    describe('Classification Configuration', () => {
+        it('should update classification config', () => {
+            const newConfig = {
+                hotThresholdRequests: 200,
+                warmThresholdRequests: 20,
+            };
+
+            registry.updateClassificationConfig(newConfig);
+
+            const config = registry.getClassificationConfig();
+            expect(config.hotThresholdRequests).toBe(200);
+            expect(config.warmThresholdRequests).toBe(20);
+        });
+
+        it('should reclassify versions after config update', () => {
+            const tsv: TSV = 'tsv:1732186200-users-001';
+            registry.registerVersion('/api/users', tsv, { 
+                hash: 'a', 
+                status: 'hot',
+                requestCount: 150,
+            });
+
+            // Simulate recent requests
+            for (let i = 0; i < 150; i++) {
+                registry.recordRequest(tsv);
+            }
+
+            let info = registry.getVersionInfo(tsv);
+            expect(info?.status).toBe('hot');
+
+            // Update config to require more requests for hot status
+            registry.updateClassificationConfig({
+                hotThresholdRequests: 500,
+            });
+
+            info = registry.getVersionInfo(tsv);
+            expect(info?.status).toBe('warm'); // Should be downgraded
+        });
+
+        it('should get current classification config', () => {
+            const config = registry.getClassificationConfig();
+            
+            expect(config.hotThresholdRequests).toBeDefined();
+            expect(config.warmThresholdRequests).toBeDefined();
+            expect(config.coldThresholdMs).toBeDefined();
+            expect(config.classificationWindowMs).toBeDefined();
+        });
+    });
+
+    describe('Request Estimation', () => {
+        it('should estimate recent requests based on recency', () => {
+            const registry = new VersionRegistry(undefined, {
+                hotThresholdRequests: 100,
+                warmThresholdRequests: 10,
+                coldThresholdMs: 7 * 24 * 60 * 60 * 1000,
+                classificationWindowMs: 24 * 60 * 60 * 1000,
+            });
+
+            const tsv: TSV = 'tsv:1732186200-users-001';
+            registry.registerVersion('/api/users', tsv, { 
+                hash: 'a', 
+                status: 'warm',
+                requestCount: 0,
+            });
+
+            // Record requests
+            for (let i = 0; i < 100; i++) {
+                registry.recordRequest(tsv);
+            }
+
+            const info = registry.getVersionInfo(tsv);
+            // Should be hot because requests are recent
+            expect(info?.status).toBe('hot');
+        });
+
+        it('should decay estimated requests over time', () => {
+            const registry = new VersionRegistry(undefined, {
+                hotThresholdRequests: 100,
+                warmThresholdRequests: 10,
+                coldThresholdMs: 7 * 24 * 60 * 60 * 1000,
+                classificationWindowMs: 1000, // 1 second window for testing
+            });
+
+            const tsv: TSV = 'tsv:1732186200-users-001';
+            const halfWindowAgo = Date.now() - 500;
+            
+            registry.registerVersion('/api/users', tsv, { 
+                hash: 'a', 
+                status: 'hot',
+                requestCount: 200,
+                lastAccessed: halfWindowAgo,
+            });
+
+            registry.reclassifyAllVersions();
+
+            const info = registry.getVersionInfo(tsv);
+            // Should still be hot because within window
+            expect(info?.status).toBe('hot');
+        });
+    });
+});

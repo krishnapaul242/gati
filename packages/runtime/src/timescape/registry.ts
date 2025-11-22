@@ -8,6 +8,13 @@ import type {
     VersionStatus 
 } from './types.js';
 
+export interface VersionClassificationConfig {
+    hotThresholdRequests: number;      // Min requests in window to be hot
+    warmThresholdRequests: number;     // Min requests in window to be warm
+    coldThresholdMs: number;           // Time since last access to be cold
+    classificationWindowMs: number;    // Time window for request counting
+}
+
 export class VersionRegistry {
     private state: VersionRegistryState = {
         modules: {},
@@ -26,7 +33,14 @@ export class VersionRegistry {
     private versionCache: Map<string, TSV> = new Map();
     private readonly maxCacheSize: number = 1000;
 
-    constructor(initialState?: Partial<VersionRegistryState>) {
+    private classificationConfig: VersionClassificationConfig = {
+        hotThresholdRequests: 100,
+        warmThresholdRequests: 10,
+        coldThresholdMs: 7 * 24 * 60 * 60 * 1000, // 7 days
+        classificationWindowMs: 24 * 60 * 60 * 1000, // 24 hours
+    };
+
+    constructor(initialState?: Partial<VersionRegistryState>, config?: Partial<VersionClassificationConfig>) {
         if (initialState) {
             this.state = { 
                 ...this.state, 
@@ -34,6 +48,9 @@ export class VersionRegistry {
                 activeVersions: new Set(initialState.activeVersions || []),
                 coldVersions: new Set(initialState.coldVersions || []),
             };
+        }
+        if (config) {
+            this.classificationConfig = { ...this.classificationConfig, ...config };
         }
     }
 
@@ -331,14 +348,154 @@ export class VersionRegistry {
                 version.requestCount++;
                 version.lastAccessed = Date.now();
                 
-                // Update status based on activity
-                if (version.status === 'cold') {
-                    version.status = 'warm';
-                    this.state.coldVersions.delete(tsv);
-                    this.state.activeVersions.add(tsv);
+                // Reclassify based on new activity
+                this.classifyVersion(version);
+            }
+        }
+    }
+
+    /**
+     * Classify version as hot/warm/cold based on usage patterns
+     */
+    private classifyVersion(version: VersionInfo): void {
+        const now = Date.now();
+        const timeSinceLastAccess = now - version.lastAccessed;
+        
+        // Check if cold (no recent access)
+        if (timeSinceLastAccess > this.classificationConfig.coldThresholdMs) {
+            if (version.status !== 'cold') {
+                version.status = 'cold';
+                this.state.coldVersions.add(version.tsv);
+                this.state.activeVersions.delete(version.tsv);
+            }
+            return;
+        }
+
+        // For hot/warm classification, we need to estimate requests in the window
+        // Since we don't track request timestamps, we use a simple heuristic:
+        // If requestCount is high and recently accessed, it's likely hot
+        const estimatedRecentRequests = this.estimateRecentRequests(version, now);
+
+        if (estimatedRecentRequests >= this.classificationConfig.hotThresholdRequests) {
+            if (version.status !== 'hot') {
+                version.status = 'hot';
+                this.state.activeVersions.add(version.tsv);
+                this.state.coldVersions.delete(version.tsv);
+            }
+        } else if (estimatedRecentRequests >= this.classificationConfig.warmThresholdRequests) {
+            if (version.status !== 'warm') {
+                version.status = 'warm';
+                this.state.activeVersions.add(version.tsv);
+                this.state.coldVersions.delete(version.tsv);
+            }
+        } else {
+            // Low activity but not cold yet
+            if (version.status !== 'warm') {
+                version.status = 'warm';
+                this.state.activeVersions.add(version.tsv);
+                this.state.coldVersions.delete(version.tsv);
+            }
+        }
+    }
+
+    /**
+     * Estimate recent requests based on total count and last access time
+     * This is a heuristic since we don't track individual request timestamps
+     */
+    private estimateRecentRequests(version: VersionInfo, now: number): number {
+        const timeSinceLastAccess = now - version.lastAccessed;
+        const windowMs = this.classificationConfig.classificationWindowMs;
+
+        // If last access was within the window, assume requests are recent
+        if (timeSinceLastAccess < windowMs) {
+            // Simple decay: more recent = higher weight
+            const recencyFactor = 1 - (timeSinceLastAccess / windowMs);
+            return Math.floor(version.requestCount * recencyFactor);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Reclassify all versions (useful for periodic background jobs)
+     */
+    public reclassifyAllVersions(): void {
+        for (const timeline of Object.values(this.state.handlers)) {
+            for (const version of timeline.versions) {
+                this.classifyVersion(version);
+            }
+        }
+    }
+
+    /**
+     * Get versions by status
+     */
+    public getVersionsByStatus(status: VersionStatus, handlerPath?: string): VersionInfo[] {
+        const results: VersionInfo[] = [];
+
+        if (handlerPath) {
+            const timeline = this.state.handlers[handlerPath];
+            if (timeline) {
+                results.push(...timeline.versions.filter(v => v.status === status));
+            }
+        } else {
+            for (const timeline of Object.values(this.state.handlers)) {
+                results.push(...timeline.versions.filter(v => v.status === status));
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Get usage statistics
+     */
+    public getUsageStats(handlerPath?: string): {
+        hot: number;
+        warm: number;
+        cold: number;
+        totalRequests: number;
+        totalVersions: number;
+    } {
+        let hot = 0;
+        let warm = 0;
+        let cold = 0;
+        let totalRequests = 0;
+        let totalVersions = 0;
+
+        const timelines = handlerPath 
+            ? [this.state.handlers[handlerPath]].filter(Boolean)
+            : Object.values(this.state.handlers);
+
+        for (const timeline of timelines) {
+            for (const version of timeline.versions) {
+                totalVersions++;
+                totalRequests += version.requestCount;
+
+                switch (version.status) {
+                    case 'hot': hot++; break;
+                    case 'warm': warm++; break;
+                    case 'cold': cold++; break;
                 }
             }
         }
+
+        return { hot, warm, cold, totalRequests, totalVersions };
+    }
+
+    /**
+     * Update classification configuration
+     */
+    public updateClassificationConfig(config: Partial<VersionClassificationConfig>): void {
+        this.classificationConfig = { ...this.classificationConfig, ...config };
+        this.reclassifyAllVersions();
+    }
+
+    /**
+     * Get classification configuration
+     */
+    public getClassificationConfig(): VersionClassificationConfig {
+        return { ...this.classificationConfig };
     }
 
     /**
