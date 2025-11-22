@@ -85,7 +85,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm --filter @gati-framework/core --filter @gati-framework/types build
+        run: pnpm --filter @gati-framework/core --filter @gati-framework/types --filter @gati-framework/cli build
 
       - name: Run tests
         run: pnpm test
