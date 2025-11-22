@@ -67,7 +67,7 @@ export class SQLiteTimelineStore implements TimelineStore {
     async getLatest(type: ArtifactType, id: string): Promise<ChangeLogItem | null> {
         const row = this.db.prepare(`
       SELECT * FROM timeline WHERE type = ? ORDER BY timestamp DESC LIMIT 1
-    `).get(type) as any;
+    `).get(type);
 
         if (!row) return null;
 

@@ -45,7 +45,7 @@ export function deserializeGType(json: string): GType | GTypeSchema {
     const isSchema = 'root' in parsed;
     
     if (isSchema) {
-      const schema = parsed as GTypeSchema;
+      const schema = parsed;
       
       // Handle version migration
       if (!schema.version) {
@@ -67,7 +67,7 @@ export function deserializeGType(json: string): GType | GTypeSchema {
       
       return schema;
     } else {
-      const gtype = parsed as GType;
+      const gtype = parsed;
       
       // Add version field if missing (pre-v1.0)
       if (!gtype.version) {

@@ -63,7 +63,7 @@ export function createPlaygroundModule(
   const breakpoints = new Map<string, Breakpoint>();
 
   // Store global context reference
-  let globalContext = gctx;
+  const globalContext = gctx;
 
   // Periodic cleanup of old events
   setInterval(() => {

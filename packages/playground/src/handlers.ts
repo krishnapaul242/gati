@@ -73,7 +73,7 @@ export const getRouteHandler: Handler = async (req, res, gctx) => {
     return;
   }
 
-  const route = playground.getRoute(routeId as string);
+  const route = playground.getRoute(routeId);
   if (!route) {
     res.status(404).json({ error: 'Route not found' });
     return;
@@ -116,7 +116,7 @@ export const getEventsHandler: Handler = async (req, res, gctx) => {
     return;
   }
 
-  const events = playground.getEventStream(traceId as string);
+  const events = playground.getEventStream(traceId);
   res.json({ events, traceId });
 };
 
@@ -193,7 +193,7 @@ export const removeBreakpointHandler: Handler = async (req, res, gctx) => {
     return;
   }
 
-  playground.removeBreakpoint(breakpointId as string);
+  playground.removeBreakpoint(breakpointId);
   res.json({ success: true });
 };
 

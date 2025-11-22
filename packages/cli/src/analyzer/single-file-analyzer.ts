@@ -83,7 +83,7 @@ function extractMethodFromExport(sourceFile: any): string | undefined {
   if (methodExport && methodExport[0]) {
     const declaration = methodExport[0];
     if (declaration.getKind() === 273) {
-      const initializer = (declaration as any).getInitializer();
+      const initializer = (declaration).getInitializer();
       if (initializer && initializer.getLiteralValue) {
         return initializer.getLiteralValue();
       }
@@ -100,7 +100,7 @@ function extractRouteFromExport(sourceFile: any): string | undefined {
   if (routeExport && routeExport[0]) {
     const declaration = routeExport[0];
     if (declaration.getKind() === 273) {
-      const initializer = (declaration as any).getInitializer();
+      const initializer = (declaration).getInitializer();
       if (initializer && initializer.getLiteralValue) {
         return initializer.getLiteralValue();
       }

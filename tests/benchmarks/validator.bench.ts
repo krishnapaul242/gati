@@ -15,10 +15,10 @@ const validateSimpleUser = (data: unknown): boolean => {
   return (
     typeof obj.id === 'string' &&
     typeof obj.email === 'string' &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(obj.email as string) &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(obj.email) &&
     typeof obj.age === 'number' &&
-    (obj.age as number) >= 0 &&
-    (obj.age as number) <= 120
+    (obj.age) >= 0 &&
+    (obj.age) <= 120
   );
 };
 

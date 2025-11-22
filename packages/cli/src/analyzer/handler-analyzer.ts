@@ -3,7 +3,8 @@
  * @description Analyze handlers and modules using ts-morph
  */
 
-import { Project, SourceFile, SyntaxKind } from 'ts-morph';
+import type { SourceFile} from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import { resolve, relative } from 'path';
 import { existsSync, readdirSync, statSync } from 'fs';
 

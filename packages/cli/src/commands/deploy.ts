@@ -5,7 +5,7 @@
 
 /* eslint-disable no-console */
 
-import { Command } from 'commander';
+import type { Command } from 'commander';
 import ora from 'ora';
 import chalk from 'chalk';
 import prompts from 'prompts';

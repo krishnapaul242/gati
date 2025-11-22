@@ -246,7 +246,7 @@ describe('TimescapeIntegration', () => {
                 backward: {
                     request: async (data) => data,
                     response: async (data) => {
-                        const { newField, ...rest } = data as any;
+                        const { newField, ...rest } = data;
                         return rest;
                     },
                 },

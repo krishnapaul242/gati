@@ -7,7 +7,7 @@ import type {
   GlobalContext,
   GlobalContextOptions,
 } from './types/context.js';
-import { LifecyclePriority } from './types/context.js';
+import type { LifecyclePriority } from './types/context.js';
 import type { ModuleLoader } from './module-loader.js';
 import { createModuleLoader } from './module-loader.js';
 import { LifecycleManager } from './lifecycle-manager.js';

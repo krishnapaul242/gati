@@ -20,7 +20,7 @@ vi.mock('child_process', () => {
     ) => {
       execCallHistory.push(cmd);
       let stdout = '';
-      let stderr = '';
+      const stderr = '';
       let err: Error | null = null;
 
       if (cmd.includes('git rev-parse')) {

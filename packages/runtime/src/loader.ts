@@ -172,7 +172,7 @@ function extractMetadata(
   let meta: unknown = m['metadata'];
   if (meta === undefined) {
     const def = m['default'];
-    if (def && typeof def === 'object' && 'metadata' in (def as object)) {
+    if (def && typeof def === 'object' && 'metadata' in (def)) {
       meta = (def as Record<string, unknown>)['metadata'];
     }
   }
