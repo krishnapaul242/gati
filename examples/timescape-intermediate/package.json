@@ -1,0 +1,19 @@
+{
+  "name": "@gati-examples/timescape-intermediate",
+  "version": "1.0.0",
+  "description": "Intermediate example for Timescape API versioning - E-commerce with breaking changes",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "gati dev",
+    "build": "gati build",
+    "test": "node test-requests.js",
+    "migrate": "node run-migrations.js"
+  },
+  "dependencies": {
+    "@gati-framework/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
