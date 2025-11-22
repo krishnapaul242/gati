@@ -190,3 +190,313 @@
 .emoji {
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
+
+/**
+ * Mobile Responsive Enhancements
+ * -------------------------------------------------------------------------- */
+
+/* Mobile: Base adjustments */
+@media (max-width: 768px) {
+  /* Hero section */
+  .VPHero .name {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .VPHero .tagline {
+    font-size: 1rem !important;
+    line-height: 1.4 !important;
+    padding: 0 1rem;
+  }
+
+  .VPHero .text {
+    font-size: 1.5rem !important;
+  }
+
+  .VPHero .actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .VPHero .action {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  /* Feature cards */
+  .VPFeatures {
+    padding: 24px 16px !important;
+  }
+
+  .VPFeature {
+    padding: 20px !important;
+  }
+
+  .VPFeature .title {
+    font-size: 1.1rem !important;
+  }
+
+  .VPFeature .details {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Content area */
+  .vp-doc {
+    padding: 24px 16px !important;
+  }
+
+  .vp-doc h1 {
+    font-size: 1.75rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .vp-doc h2 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+    margin-top: 32px !important;
+  }
+
+  .vp-doc h3 {
+    font-size: 1.25rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .vp-doc p {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Code blocks */
+  .vp-code-group {
+    margin: 12px -16px !important;
+  }
+
+  div[class*='language-'] {
+    margin: 16px -16px !important;
+    border-radius: 0 !important;
+  }
+
+  div[class*='language-'] code {
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Tables */
+  .vp-doc table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.85rem !important;
+  }
+
+  .vp-doc th,
+  .vp-doc td {
+    padding: 8px 12px !important;
+    white-space: nowrap;
+  }
+
+  /* Navigation */
+  .VPNav {
+    padding: 0 16px !important;
+  }
+
+  .VPNavBar {
+    padding: 0 !important;
+  }
+
+  /* Sidebar */
+  .VPSidebar {
+    padding: 16px !important;
+  }
+
+  .VPSidebarItem {
+    font-size: 0.9rem !important;
+  }
+
+  /* Footer */
+  .VPFooter {
+    padding: 24px 16px !important;
+  }
+
+  /* Custom blocks */
+  .custom-block {
+    margin: 16px -16px !important;
+    padding: 16px !important;
+    border-radius: 0 !important;
+  }
+
+  /* Lists */
+  .vp-doc ul,
+  .vp-doc ol {
+    padding-left: 1.25rem !important;
+  }
+
+  /* Images */
+  .vp-doc img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Badges */
+  .VPBadge {
+    font-size: 0.75rem !important;
+    padding: 2px 8px !important;
+  }
+
+  /* Search */
+  .VPNavBarSearch {
+    padding: 0 8px !important;
+  }
+
+  /* Social links */
+  .VPSocialLinks {
+    gap: 8px !important;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .VPHero .name {
+    font-size: 1.75rem !important;
+  }
+
+  .VPHero .text {
+    font-size: 1.25rem !important;
+  }
+
+  .VPHero .tagline {
+    font-size: 0.9rem !important;
+  }
+
+  .vp-doc h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .vp-doc h2 {
+    font-size: 1.3rem !important;
+  }
+
+  .vp-doc h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .vp-doc p,
+  .vp-doc li {
+    font-size: 0.9rem !important;
+  }
+
+  div[class*='language-'] code {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .VPHero .name {
+    font-size: 3rem !important;
+  }
+
+  .VPHero .tagline {
+    font-size: 1.25rem !important;
+  }
+
+  .vp-doc {
+    padding: 32px 24px !important;
+  }
+
+  .VPFeatures {
+    padding: 32px 24px !important;
+  }
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  .VPButton,
+  .VPLink,
+  a.header-anchor {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Better spacing for touch */
+  .VPNavBarMenuLink {
+    padding: 12px 16px !important;
+  }
+
+  .VPSidebarItem .link {
+    padding: 8px 12px !important;
+  }
+}
+
+/* Horizontal scroll for wide content */
+@media (max-width: 768px) {
+  .vp-doc pre {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent text overflow */
+  .vp-doc {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Better code inline */
+  .vp-doc code {
+    font-size: 0.85em !important;
+    padding: 2px 6px !important;
+  }
+}
+
+/* Improve readability on mobile */
+@media (max-width: 768px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Better line height for mobile reading */
+  .vp-doc p,
+  .vp-doc li {
+    line-height: 1.7 !important;
+  }
+
+  /* Improve link visibility */
+  .vp-doc a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  .vp-doc a:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* Fix for very wide screens */
+@media (min-width: 1440px) {
+  .VPDoc.has-sidebar .content-container {
+    max-width: 1152px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .VPNav,
+  .VPSidebar,
+  .VPFooter,
+  .VPDocFooter {
+    display: none !important;
+  }
+
+  .VPDoc .content {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+}

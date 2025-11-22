@@ -22,6 +22,7 @@ export default defineConfig({
   ],
   
   head: [
+    ['meta', { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes' }],
     ['link', { rel: 'icon', type: 'image/png', href: '/gati/gati.png' }],
     ['meta', { name: 'theme-color', content: '#2d5a3d' }],
     ['meta', { property: 'og:type', content: 'website' }],
@@ -29,6 +30,8 @@ export default defineConfig({
     ['meta', { property: 'og:title', content: 'Gati | Motion in Code' }],
     ['meta', { property: 'og:description', content: 'Next-gen TypeScript framework for cloud-native, versioned APIs' }],
     ['meta', { property: 'og:site_name', content: 'Gati' }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }],
   ],
 
   themeConfig: {
