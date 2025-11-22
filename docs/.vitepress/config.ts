@@ -16,6 +16,7 @@ export default defineConfig({
     /\/guide\/cors/,
     /\/guide\/building/,
     /\/guide\/environment/,
+    /\/guides\/benchmarking/,
     // Legacy architecture links
     /\.\/architecture/,
   ],
