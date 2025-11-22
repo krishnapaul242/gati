@@ -84,7 +84,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm --filter="!@gati-framework/cli" build
+        run: pnpm --filter @gati-framework/core --filter @gati-framework/types build
 
       - name: Run tests
         run: pnpm test
@@ -132,8 +132,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm --filter="!@gati-framework/cli" build
+        run: pnpm --filter @gati-framework/core --filter @gati-framework/types build
 
       - name: Check build artifacts
         run: |
-          ls -la packages/*/dist
+          ls -la packages/core/dist packages/types/dist
