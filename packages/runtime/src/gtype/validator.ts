@@ -27,6 +27,16 @@ import {
  * Validate a value against a GType schema
  */
 export function validate(value: unknown, schema: GType, path: PathSegment[] = []): ValidationResult {
+  // Special case: if schema explicitly expects undefined, allow it
+  if (schema.kind === 'primitive' && schema.primitiveType === 'undefined') {
+    if (value === undefined) {
+      return validResult();
+    }
+    return invalidResult([
+      createValidationError(path, 'undefined', value, undefined, schema),
+    ]);
+  }
+  
   // Handle optional
   if (schema.optional && value === undefined) {
     return validResult();
