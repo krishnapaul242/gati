@@ -331,6 +331,31 @@ export enum RequestPhase {
 }
 
 /**
+ * Promise snapshot for capturing outstanding promises
+ */
+export interface PromiseSnapshot {
+  id: string;
+  status: 'pending' | 'fulfilled' | 'rejected';
+  result?: unknown;
+  error?: Error;
+}
+
+/**
+ * Snapshot token for time-travel debugging
+ */
+export interface SnapshotToken {
+  requestId: string;
+  timestamp: number;
+  state: Record<string, unknown>;
+  outstandingPromises: PromiseSnapshot[];
+  lastHookIndex: number;
+  handlerVersion?: string;
+  phase: RequestPhase;
+  traceId: string;
+  clientId: string;
+}
+
+/**
  * Local context (lctx) - scoped to a single request
  * Lightweight and stateless for distributed architecture
  */
@@ -467,6 +492,21 @@ export interface LocalContext {
   timescape: {
     resolver: ExecutionContextResolver;
     resolvedState?: VersionRegistryState;
+  };
+
+  /**
+   * Snapshot and restore for debugging
+   */
+  snapshot: {
+    /**
+     * Create a snapshot of the current context state
+     */
+    create: () => SnapshotToken;
+
+    /**
+     * Restore context from a snapshot token
+     */
+    restore: (token: SnapshotToken) => void;
   };
 }
 

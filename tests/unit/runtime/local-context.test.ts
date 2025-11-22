@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
+import fc from 'fast-check';
 import {
   createLocalContext,
   cleanupLocalContext,
@@ -224,4 +225,156 @@ describe('LocalContext', () => {
       expect(getState(lctx2, 'sharedKey')).toBeUndefined();
     });
   });
-});
+
+  describe('snapshot and restore', () => {
+    it('should create a snapshot of current state', () => {
+      setState(lctx, 'userId', '123');
+      setState(lctx, 'userName', 'John');
+
+      const snapshot = lctx.snapshot.create();
+
+      expect(snapshot).toBeDefined();
+      expect(snapshot.requestId).toBe(lctx.requestId);
+      expect(snapshot.state).toEqual({ userId: '123', userName: 'John' });
+      expect(snapshot.timestamp).toBeTypeOf('number');
+      expect(snapshot.phase).toBe(lctx.meta.phase);
+      expect(snapshot.traceId).toBe(lctx.traceId);
+      expect(snapshot.clientId).toBe(lctx.clientId);
+    });
+
+    it('should restore state from snapshot', () => {
+      setState(lctx, 'userId', '123');
+      setState(lctx, 'userName', 'John');
+
+      const snapshot = lctx.snapshot.create();
+
+      // Modify state
+      setState(lctx, 'userId', '456');
+      setState(lctx, 'userName', 'Jane');
+      setState(lctx, 'newKey', 'newValue');
+
+      // Restore
+      lctx.snapshot.restore(snapshot);
+
+      expect(getState(lctx, 'userId')).toBe('123');
+      expect(getState(lctx, 'userName')).toBe('John');
+      expect(getState(lctx, 'newKey')).toBeUndefined();
+    });
+
+    it('should capture phase in snapshot', () => {
+      lctx.lifecycle.setPhase('processing' as never);
+
+      const snapshot = lctx.snapshot.create();
+
+      expect(snapshot.phase).toBe('processing');
+    });
+
+    it('should restore phase from snapshot', () => {
+      lctx.lifecycle.setPhase('processing' as never);
+      const snapshot = lctx.snapshot.create();
+
+      lctx.lifecycle.setPhase('completed' as never);
+      expect(lctx.meta.phase).toBe('completed');
+
+      lctx.snapshot.restore(snapshot);
+      expect(lctx.meta.phase).toBe('processing');
+    });
+
+    it('should create independent snapshots', () => {
+      setState(lctx, 'counter', 1);
+      const snapshot1 = lctx.snapshot.create();
+
+      setState(lctx, 'counter', 2);
+      const snapshot2 = lctx.snapshot.create();
+
+      expect(snapshot1.state.counter).toBe(1);
+      expect(snapshot2.state.counter).toBe(2);
+    });
+
+    it('should not affect original state when modifying snapshot', () => {
+      setState(lctx, 'userId', '123');
+      const snapshot = lctx.snapshot.create();
+
+      // Modify snapshot state
+      snapshot.state.userId = '456';
+
+      // Original should be unchanged
+      expect(getState(lctx, 'userId')).toBe('123');
+    });
+  });
+
+  // Property-based tests for snapshot/restore
+  describe('Property 21: Snapshot completeness', () => {
+    it('should contain all required fields (property test)', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.dictionary(fc.string(), fc.anything()),
+          async (state) => {
+            const lctx = createLocalContext({ state });
+            const snapshot = lctx.snapshot.create();
+
+            expect(snapshot.requestId).toBeDefined();
+            expect(snapshot.timestamp).toBeTypeOf('number');
+            expect(snapshot.state).toBeDefined();
+            expect(snapshot.outstandingPromises).toBeInstanceOf(Array);
+            expect(snapshot.lastHookIndex).toBeTypeOf('number');
+            expect(snapshot.phase).toBeDefined();
+            expect(snapshot.traceId).toBeDefined();
+            expect(snapshot.clientId).toBeDefined();
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  describe('Property 47: Snapshot restoration fidelity', () => {
+    it('should restore exact state (property test)', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.dictionary(fc.string(), fc.oneof(fc.string(), fc.integer(), fc.boolean())),
+          async (initialState) => {
+            const lctx = createLocalContext({ state: initialState });
+            const snapshot = lctx.snapshot.create();
+
+            // Modify state
+            lctx.state = { modified: true };
+
+            // Restore
+            lctx.snapshot.restore(snapshot);
+
+            // State should match snapshot
+            expect(lctx.state).toEqual(snapshot.state);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it('should restore phase correctly (property test)', async () => {
+      const phases = ['received', 'authenticated', 'authorized', 'validated', 'processing', 'completed', 'error'] as const;
+      
+      await fc.assert(
+        fc.asyncProperty(
+          fc.constantFrom(...phases),
+          fc.constantFrom(...phases),
+          async (initialPhase, modifiedPhase) => {
+            const lctx = createLocalContext();
+            lctx.lifecycle.setPhase(initialPhase as never);
+            
+            const snapshot = lctx.snapshot.create();
+
+            // Modify phase
+            lctx.lifecycle.setPhase(modifiedPhase as never);
+
+            // Restore
+            lctx.snapshot.restore(snapshot);
+
+            // Phase should match snapshot
+            expect(lctx.meta.phase).toBe(snapshot.phase);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });

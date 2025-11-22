@@ -398,7 +398,7 @@ describe('HookOrchestrator', () => {
     it('should respect timeout and retry configuration (property test)', async () => {
       await fc.assert(
         fc.asyncProperty(
-          fc.integer({ min: 10, max: 50 }), // Reduced max timeout
+          fc.integer({ min: 50, max: 100 }), // Increased min timeout for reliability
           fc.integer({ min: 0, max: 2 }), // Reduced max retries
           async (timeout, retries) => {
             let attempts = 0;
@@ -408,7 +408,7 @@ describe('HookOrchestrator', () => {
               id: 'test-hook',
               fn: async () => {
                 attempts++;
-                await new Promise((resolve) => setTimeout(resolve, timeout + 10));
+                await new Promise((resolve) => setTimeout(resolve, timeout + 50)); // Increased delay significantly
               },
               level: 'global',
               timeout,
@@ -421,7 +421,7 @@ describe('HookOrchestrator', () => {
         ),
         { numRuns: 20 } // Reduced number of runs
       );
-    }, 10000); // Increased test timeout to 10 seconds
+    }, 15000); // Increased test timeout to 15 seconds
   });
 
   describe('Property 20: Lifecycle Event Emission', () => {

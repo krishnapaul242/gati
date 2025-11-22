@@ -135,6 +135,41 @@ export function createLocalContext(
       resolver,
       resolvedState: undefined, // Will be populated by resolver if needed
     },
+    snapshot: {
+      create: (): import('./types/context.js').SnapshotToken => {
+        // Capture current state
+        const state = { ...lctx.state };
+        
+        // TODO: Capture outstanding promises (requires promise tracking)
+        const outstandingPromises: import('./types/context.js').PromiseSnapshot[] = [];
+        
+        // TODO: Capture last hook index (requires hook orchestrator integration)
+        const lastHookIndex = 0;
+        
+        return {
+          requestId: lctx.requestId,
+          timestamp: Date.now(),
+          state,
+          outstandingPromises,
+          lastHookIndex,
+          handlerVersion: undefined, // Will be set by handler engine
+          phase: lctx.meta.phase,
+          traceId: lctx.traceId,
+          clientId: lctx.clientId,
+        };
+      },
+      restore: (token: import('./types/context.js').SnapshotToken): void => {
+        // Restore state
+        lctx.state = { ...token.state };
+        
+        // Restore metadata
+        lctx.meta.phase = token.phase;
+        
+        // Note: Outstanding promises and hook index restoration
+        // would require more complex promise tracking and hook orchestrator integration
+        // This is a simplified implementation for the MVP
+      },
+    },
   };
 
   // Store request lifecycle manager for later access
