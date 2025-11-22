@@ -381,6 +381,6 @@ export function exampleTypeGuard() {
     console.log('User name:', data.name);
     console.log('User email:', data.email);
   } else {
-    console.log('Invalid user data');
+    
   }
 }
