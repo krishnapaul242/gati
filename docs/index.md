@@ -204,7 +204,7 @@ Gati is currently a solo project by Krishna Paul. I'm actively looking for:
 - 📚 Technical writers
 - 🎨 UI/UX designers (Module Registry & Control Panel)
 
-[Join the journey →](/contributing/)
+[Join the journey →](/contributing/README)
 
 ## Community
 
