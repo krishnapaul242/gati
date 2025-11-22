@@ -178,6 +178,7 @@ export default defineConfig({
             { text: 'Contributing Guide', link: '/contributing/' },
             { text: 'Agentic Development', link: '/contributing/agentic-development' },
             { text: 'Release Guide', link: '/contributing/release-guide' },
+            { text: 'CI/CD Pipeline', link: '/contributing/ci-cd' },
             { text: 'Codebase Structure', link: '/contributing/codebase-structure' }
           ]
         }

@@ -159,18 +159,23 @@ One command to deploy anywhere. Gati handles containers, manifests, scaling, SSL
 
 ## Current Status
 
-| Component | Version | Status | Description |
-|-----------|---------|--------|-------------|
-| Runtime Engine | 2.0.3 | ✅ **Stable** | Handler execution, contexts, lifecycle management |
-| CLI Tools | 1.0.7 | ✅ **Stable** | Dev server, build, deployment commands |
-| GatiC Scaffolder | 0.1.6 | ✅ **Stable** | Project creation and templates |
-| AWS EKS Plugin | 1.0.0 | ✅ **Stable** | AWS deployment automation |
-| Playground | 1.0.0 | ✅ **Stable** | Visual debugging (3-mode) |
-| Type System | - | 🚧 **M2 Priority** | Branded types, constraint combinators |
-| Timescape | - | 🚧 **M2 Priority** | Version management, schema diffing |
-| GCP/Azure | - | 📅 **M2 Planned** | Multi-cloud deployment |
-| SDK Generation | - | 📅 **M5 Planned** | Auto-generated typed clients |
-| Control Panel | - | 📅 **M4 Planned** | Web UI for monitoring |
+| Component | Version | Status | NPM | Description |
+|-----------|---------|--------|-----|-------------|
+| Core Framework | 1.0.0 | ✅ **Ready** | 🚀 **Publishing Soon** | Core runtime, handler engine, contexts |
+| Type Definitions | 1.0.0 | ✅ **Ready** | 🚀 **Publishing Soon** | TypeScript types and interfaces |
+| CLI Tools | 1.0.13 | 🚧 **In Progress** | - | Dev server, build, deployment commands |
+| Runtime Engine | 2.0.3 | 🚧 **In Progress** | - | Timescape, lifecycle management |
+| AWS EKS Plugin | 1.0.0 | 🚧 **In Progress** | - | AWS deployment automation |
+| Playground | 1.0.0 | 🚧 **In Progress** | - | Visual debugging (3-mode) |
+| Type System | - | 📅 **M2 Priority** | - | Branded types, constraint combinators |
+| Timescape | - | 📅 **M2 Priority** | - | Version management, schema diffing |
+| GCP/Azure | - | 📅 **M2 Planned** | - | Multi-cloud deployment |
+| SDK Generation | - | 📅 **M5 Planned** | - | Auto-generated typed clients |
+| Control Panel | - | 📅 **M4 Planned** | - | Web UI for monitoring |
+
+### 🎉 First NPM Release Coming Soon!
+
+The core packages (`@gati-framework/core` and `@gati-framework/types`) are **production-ready** and will be published to npm shortly. CI/CD pipeline is configured and passing!
 
 ### Production-Ready Features (✅)
 
