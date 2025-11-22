@@ -38,6 +38,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Quick Start', link: '/onboarding/quick-start' },
+      { text: 'Blog', link: '/blog/' },
       { text: 'Vision', link: '/vision/why-gati' },
       { 
         text: 'Guides', 
@@ -191,6 +192,15 @@ export default defineConfig({
           text: 'Project Documentation',
           items: [
             { text: 'Feature Registry', link: '/project-docs/feature-registry' }
+          ]
+        }
+      ],
+      '/blog/': [
+        {
+          text: 'Blog',
+          items: [
+            { text: 'All Posts', link: '/blog/' },
+            { text: 'Introducing Gati', link: '/blog/introducing-gati' }
           ]
         }
       ]

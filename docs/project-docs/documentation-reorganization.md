@@ -191,7 +191,7 @@ Updated `docs/.vitepress/config.ts`:
 
 ## Related Documentation
 
-- [Documentation Guidelines](./DOCUMENTATION_GUIDELINES.md)
+- [Documentation Guidelines](../DOCUMENTATION_GUIDELINES.md)
 - [Documentation Update Summary](../DOCUMENTATION_UPDATE_SUMMARY.md)
 - [CI/CD Complete](../changelog/2025-11-22-ci-cd-complete.md)
 
