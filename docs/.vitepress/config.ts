@@ -209,6 +209,7 @@ export default defineConfig({
           text: 'Blog',
           items: [
             { text: 'All Posts', link: '/blog/' },
+            { text: 'Gati Vision — Zero-Ops for AI Era', link: '/blog/gati-vision-launch' },
             { text: 'Introducing Gati', link: '/blog/introducing-gati' }
           ]
         }

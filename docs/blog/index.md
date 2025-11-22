@@ -4,6 +4,18 @@ Stay updated with the latest news, releases, and insights from the Gati team.
 
 ## Latest Posts
 
+### [Introducing Gati — The Zero-Ops Backend Framework for the AI Era](./gati-vision-launch.md)
+
+**November 23, 2025** • *Krishna Paul*
+
+Build faster. Break nothing. Deploy everywhere. A comprehensive vision of Gati's revolutionary approach to backend development - from zero-ops deployment to AI-native integrations, Timescape versioning, and the upcoming Gati Registry marketplace.
+
+**Tags:** announcement, vision, ai, zero-ops, backend, typescript
+
+[Read more →](./gati-vision-launch.md)
+
+---
+
 ### [Introducing Gati: The Backend That Builds, Scales, and Evolves Itself](./introducing-gati.md)
 
 **November 22, 2025** • *Krishna Paul*
