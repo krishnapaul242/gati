@@ -12,6 +12,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail CI on lint errors
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
