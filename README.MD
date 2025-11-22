@@ -11,6 +11,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 [![CI](https://github.com/krishnapaul242/gati/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnapaul242/gati/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/krishnapaul242/gati?style=social)](https://github.com/krishnapaul242/gati/stargazers)
 
 [Documentation](https://krishnapaul242.github.io/gati/) • [Quick Start](#-quick-start) • [Examples](#-examples) • [Roadmap](#-roadmap)
 
@@ -306,7 +307,7 @@ Whether you're interested in:
 
 ### How to Get Involved
 
-1. ⭐ **Star the repo** to show support
+1. ⭐ **[Star the repo](https://github.com/krishnapaul242/gati/stargazers)** to show support
 2. 💬 **Join discussions** - Share your ideas
 3. 🐛 **Report bugs** - Help me improve quality
 4. 📖 **Improve docs** - Make Gati easier to use
@@ -397,8 +398,10 @@ Special thanks to all [contributors](https://github.com/krishnapaul242/gati/grap
 
 **"Gati is not just fast—it's forward."** ⚡
 
-[⭐ Star us on GitHub](https://github.com/krishnapaul242/gati) • [📖 Read the Docs](https://krishnapaul242.github.io/gati/) • [💬 Join Discussions](https://github.com/krishnapaul242/gati/discussions)
+[![GitHub stars](https://img.shields.io/github/stars/krishnapaul242/gati?style=social)](https://github.com/krishnapaul242/gati/stargazers)
 
-Made with ❤️ by developers, for developers
+[⭐ Star on GitHub](https://github.com/krishnapaul242/gati/stargazers) • [📖 Read the Docs](https://krishnapaul242.github.io/gati/) • [💬 Join Discussions](https://github.com/krishnapaul242/gati/discussions)
+
+Made with ❤️ by Krishna Paul
 
 </div>

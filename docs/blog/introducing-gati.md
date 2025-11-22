@@ -484,19 +484,13 @@ gati deploy dev --local
 
 ---
 
-## What Developers Are Saying
+## Community Support
 
-> "Finally, a backend framework that just works. No more YAML hell, no more Docker nightmares. Just code."
-> 
-> — Early adopter
+[![GitHub stars](https://img.shields.io/github/stars/krishnapaul242/gati?style=social)](https://github.com/krishnapaul242/gati/stargazers)
 
-> "The hot reload is insanely fast. I can iterate on my API in real-time without losing my flow."
-> 
-> — Beta tester
+See who's supporting Gati: [View Stargazers](https://github.com/krishnapaul242/gati/stargazers)
 
-> "Deploying to Kubernetes used to take me days. With Gati, it's one command. Game changer."
-> 
-> — DevOps Engineer
+**Be part of the community!** Star the repo to show your support and stay updated.
 
 ---
 
@@ -511,7 +505,7 @@ As a solo developer, I'm just getting started, and I'd love for you to be part o
 ### How to Get Started
 
 - 🚀 **Try Gati** - Build something with it
-- ⭐ **Star on GitHub** - Show your support
+- ⭐ **[Star on GitHub](https://github.com/krishnapaul242/gati/stargazers)** - Show your support
 - 💬 **Share feedback** - Tell me what you think
 - 🤝 **Contribute** - Help build features
 - 📢 **Spread the word** - Tell other developers
@@ -540,12 +534,14 @@ I'm actively working on **M3 (Timescape & Type System)** and would love help wit
 
 **"Gati is not just fast—it's forward."** ⚡
 
-[Get Started](https://krishnapaul242.github.io/gati/onboarding/quick-start) • [Documentation](https://krishnapaul242.github.io/gati/) • [GitHub](https://github.com/krishnapaul242/gati)
+[![GitHub stars](https://img.shields.io/github/stars/krishnapaul242/gati?style=social)](https://github.com/krishnapaul242/gati/stargazers)
+
+[Get Started](https://krishnapaul242.github.io/gati/onboarding/quick-start) • [Documentation](https://krishnapaul242.github.io/gati/) • [GitHub](https://github.com/krishnapaul242/gati) • [Stargazers](https://github.com/krishnapaul242/gati/stargazers)
 
 ---
 
-*Built with ❤️ by developers, for developers*
+*Built with ❤️ by Krishna Paul*
 
-*MIT License © 2025 Krishna Paul*
+*MIT License © 2025*
 
 </div>

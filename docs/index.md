@@ -210,6 +210,13 @@ Gati is currently a solo project by Krishna Paul. I'm actively looking for:
 
 Gati is built by Krishna Paul as a solo project, and I'm looking for contributors!
 
+<p align="center">
+  <a href="https://github.com/krishnapaul242/gati/stargazers">
+    <img src="https://img.shields.io/github/stars/krishnapaul242/gati?style=social" alt="GitHub stars">
+  </a>
+</p>
+
+- ⭐ [Star on GitHub](https://github.com/krishnapaul242/gati/stargazers) — Show your support
 - 💬 [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions) — Ask questions, share ideas
 - 🐛 [Issue Tracker](https://github.com/krishnapaul242/gati/issues) — Report bugs, request features
 - 📖 [Contributing Guide](/contributing/README) — Help build Gati
