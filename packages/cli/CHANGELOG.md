@@ -1,5 +1,13 @@
 # @gati-framework/cli
 
+## 1.0.14
+
+### Patch Changes
+
+- Updated dependencies [cab87b8]
+  - @gati-framework/core@0.4.5
+  - @gati-framework/types@1.0.1
+
 ## 1.0.13
 
 ### Patch Changes

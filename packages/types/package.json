@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gati Type System - TypeScript-first branded types and schema system",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/production-hardening",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Production hardening utilities for Gati - secret management, config validation, auto-scaling",
   "keywords": [
     "gati",
