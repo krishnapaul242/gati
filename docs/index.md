@@ -191,17 +191,18 @@ All core packages are **published to npm** and production-ready! CI/CD pipeline 
 ### Roadmap
 
 **M3 (November 2025)** — 🚧 IN PROGRESS - Timescape versioning, module system, type system  
-**M4 (Q1 2026)** — Control Panel (monitoring and configuration UI)  
-**M5 (Q1 2026)** — SDK generation from handler signatures  
-**M6 (Q2 2026)** — CDN integration, SSL automation
+**M4 (February 2026)** — Module Registry & Marketplace ([Specs](https://github.com/krishnapaul242/gati/tree/main/apps/gati-registry))  
+**M5 (Q1 2026)** — Control Panel (monitoring and configuration UI)  
+**M6 (Q1 2026)** — SDK generation from handler signatures  
+**M7 (Q2 2026)** — CDN integration, SSL automation
 
 ### Looking for Contributors!
 
 Gati is currently a solo project by Krishna Paul. I'm actively looking for:
 - 🧪 Beta testers
-- 👨‍💻 Contributors (especially for M3 features)
+- 👨‍💻 Contributors (especially for M3 & M4 features)
 - 📚 Technical writers
-- 🎨 UI/UX designers
+- 🎨 UI/UX designers (Module Registry & Control Panel)
 
 [Join the journey →](/contributing/)
 

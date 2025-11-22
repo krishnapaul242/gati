@@ -246,8 +246,8 @@ I'm currently working on the revolutionary API versioning and type system:
 - Zero-downtime version deployments
 
 **Module System:**
-- Enhanced module registry
-- Module marketplace
+- Enhanced module contracts
+- Module interfaces and types
 - Dependency management
 - Isolated module execution
 
@@ -259,7 +259,46 @@ I'm currently working on the revolutionary API versioning and type system:
 
 **Ship breaking changes without fear.**
 
-### 📊 M4 - Control Panel (Q1 2026)
+### 🔌 M4 - Module Registry & Marketplace (February 2026)
+
+Public module registry and marketplace for sharing and discovering modules:
+
+**Module Registry:**
+- Public npm-like registry for Gati modules
+- Semantic versioning
+- Dependency resolution
+- Module discovery and search
+
+**Marketplace:**
+- Browse and install community modules
+- Module ratings and reviews
+- Usage statistics
+- Revenue sharing for module authors (70/30 split)
+
+**Module Types:**
+- Database connectors (PostgreSQL, MongoDB, MySQL, etc.)
+- Authentication providers (OAuth, JWT, SAML, etc.)
+- Cache systems (Redis, Memcached, etc.)
+- Queue systems (RabbitMQ, Kafka, etc.)
+- AI/ML integrations (OpenAI, Anthropic, etc.)
+- Custom business logic modules
+
+**Install modules like npm packages:**
+
+```bash
+# Install a database module
+gati module install @gati-modules/postgres
+
+# Install an auth module
+gati module install @gati-modules/oauth
+
+# Search for modules
+gati module search redis
+```
+
+**Build and publish your own modules, earn from the marketplace!**
+
+### 📊 M5 - Control Panel (Q1 2026)
 
 Live monitoring and configuration dashboard:
 
@@ -271,7 +310,7 @@ Live monitoring and configuration dashboard:
 
 **Observe and control your backend visually.**
 
-### 🛠️ M5 - SDK Generation (Q1 2026)
+### 🛠️ M6 - SDK Generation (Q1 2026)
 
 Auto-generated typed clients:
 
@@ -283,7 +322,7 @@ gati generate sdk --platform go
 
 **Type-safe clients for any platform, automatically.**
 
-### ☁️ M6 - CDN & SSL (Q2 2026)
+### ☁️ M7 - CDN & SSL (Q2 2026)
 
 Global distribution and security:
 
@@ -418,6 +457,8 @@ I'm building a future where:
 
 **Want to be part of this journey?** I'm looking for contributors!
 
+**Learn more about the Module Registry:** [Gati Registry Documentation](https://github.com/krishnapaul242/gati/tree/main/apps/gati-registry)
+
 ---
 
 ## Try Gati Today
@@ -486,9 +527,12 @@ I'm actively working on **M3 (Timescape & Type System)** and would love help wit
 - Building module system components
 - Implementing type system contracts
 - Writing documentation and examples
-- Designing the Control Panel UI
+- Designing the Module Registry UI (Feb 2026)
+- Designing the Control Panel UI (Q1 2026)
 
 **Interested?** Reach out via [GitHub Discussions](https://github.com/krishnapaul242/gati/discussions)!
+
+**Module Registry Specs:** [apps/gati-registry](https://github.com/krishnapaul242/gati/tree/main/apps/gati-registry)
 
 ---
 

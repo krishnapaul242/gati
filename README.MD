@@ -105,11 +105,13 @@ export const handler: Handler = async (req, res, gctx, lctx) => {
 | **M1** — Foundation & Core Runtime | ✅ Complete | Q4 2025 | Handler engine, CLI, Kubernetes deployment |
 | **M2** — Cloud Infrastructure | ✅ Complete | Q4 2025 | AWS/GCP/Azure plugins, auto-scaling, CI/CD |
 | **M3** — Timescape & Type System | 🚧 In Progress | Nov 2025 | API versioning, module system, type system, contracts |
-| **M4** — Control Panel | ⏳ Planned | Q1 2026 | Live monitoring and configuration dashboard |
-| **M5** — SDK Generation | ⏳ Planned | Q1 2026 | Auto-generate typed clients for any platform |
-| **M6** — CDN & SSL | ⏳ Planned | Q2 2026 | Global CDN, automatic SSL, multi-region support |
+| **M4** — Module Registry & Marketplace | ⏳ Planned | Feb 2026 | Public module registry, marketplace, discovery |
+| **M5** — Control Panel | ⏳ Planned | Q1 2026 | Live monitoring and configuration dashboard |
+| **M6** — SDK Generation | ⏳ Planned | Q1 2026 | Auto-generate typed clients for any platform |
+| **M7** — CDN & SSL | ⏳ Planned | Q2 2026 | Global CDN, automatic SSL, multi-region support |
 
-**📋 Detailed roadmap:** [docs/architecture/milestones.md](./docs/architecture/milestones.md)
+**📋 Detailed roadmap:** [docs/architecture/milestones.md](./docs/architecture/milestones.md)  
+**🔌 Module Registry:** [apps/gati-registry/README.md](./apps/gati-registry/README.md) (Coming Feb 2026)
 
 ## 🎓 Documentation
 
@@ -371,7 +373,9 @@ I'm currently working on **M3 - Timescape & Type System**:
 - 🔄 Timescape API versioning
 - 📦 Enhanced module system
 - 🏷️ Type system with contracts
-- 🔌 Module registry and marketplace
+- 🔌 Module contracts and interfaces
+
+**Next Up (February 2026):** Module Registry & Marketplace for sharing and discovering modules
 
 **Want to help?** These are great areas for contributors!
 

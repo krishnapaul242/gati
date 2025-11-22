@@ -120,6 +120,12 @@ export default defineConfig({
             { text: 'AWS EKS', link: '/guides/aws-eks-deployment' },
             { text: 'HPA & Ingress', link: '/guides/hpa-ingress' }
           ]
+        },
+        {
+          text: 'Module System (Planned)',
+          items: [
+            { text: 'Module Registry & Marketplace', link: '/guides/module-registry' }
+          ]
         }
       ],
       '/api-reference/': [
