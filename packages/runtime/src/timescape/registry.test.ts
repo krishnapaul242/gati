@@ -389,6 +389,12 @@ describe('VersionRegistry', () => {
 });
 
 describe('Version Classification', () => {
+    let registry: VersionRegistry;
+
+    beforeEach(() => {
+        registry = new VersionRegistry();
+    });
+
     describe('Hot/Warm/Cold Classification', () => {
         it('should classify version as hot with high request count', () => {
             const registry = new VersionRegistry(undefined, {

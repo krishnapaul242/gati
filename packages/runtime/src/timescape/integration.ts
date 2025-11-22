@@ -161,11 +161,17 @@ export class TimescapeIntegration {
         const startTime = Date.now();
 
         try {
+            // Get all versions for the handler path to build transformation chain
+            const registryVersions = this.registry.getVersions(req.path || '').map(v => v.tsv);
+            // Ensure both from and to versions are in the array
+            const versions = Array.from(new Set([...registryVersions, metadata.resolvedVersion, metadata.handlerVersion]));
+            
             const result = await this.transformerEngine.transformRequest(
                 req.body,
                 metadata.resolvedVersion,
                 metadata.handlerVersion,
-                this.config.transformerTimeout
+                versions,
+                { timeout: this.config.transformerTimeout }
             );
 
             if (!result.success) {
@@ -216,7 +222,8 @@ export class TimescapeIntegration {
      */
     async transformResponse(
         responseData: unknown,
-        metadata: VersionResolutionMetadata
+        metadata: VersionResolutionMetadata,
+        handlerPath?: string
     ): Promise<unknown> {
         if (!this.config.applyTransformers) {
             return responseData;
@@ -230,11 +237,19 @@ export class TimescapeIntegration {
         const startTime = Date.now();
 
         try {
+            // Get all versions for building transformation chain
+            const registryVersions = handlerPath 
+                ? this.registry.getVersions(handlerPath).map(v => v.tsv)
+                : [];
+            // Ensure both from and to versions are in the array
+            const versions = Array.from(new Set([...registryVersions, metadata.handlerVersion, metadata.resolvedVersion]));
+            
             const result = await this.transformerEngine.transformResponse(
                 responseData,
                 metadata.handlerVersion,
                 metadata.resolvedVersion,
-                this.config.transformerTimeout
+                versions,
+                { timeout: this.config.transformerTimeout }
             );
 
             if (!result.success) {

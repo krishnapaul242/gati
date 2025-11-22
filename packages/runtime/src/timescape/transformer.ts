@@ -41,6 +41,7 @@ export interface TransformResult<T = unknown> {
     data?: T;
     error?: Error;
     transformedVersions: TSV[];
+    chainLength?: number;
 }
 
 /**
@@ -199,6 +200,7 @@ export class TransformerEngine {
                 success: false,
                 error: new Error(`Cannot build transformation chain from ${from} to ${to}`),
                 transformedVersions: [],
+                chainLength: 0,
             };
         }
 
@@ -208,6 +210,7 @@ export class TransformerEngine {
                 success: true,
                 data,
                 transformedVersions: [],
+                chainLength: 0,
             };
         }
 
@@ -252,6 +255,7 @@ export class TransformerEngine {
                 success: true,
                 data: currentData,
                 transformedVersions,
+                chainLength: chain.length - 1,
             };
         } catch (error) {
             if (options.fallbackOnError) {

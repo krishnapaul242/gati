@@ -6,6 +6,25 @@ import { TimescapeMetrics } from './metrics.js';
 import type { Request, LocalContext } from '../types/index.js';
 import type { TSV } from './types.js';
 
+// Mock PrometheusMetrics
+const createMockPrometheusMetrics = () => ({
+    createCounter: vi.fn(() => ({
+        inc: vi.fn(),
+        labels: vi.fn(() => ({ inc: vi.fn() })),
+    })),
+    createGauge: vi.fn(() => ({
+        set: vi.fn(),
+        inc: vi.fn(),
+        dec: vi.fn(),
+        labels: vi.fn(() => ({ set: vi.fn(), inc: vi.fn(), dec: vi.fn() })),
+    })),
+    createHistogram: vi.fn(() => ({
+        observe: vi.fn(),
+        labels: vi.fn(() => ({ observe: vi.fn() })),
+        startTimer: vi.fn(() => vi.fn()),
+    })),
+});
+
 describe('TimescapeIntegration', () => {
     let registry: VersionRegistry;
     let transformerEngine: TransformerEngine;
@@ -15,7 +34,8 @@ describe('TimescapeIntegration', () => {
     beforeEach(() => {
         registry = new VersionRegistry();
         transformerEngine = new TransformerEngine();
-        metrics = new TimescapeMetrics();
+        const mockPrometheusMetrics = createMockPrometheusMetrics();
+        metrics = new TimescapeMetrics(mockPrometheusMetrics as any);
         integration = new TimescapeIntegration(registry, transformerEngine, metrics);
     });
 
@@ -134,17 +154,21 @@ describe('TimescapeIntegration', () => {
             transformerEngine.register({
                 fromVersion: v1,
                 toVersion: v2,
+                immutable: true,
+                createdAt: Date.now(),
+                createdBy: 'test',
                 forward: {
-                    request: async (data) => ({ ...data, newField: 'added' }),
-                    response: async (data) => data,
+                    transformRequest: async (data) => ({ ...data, newField: 'added' }),
+                    transformResponse: async (data) => data,
                 },
                 backward: {
-                    request: async (data) => data,
-                    response: async (data) => data,
+                    transformRequest: async (data) => data,
+                    transformResponse: async (data) => data,
                 },
             });
 
             const req: Partial<Request> = {
+                path: '/api/users',
                 body: { id: 1, name: 'Test' },
             };
 
@@ -171,6 +195,7 @@ describe('TimescapeIntegration', () => {
             registry.registerVersion('/api/users', tsv, { hash: 'a' });
 
             const req: Partial<Request> = {
+                path: '/api/users',
                 body: { id: 1, name: 'Test' },
             };
 
@@ -198,19 +223,23 @@ describe('TimescapeIntegration', () => {
             transformerEngine.register({
                 fromVersion: v1,
                 toVersion: v2,
+                immutable: true,
+                createdAt: Date.now(),
+                createdBy: 'test',
                 forward: {
-                    request: async () => {
+                    transformRequest: async () => {
                         throw new Error('Transform failed');
                     },
-                    response: async (data) => data,
+                    transformResponse: async (data) => data,
                 },
                 backward: {
-                    request: async (data) => data,
-                    response: async (data) => data,
+                    transformRequest: async (data) => data,
+                    transformResponse: async (data) => data,
                 },
             });
 
             const req: Partial<Request> = {
+                path: '/api/users',
                 body: { id: 1 },
             };
 
@@ -239,13 +268,16 @@ describe('TimescapeIntegration', () => {
             transformerEngine.register({
                 fromVersion: v1,
                 toVersion: v2,
+                immutable: true,
+                createdAt: Date.now(),
+                createdBy: 'test',
                 forward: {
-                    request: async (data) => data,
-                    response: async (data) => data,
+                    transformRequest: async (data) => data,
+                    transformResponse: async (data) => data,
                 },
                 backward: {
-                    request: async (data) => data,
-                    response: async (data) => {
+                    transformRequest: async (data) => data,
+                    transformResponse: async (data: any) => {
                         const { newField, ...rest } = data;
                         return rest;
                     },
@@ -261,7 +293,7 @@ describe('TimescapeIntegration', () => {
             };
 
             const responseData = { id: 1, name: 'Test', newField: 'value' };
-            const transformed = await integration.transformResponse(responseData, metadata);
+            const transformed = await integration.transformResponse(responseData, metadata, '/api/users');
 
             expect(transformed).toEqual({ id: 1, name: 'Test' });
         });
@@ -404,17 +436,21 @@ describe('TimescapeIntegration', () => {
             transformerEngine.register({
                 fromVersion: v1,
                 toVersion: v2,
+                immutable: true,
+                createdAt: Date.now(),
+                createdBy: 'test',
                 forward: {
-                    request: async (data) => data,
-                    response: async (data) => data,
+                    transformRequest: async (data) => data,
+                    transformResponse: async (data) => data,
                 },
                 backward: {
-                    request: async (data) => data,
-                    response: async (data) => data,
+                    transformRequest: async (data) => data,
+                    transformResponse: async (data) => data,
                 },
             });
 
             const req: Partial<Request> = {
+                path: '/api/users',
                 body: { id: 1 },
             };
 
