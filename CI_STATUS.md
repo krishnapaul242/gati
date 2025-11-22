@@ -2,13 +2,14 @@
 
 ## ✅ What's Working
 
-### CI Pipeline (Passing)
+### CI Pipeline (Passing) ✅
 - **Build**: Core and Types packages build successfully
 - **Test**: Core and Types tests pass
 - **Lint**: Runs but non-blocking (shows warnings)
 
-### Release Pipeline (Fixed)
+### Release Pipeline (Fixed) ✅
 - Configured to only build/test stable packages
+- Release script updated to build only core and types
 - Ready for npm publishing once `NPM_TOKEN` is added
 
 ## ⚠️ Known Issues
