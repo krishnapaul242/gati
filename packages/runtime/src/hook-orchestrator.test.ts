@@ -774,6 +774,219 @@ describe('HookOrchestrator', () => {
       expect(customEvents).toHaveLength(0);
     });
   });
+
+  describe('Compensating Actions', () => {
+    it('should register compensating actions', () => {
+      const action = vi.fn();
+      orchestrator.registerCompensatingAction(action, 'test-action');
+
+      const actions = orchestrator.getCompensatingActions();
+      expect(actions).toHaveLength(1);
+      expect(actions[0].id).toBe('test-action');
+    });
+
+    it('should auto-generate ID if not provided', () => {
+      const action = vi.fn();
+      orchestrator.registerCompensatingAction(action);
+
+      const actions = orchestrator.getCompensatingActions();
+      expect(actions).toHaveLength(1);
+      expect(actions[0].id).toMatch(/^compensation-/);
+    });
+
+    it('should execute compensating actions in reverse order', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerCompensatingAction(() => executionOrder.push('action1'), 'action1');
+      orchestrator.registerCompensatingAction(() => executionOrder.push('action2'), 'action2');
+      orchestrator.registerCompensatingAction(() => executionOrder.push('action3'), 'action3');
+
+      await orchestrator.executeCompensatingActions(lctx);
+
+      expect(executionOrder).toEqual(['action3', 'action2', 'action1']);
+    });
+
+    it('should execute compensating actions when catch hooks are executed', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerCompensatingAction(() => executionOrder.push('compensation'), 'comp1');
+      orchestrator.registerCatch({
+        id: 'catch-hook',
+        fn: () => executionOrder.push('catch'),
+        level: 'global',
+      });
+
+      await orchestrator.executeCatch(new Error('test'), lctx, gctx);
+
+      expect(executionOrder).toEqual(['compensation', 'catch']);
+    });
+
+    it('should emit compensation:start and compensation:end events', async () => {
+      orchestrator.registerCompensatingAction(() => {}, 'test-action');
+
+      await orchestrator.executeCompensatingActions(lctx);
+
+      const startEvents = events.filter((e) => e.type === 'compensation:start');
+      const endEvents = events.filter((e) => e.type === 'compensation:end');
+
+      expect(startEvents).toHaveLength(1);
+      expect(endEvents).toHaveLength(1);
+      expect(startEvents[0].metadata?.actionId).toBe('test-action');
+      expect(endEvents[0].metadata?.actionId).toBe('test-action');
+      expect(endEvents[0].duration).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should emit compensation:error and compensation:alert on failure', async () => {
+      const alerts: Array<{ message: string; error: Error; metadata?: Record<string, unknown> }> = [];
+      const customOrchestrator = new HookOrchestrator({
+        emitEvents: true,
+        onEvent: (event) => events.push(event),
+        onAlert: (message, error, metadata) => alerts.push({ message, error, metadata }),
+      });
+
+      customOrchestrator.registerCompensatingAction(() => {
+        throw new Error('Compensation failed');
+      }, 'failing-action');
+
+      await customOrchestrator.executeCompensatingActions(lctx);
+
+      const errorEvents = events.filter((e) => e.type === 'compensation:error');
+      const alertEvents = events.filter((e) => e.type === 'compensation:alert');
+
+      expect(errorEvents).toHaveLength(1);
+      expect(alertEvents).toHaveLength(1);
+      expect(errorEvents[0].error?.message).toBe('Compensation failed');
+      expect(alertEvents[0].metadata?.message).toContain('failing-action');
+      
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].message).toContain('failing-action');
+      expect(alerts[0].error.message).toBe('Compensation failed');
+    });
+
+    it('should continue executing other compensating actions if one fails', async () => {
+      const executionOrder: string[] = [];
+
+      orchestrator.registerCompensatingAction(() => executionOrder.push('action1'), 'action1');
+      orchestrator.registerCompensatingAction(() => {
+        executionOrder.push('action2');
+        throw new Error('Action 2 failed');
+      }, 'action2');
+      orchestrator.registerCompensatingAction(() => executionOrder.push('action3'), 'action3');
+
+      await orchestrator.executeCompensatingActions(lctx);
+
+      // All actions should execute despite action2 failing
+      expect(executionOrder).toEqual(['action3', 'action2', 'action1']);
+    });
+
+    it('should clear compensating actions after execution', async () => {
+      orchestrator.registerCompensatingAction(() => {}, 'action1');
+      orchestrator.registerCompensatingAction(() => {}, 'action2');
+
+      expect(orchestrator.getCompensatingActions()).toHaveLength(2);
+
+      await orchestrator.executeCompensatingActions(lctx);
+
+      expect(orchestrator.getCompensatingActions()).toHaveLength(0);
+    });
+
+    it('should clear compensating actions without executing', () => {
+      const action = vi.fn();
+      orchestrator.registerCompensatingAction(action, 'action1');
+
+      expect(orchestrator.getCompensatingActions()).toHaveLength(1);
+
+      orchestrator.clearCompensatingActions();
+
+      expect(orchestrator.getCompensatingActions()).toHaveLength(0);
+      expect(action).not.toHaveBeenCalled();
+    });
+
+    it('should handle async compensating actions', async () => {
+      let executed = false;
+
+      orchestrator.registerCompensatingAction(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        executed = true;
+      }, 'async-action');
+
+      await orchestrator.executeCompensatingActions(lctx);
+
+      expect(executed).toBe(true);
+    });
+
+    it('should clear compensating actions when clear() is called', () => {
+      orchestrator.registerCompensatingAction(() => {}, 'action1');
+      orchestrator.registerBefore({ id: 'hook1', fn: () => {}, level: 'global' });
+
+      expect(orchestrator.getCompensatingActions()).toHaveLength(1);
+      expect(orchestrator.getHooks().before).toHaveLength(1);
+
+      orchestrator.clear();
+
+      expect(orchestrator.getCompensatingActions()).toHaveLength(0);
+      expect(orchestrator.getHooks().before).toHaveLength(0);
+    });
+
+    it('should handle compensating actions in a realistic scenario', async () => {
+      const state = {
+        userId: null as string | null,
+        emailSent: false,
+        recordCreated: false,
+      };
+
+      // Simulate a multi-step operation with compensating actions
+      orchestrator.registerBefore({
+        id: 'create-user',
+        fn: () => {
+          state.userId = 'user-123';
+          orchestrator.registerCompensatingAction(() => {
+            state.userId = null;
+          }, 'delete-user');
+        },
+        level: 'global',
+      });
+
+      orchestrator.registerBefore({
+        id: 'send-email',
+        fn: () => {
+          state.emailSent = true;
+          orchestrator.registerCompensatingAction(() => {
+            state.emailSent = false;
+          }, 'unsend-email');
+        },
+        level: 'global',
+      });
+
+      orchestrator.registerBefore({
+        id: 'create-record',
+        fn: () => {
+          state.recordCreated = true;
+          orchestrator.registerCompensatingAction(() => {
+            state.recordCreated = false;
+          }, 'delete-record');
+          throw new Error('Record creation failed');
+        },
+        level: 'global',
+      });
+
+      // Execute and expect failure
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow('Record creation failed');
+
+      // State should be partially set
+      expect(state.userId).toBe('user-123');
+      expect(state.emailSent).toBe(true);
+      expect(state.recordCreated).toBe(true);
+
+      // Execute catch hooks (which will run compensating actions)
+      await orchestrator.executeCatch(new Error('test'), lctx, gctx);
+
+      // Compensating actions should have rolled back the state
+      expect(state.userId).toBeNull();
+      expect(state.emailSent).toBe(false);
+      expect(state.recordCreated).toBe(false);
+    });
+  });
 });
 
 // Feature: runtime-architecture, Property 25: Hook execution order

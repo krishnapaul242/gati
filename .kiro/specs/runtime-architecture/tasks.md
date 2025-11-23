@@ -1,5 +1,46 @@
 # Implementation Plan
 
+## Current Status Summary
+
+**Completed (Tasks 1-8):**
+- ✅ Project structure and type definitions
+- ✅ Local Context (lctx) with state management, hooks, and snapshot/restore
+- ✅ Global Context (gctx) with module registry and lifecycle management
+- ✅ GType schema system with validation
+- ✅ Hook Orchestrator (LCC) with lifecycle management, validation, and compensating actions
+- ✅ Snapshot and restore functionality
+- ✅ Handler Manifest generation (in CLI analyzer)
+- ✅ Property-based testing infrastructure with fast-check
+- ✅ Property tests for Local Context (Properties 21, 23, 24, 27, 47)
+- ✅ Property tests for Hook Orchestrator (Properties 6, 8, 10, 11, 20, 25)
+
+**In Progress:**
+- None currently
+
+**Not Started (Tasks 10-29):**
+- Module Manifest and capability system
+- Module RPC adapters
+- Ingress component
+- Transformer execution
+- Pub/Sub Queue Fabric
+- Manifest & Schema Store
+- Secrets Manager
+- Metrics and Observability
+- Codegen for validators and SDK stubs
+- Handler Worker execution engine
+- Playground request inspection
+- Hook manifest recording
+- Testing harness (@gati/testing)
+- Runtime simulation (@gati/simulate)
+- Kubernetes Operator
+- End-to-end integration
+- Example handlers and modules
+- Documentation
+
+**Note:** Property-based tests (marked with *) are optional and can be implemented after core functionality is complete.
+
+---
+
 - [x] 1. Set up project structure and core type definitions
   - Create directory structure for runtime components
   - Define TypeScript interfaces for Handler, LocalContext, GlobalContext
@@ -50,11 +91,11 @@
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
   - **Status**: Implemented in packages/runtime/src/global-context.ts (secrets manager and metrics client interfaces need implementation)
 
-- [ ] 3.1 Write property test for module registry completeness
+- [ ]* 3.1 Write property test for module registry completeness
   - **Property 28: Module registry completeness**
   - **Validates: Requirements 8.1**
 
-- [ ] 3.2 Write property test for configuration immutability
+- [ ]* 3.2 Write property test for configuration immutability
   - **Property 32: Configuration immutability**
   - **Validates: Requirements 8.5**
 
@@ -141,15 +182,16 @@
   - **Validates: Requirements 15.4**
   - **Status**: ✅ Complete
 
-- [ ] 7. Implement compensating actions for error handling
+- [x] 7. Implement compensating actions for error handling
   - Add compensation registry to LCC
   - Implement registerCompensatingAction method
   - Execute compensating actions in reverse order on errors
   - Add logging for compensating action execution
   - Emit alerts when compensating actions fail
   - _Requirements: 2.1_
+  - **Status**: ✅ Complete - Implemented in HookOrchestrator
 
-- [ ] 8. Implement Handler Manifest generation
+- [x] 8. Implement Handler Manifest generation
   - Create Analyzer to extract TypeScript types from handler code
   - Generate handler ID, path, and methods from handler definition
   - Extract GType references for request/response/params/headers
@@ -158,12 +200,62 @@
   - Generate Timescape fingerprint
   - Extract module and plugin dependencies
   - _Requirements: 1.2, 11.1_
+  - **Status**: ✅ Complete - Implemented in packages/cli/src/analyzer/manifest-generator.ts
 
-- [ ] 8.1 Write property test for manifest generation completeness
+- [ ]* 8.1 Write property test for manifest generation completeness
   - **Property 2: Manifest generation completeness**
   - **Validates: Requirements 1.2, 11.1**
 
-- [ ] 9. Implement Module Manifest and capability system
+- [-] 9. Implement Route Manager with version resolution and Timescape integration
+
+
+
+
+
+
+  - Create enhanced Route Manager class with version resolution
+  - Implement Timescape integration for version queries
+  - Add manifest, GType, and health status caching
+  - Implement version resolution based on path and preference
+  - Add handler instance selection and routing
+  - Implement policy enforcement (rate limiting, authentication)
+  - Add warm pool management for critical versions
+  - Implement usage tracking for auto-decommissioning
+  - _Requirements: 4.1, 4.2, 4.3, 9.1, 9.2, 9.3, 9.5, 2.3_
+
+- [ ]* 9.1 Write property test for version resolution
+  - **Property 33: Version resolution**
+  - **Validates: Requirements 9.1**
+
+- [ ]* 9.2 Write property test for breaking change detection
+  - **Property 14: Breaking change detection**
+  - **Validates: Requirements 4.1**
+
+- [ ]* 9.3 Write property test for non-breaking version activation
+  - **Property 15: Non-breaking version activation**
+  - **Validates: Requirements 4.2**
+
+- [ ]* 9.4 Write property test for multi-version routing
+  - **Property 16: Multi-version routing**
+  - **Validates: Requirements 4.3**
+
+- [ ]* 9.5 Write property test for manifest caching
+  - **Property 36: Manifest caching**
+  - **Validates: Requirements 9.5**
+
+- [ ]* 9.6 Write property test for rate limit enforcement
+  - **Property 34: Rate limit enforcement**
+  - **Validates: Requirements 9.2**
+
+- [ ]* 9.7 Write property test for authentication enforcement
+  - **Property 35: Authentication enforcement**
+  - **Validates: Requirements 9.3**
+
+- [ ]* 9.8 Write property test for unhealthy version routing
+  - **Property 7: Unhealthy version routing**
+  - **Validates: Requirements 2.3**
+
+- [ ] 10. Implement Module Manifest and capability system
   - Create Module Manifest structure
   - Add capability declaration and validation
   - Implement capability enforcement in Global Context
@@ -171,15 +263,15 @@
   - Create module method definitions with input/output types
   - _Requirements: 5.3, 12.1, 12.2_
 
-- [ ] 9.1 Write property test for module capability declaration
+- [ ]* 10.1 Write property test for module capability declaration
   - **Property 40: Module capability declaration**
   - **Validates: Requirements 12.1**
 
-- [ ] 9.2 Write property test for capability enforcement
+- [ ]* 10.2 Write property test for capability enforcement
   - **Property 19: Capability enforcement**
   - **Validates: Requirements 5.3, 12.2**
 
-- [ ] 10. Implement Module RPC adapters
+- [ ] 11. Implement Module RPC adapters
   - Create ModuleClient interface with typed stubs
   - Implement automatic serialization and deserialization
   - Add retry logic with exponential backoff
@@ -187,15 +279,15 @@
   - Add timeout handling
   - _Requirements: 1.4, 5.2_
 
-- [ ] 10.1 Write property test for module client type safety
+- [ ]* 11.1 Write property test for module client type safety
   - **Property 4: Module client type safety**
   - **Validates: Requirements 1.4**
 
-- [ ] 10.2 Write property test for RPC serialization
+- [ ]* 11.2 Write property test for RPC serialization
   - **Property 18: Module RPC serialization**
   - **Validates: Requirements 5.2**
 
-- [ ] 11. Implement Ingress component
+- [ ] 12. Implement Ingress component
   - Create Ingress class to receive HTTP requests
   - Implement authentication (JWT, API keys, OAuth)
   - Add header normalization
@@ -203,69 +295,22 @@
   - Add request descriptor publishing to routing fabric
   - _Requirements: 1.3_
 
-- [ ] 11.1 Write property test for request ID uniqueness
+- [ ]* 12.1 Write property test for request ID uniqueness
   - **Property 3: Request ID uniqueness**
   - **Validates: Requirements 1.3**
 
-- [ ] 12. Implement Route Manager with version resolution
-  - Create Route Manager class
-  - Implement Timescape integration for version resolution
-  - Add manifest, GType, and health status caching
-  - Implement version resolution based on path and preference
-  - Add handler instance selection and routing
-  - _Requirements: 4.1, 4.2, 4.3, 9.1, 9.5_
-
-- [ ] 12.1 Write property test for version resolution
-  - **Property 33: Version resolution**
-  - **Validates: Requirements 9.1**
-
-- [ ] 12.2 Write property test for breaking change detection
-  - **Property 14: Breaking change detection**
-  - **Validates: Requirements 4.1**
-
-- [ ] 12.3 Write property test for non-breaking version activation
-  - **Property 15: Non-breaking version activation**
-  - **Validates: Requirements 4.2**
-
-- [ ] 12.4 Write property test for multi-version routing
-  - **Property 16: Multi-version routing**
-  - **Validates: Requirements 4.3**
-
-- [ ] 12.5 Write property test for manifest caching
-  - **Property 36: Manifest caching**
-  - **Validates: Requirements 9.5**
-
-- [ ] 13. Implement policy enforcement in Route Manager
-  - Add rate limiting enforcement per handler manifest
-  - Implement authentication verification with role checking
-  - Add warm pool management for critical versions
-  - Implement usage tracking for auto-decommissioning
-  - _Requirements: 2.3, 9.2, 9.3_
-
-- [ ] 13.1 Write property test for rate limit enforcement
-  - **Property 34: Rate limit enforcement**
-  - **Validates: Requirements 9.2**
-
-- [ ] 13.2 Write property test for authentication enforcement
-  - **Property 35: Authentication enforcement**
-  - **Validates: Requirements 9.3**
-
-- [ ] 13.3 Write property test for unhealthy version routing
-  - **Property 7: Unhealthy version routing**
-  - **Validates: Requirements 2.3**
-
-- [ ] 14. Implement transformer execution for version compatibility
+- [ ] 13. Implement transformer execution for version compatibility
   - Add transformer registry to Route Manager
   - Implement transformer execution for old-version requests
   - Add transformer chaining for multi-step transformations
   - Integrate with Timescape to fetch transformers
   - _Requirements: 4.4_
 
-- [ ] 14.1 Write property test for transformer execution
+- [ ]* 13.1 Write property test for transformer execution
   - **Property 17: Transformer execution**
   - **Validates: Requirements 4.4**
 
-- [ ] 15. Implement Pub/Sub Queue Fabric
+- [ ] 14. Implement Pub/Sub Queue Fabric
   - Create Queue Fabric interface
   - Implement topic-based publish/subscribe
   - Add backpressure enforcement
@@ -273,19 +318,19 @@
   - Add result delivery to originating request contexts
   - _Requirements: 13.3_
 
-- [ ] 15.1 Write property test for backpressure propagation
+- [ ]* 14.1 Write property test for backpressure propagation
   - **Property 43: Backpressure propagation**
   - **Validates: Requirements 13.3**
 
-- [ ] 15.2 Write property test for event publishing scope
+- [ ]* 14.2 Write property test for event publishing scope
   - **Property 26: Event publishing scope**
   - **Validates: Requirements 7.4**
 
-- [ ] 15.3 Write property test for global pub/sub delivery
+- [ ]* 14.3 Write property test for global pub/sub delivery
   - **Property 31: Global pub/sub delivery**
   - **Validates: Requirements 8.4**
 
-- [ ] 16. Implement Manifest & Schema Store
+- [ ] 15. Implement Manifest & Schema Store
   - Create Manifest Store interface
   - Implement manifest persistence (handlers and modules)
   - Add GType schema storage and retrieval
@@ -294,114 +339,114 @@
   - Implement Timescape metadata persistence
   - _Requirements: 11.5_
 
-- [ ] 16.1 Write property test for manifest store persistence
+- [ ]* 15.1 Write property test for manifest store persistence
   - **Property 39: Manifest store persistence**
   - **Validates: Requirements 11.5**
 
-- [ ] 17. Implement Secrets Manager
+- [ ] 16. Implement Secrets Manager
   - Create SecretManager interface
   - Implement secure secret retrieval
   - Add short-lived caching with TTL
   - Ensure secrets are not directly accessible to handlers
   - _Requirements: 8.2, 12.4_
 
-- [ ] 17.1 Write property test for secrets caching
+- [ ]* 16.1 Write property test for secrets caching
   - **Property 29: Secrets caching**
   - **Validates: Requirements 8.2**
 
-- [ ] 17.2 Write property test for secrets manager access control
+- [ ]* 16.2 Write property test for secrets manager access control
   - **Property 41: Secrets manager access control**
   - **Validates: Requirements 12.4**
 
-- [ ] 18. Implement Metrics and Observability integration
+- [ ] 17. Implement Metrics and Observability integration
   - Create MetricsClient with OpenTelemetry integration
   - Implement counter, gauge, and histogram methods
   - Add tracing with request ID, handler ID, and version in spans
   - Implement structured logging with request context
   - _Requirements: 6.5, 8.3, 12.5_
 
-- [ ] 18.1 Write property test for metrics emission
+- [ ]* 17.1 Write property test for metrics emission
   - **Property 30: Metrics emission**
   - **Validates: Requirements 8.3**
 
-- [ ] 18.2 Write property test for tracing metadata
+- [ ]* 17.2 Write property test for tracing metadata
   - **Property 22: Tracing metadata**
   - **Validates: Requirements 6.5**
 
-- [ ] 18.3 Write property test for audit logging completeness
+- [ ]* 17.3 Write property test for audit logging completeness
   - **Property 42: Audit logging completeness**
   - **Validates: Requirements 12.5**
 
-- [ ] 19. Implement Codegen for validators and SDK stubs
+- [ ] 18. Implement Codegen for validators and SDK stubs
   - Create validator function generator from GType schemas
   - Implement TypeScript type definition generator from manifests
   - Add SDK client stub generator for handlers
   - Generate manifest bundles for operator deployment
   - _Requirements: 1.5, 3.5, 11.2, 11.3_
 
-- [ ] 19.1 Write property test for TypeScript definition generation
+- [ ]* 18.1 Write property test for TypeScript definition generation
   - **Property 5: TypeScript definition generation**
   - **Validates: Requirements 1.5**
 
-- [ ] 19.2 Write property test for SDK client stub generation
+- [ ]* 18.2 Write property test for SDK client stub generation
   - **Property 38: SDK client stub generation**
   - **Validates: Requirements 11.3**
 
-- [ ] 20. Implement Handler Worker execution engine
+- [ ] 19. Implement Handler Worker execution engine
   - Create HandlerWorker class
   - Implement handler invocation with (req, res, lctx, gctx) signature
   - Add health check endpoint
   - Ensure stateless execution
   - _Requirements: 1.1_
 
-- [ ] 20.1 Write property test for handler signature conformance
+- [ ]* 19.1 Write property test for handler signature conformance
   - **Property 1: Handler signature conformance**
   - **Validates: Requirements 1.1**
 
-- [ ] 21. Implement Playground request inspection
+- [ ] 20. Implement Playground request inspection
   - Create Playground API for request trace inspection
   - Implement request path visualization (ingress → RM → LCC → handler → modules)
   - Add snapshot viewing and comparison
   - Implement debug gate functionality to pause execution
   - _Requirements: 15.2, 15.3_
 
-- [ ] 21.1 Write property test for request replay execution
+- [ ]* 20.1 Write property test for request replay execution
   - **Property 45: Request replay execution**
   - **Validates: Requirements 15.2, 15.5**
 
-- [ ] 21.2 Write property test for version diff computation
+- [ ]* 20.2 Write property test for version diff computation
   - **Property 46: Version diff computation**
   - **Validates: Requirements 15.3**
 
-- [ ] 21.3 Write property test for snapshot storage
+- [ ]* 20.3 Write property test for snapshot storage
   - **Property 44: Snapshot storage**
   - **Validates: Requirements 15.1**
 
-- [ ] 22. Implement hook manifest recording
+- [ ] 21. Implement hook manifest recording
   - Add hook definition recording to manifest generation
   - Store hook metadata (sync/async, timeout, retries)
   - Enable playback in Playground
   - _Requirements: 10.4_
 
-- [ ] 22.1 Write property test for hook manifest recording
+- [ ]* 21.1 Write property test for hook manifest recording
   - **Property 37: Hook manifest recording**
   - **Validates: Requirements 10.4**
 
-- [ ] 23. Create testing harness (@gati/testing)
+- [ ] 22. Create testing harness (@gati/testing)
   - Implement createTestHarness function
   - Add fake LocalContext and GlobalContext implementations
   - Create module mock utilities
   - Add helper functions for handler testing
   - _Requirements: 14.2_
 
-- [ ] 24. Create runtime simulation package (@gati/simulate)
+- [ ] 23. Create runtime simulation package (@gati/simulate)
   - Implement simulateRuntime function
   - Add in-process Route Manager emulation
   - Add LCC hook emulation
   - Add module RPC emulation
   - _Requirements: 14.3_
 
-- [ ] 25. Implement Operator for Kubernetes deployment
+- [ ] 24. Implement Operator for Kubernetes deployment
   - Create Kubernetes Operator for handler deployment
   - Implement module deployment
   - Add handler and module scaling logic
@@ -409,7 +454,7 @@
   - Add version decommissioning after traffic drains
   - _Requirements: 4.5_
 
-- [ ] 26. Create end-to-end integration
+- [ ] 25. Create end-to-end integration
   - Wire Ingress to Route Manager via Queue Fabric
   - Connect Route Manager to LCC
   - Integrate LCC with Handler Workers
@@ -417,14 +462,14 @@
   - Add observability throughout the pipeline
   - _Requirements: 1.3_
 
-- [ ] 27. Checkpoint - Ensure all tests pass
+- [ ] 26. Checkpoint - Ensure all tests pass
   - Run all unit tests
   - Run all property-based tests (minimum 100 iterations each)
   - Run integration tests
   - Run runtime simulation tests
   - Ensure all tests pass, ask the user if questions arise
 
-- [ ] 28. Create example handlers and modules
+- [ ] 27. Create example handlers and modules
   - Create example user creation handler
   - Create example database module
   - Create example email notification module
@@ -432,7 +477,7 @@
   - Document example usage patterns
   - _Requirements: 1.1, 1.2_
 
-- [ ] 29. Write documentation
+- [ ] 28. Write documentation
   - Document handler development guide
   - Document module development guide
   - Document manifest format
@@ -441,5 +486,5 @@
   - Document deployment guide
   - _Requirements: All_
 
-- [ ] 30. Final Checkpoint - Ensure all tests pass
+- [ ] 29. Final Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise

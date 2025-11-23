@@ -70,7 +70,11 @@ export type LifecycleEventType =
   | 'handler:error'
   | 'validation:start'
   | 'validation:end'
-  | 'validation:error';
+  | 'validation:error'
+  | 'compensation:start'
+  | 'compensation:end'
+  | 'compensation:error'
+  | 'compensation:alert';
 
 /**
  * Lifecycle event
@@ -83,6 +87,31 @@ export interface LifecycleEvent {
   error?: Error;
   duration?: number;
   metadata?: Record<string, unknown>;
+}
+
+/**
+ * Compensating action function signature
+ */
+export type CompensatingAction = () => void | Promise<void>;
+
+/**
+ * Compensating action with metadata
+ */
+export interface CompensatingActionEntry {
+  /**
+   * Unique action identifier
+   */
+  id: string;
+  
+  /**
+   * Compensating action function
+   */
+  action: CompensatingAction;
+  
+  /**
+   * Timestamp when action was registered
+   */
+  registeredAt: number;
 }
 
 /**
@@ -108,6 +137,11 @@ export interface HookOrchestratorConfig {
    * Event handler
    */
   onEvent?: (event: LifecycleEvent) => void;
+  
+  /**
+   * Alert handler for compensating action failures
+   */
+  onAlert?: (message: string, error: Error, metadata?: Record<string, unknown>) => void;
 }
 
 /**
@@ -117,7 +151,8 @@ export class HookOrchestrator {
   private beforeHooks: Hook[] = [];
   private afterHooks: Hook[] = [];
   private catchHooks: Hook[] = [];
-  private config: Required<HookOrchestratorConfig>;
+  private compensatingActions: CompensatingActionEntry[] = [];
+  private config: Required<Omit<HookOrchestratorConfig, 'onAlert'>> & { onAlert?: (message: string, error: Error, metadata?: Record<string, unknown>) => void };
   
   constructor(config: HookOrchestratorConfig = {}) {
     this.config = {
@@ -125,6 +160,7 @@ export class HookOrchestrator {
       defaultRetries: config.defaultRetries ?? 0,
       emitEvents: config.emitEvents ?? true,
       onEvent: config.onEvent ?? (() => {}),
+      onAlert: config.onAlert,
     };
   }
   
@@ -195,10 +231,14 @@ export class HookOrchestrator {
    * Execute catch hooks
    */
   async executeCatch(
-    _error: Error,
+    error: Error,
     lctx: LocalContext,
     gctx: GlobalContext
   ): Promise<void> {
+    // Execute compensating actions first (in reverse order)
+    await this.executeCompensatingActions(lctx);
+    
+    // Then execute catch hooks
     for (const hook of this.catchHooks) {
       try {
         await this.executeHook(hook, lctx, gctx);
@@ -207,6 +247,117 @@ export class HookOrchestrator {
         console.error(`Catch hook ${hook.id} failed:`, hookError);
       }
     }
+  }
+  
+  /**
+   * Register a compensating action
+   * Compensating actions are executed in reverse order when an error occurs
+   */
+  registerCompensatingAction(action: CompensatingAction, id?: string): void {
+    const actionId = id ?? `compensation-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    
+    this.compensatingActions.push({
+      id: actionId,
+      action,
+      registeredAt: Date.now(),
+    });
+  }
+  
+  /**
+   * Execute all compensating actions in reverse order
+   */
+  async executeCompensatingActions(lctx: LocalContext): Promise<void> {
+    if (this.compensatingActions.length === 0) {
+      return;
+    }
+    
+    // Execute in reverse order (LIFO)
+    const actionsToExecute = [...this.compensatingActions].reverse();
+    
+    for (const entry of actionsToExecute) {
+      this.emitEvent({
+        type: 'compensation:start',
+        timestamp: Date.now(),
+        requestId: lctx.requestId,
+        metadata: { actionId: entry.id, registeredAt: entry.registeredAt },
+      });
+      
+      const start = Date.now();
+      
+      try {
+        await Promise.resolve(entry.action());
+        
+        const duration = Date.now() - start;
+        
+        this.emitEvent({
+          type: 'compensation:end',
+          timestamp: Date.now(),
+          requestId: lctx.requestId,
+          duration,
+          metadata: { actionId: entry.id },
+        });
+        
+        
+      } catch (compensationError) {
+        const error = compensationError instanceof Error 
+          ? compensationError 
+          : new Error(String(compensationError));
+        
+        const duration = Date.now() - start;
+        
+        this.emitEvent({
+          type: 'compensation:error',
+          timestamp: Date.now(),
+          requestId: lctx.requestId,
+          error,
+          duration,
+          metadata: { actionId: entry.id },
+        });
+        
+        // Emit alert for compensating action failure
+        const alertMessage = `Compensating action ${entry.id} failed: ${error.message}`;
+        console.error(alertMessage, error);
+        
+        this.emitEvent({
+          type: 'compensation:alert',
+          timestamp: Date.now(),
+          requestId: lctx.requestId,
+          error,
+          metadata: { 
+            actionId: entry.id,
+            message: alertMessage,
+          },
+        });
+        
+        // Call alert handler if configured
+        if (this.config.onAlert) {
+          this.config.onAlert(alertMessage, error, {
+            actionId: entry.id,
+            requestId: lctx.requestId,
+            registeredAt: entry.registeredAt,
+          });
+        }
+        
+        // Continue executing other compensating actions even if one fails
+      }
+    }
+    
+    // Clear compensating actions after execution
+    this.compensatingActions = [];
+  }
+  
+  /**
+   * Clear all compensating actions without executing them
+   */
+  clearCompensatingActions(): void {
+    this.compensatingActions = [];
+  }
+  
+  /**
+   * Get all registered compensating actions
+   */
+  getCompensatingActions(): CompensatingActionEntry[] {
+    return [...this.compensatingActions];
   }
   
   /**
@@ -427,11 +578,12 @@ export class HookOrchestrator {
   }
   
   /**
-   * Clear all hooks
+   * Clear all hooks and compensating actions
    */
   clear(): void {
     this.beforeHooks = [];
     this.afterHooks = [];
     this.catchHooks = [];
+    this.compensatingActions = [];
   }
 }
