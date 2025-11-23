@@ -6,13 +6,20 @@
 import type {
   GlobalContext,
   GlobalContextOptions,
+  LifecyclePriority,
+  LifecycleCoordinator,
 } from './types/context.js';
-import type { LifecyclePriority } from './types/context.js';
 import type { ModuleLoader } from './module-loader.js';
 import { createModuleLoader } from './module-loader.js';
 import { LifecycleManager } from './lifecycle-manager.js';
 import { VersionRegistry } from './timescape/registry.js';
 import { SQLiteTimelineStore, JSONTimelineStore } from './timescape/timeline-store.js';
+import {
+  createModuleClient,
+  getGlobalConnectionPool,
+  type ConnectionPool,
+  type RPCCallOptions,
+} from './module-rpc.js';
 
 /**
  * Extended global context options with module loader and coordinator
@@ -27,7 +34,24 @@ export interface ExtendedGlobalContextOptions extends GlobalContextOptions {
   /**
    * Optional lifecycle coordinator for distributed systems
    */
-  coordinator?: import('./types/context.js').LifecycleCoordinator;
+  coordinator?: LifecycleCoordinator;
+
+  /**
+   * Optional connection pool for module RPC
+   * If not provided, the global pool will be used
+   */
+  connectionPool?: ConnectionPool;
+
+  /**
+   * Optional RPC call options for module clients
+   */
+  rpcOptions?: RPCCallOptions;
+
+  /**
+   * Whether to wrap modules with RPC clients
+   * Default: true
+   */
+  enableRPC?: boolean;
 }
 
 /**
@@ -126,6 +150,7 @@ export function createGlobalContext(
  * @param gctx - Global context instance
  * @param name - Module name
  * @param module - Module instance
+ * @param options - Optional RPC options
  * @throws {Error} If module with the same name already exists
  *
  * @example
@@ -136,13 +161,25 @@ export function createGlobalContext(
 export function registerModule(
   gctx: GlobalContext,
   name: string,
-  module: unknown
+  module: unknown,
+  options?: {
+    enableRPC?: boolean;
+    rpcOptions?: RPCCallOptions;
+    connectionPool?: ConnectionPool;
+  }
 ): void {
   if (name in gctx.modules) {
     throw new Error(`Module "${name}" is already registered`);
   }
 
-  gctx.modules[name] = module;
+  // Wrap module with RPC client if enabled
+  const enableRPC = options?.enableRPC ?? true;
+  if (enableRPC && typeof module === 'object' && module !== null) {
+    const pool = options?.connectionPool || getGlobalConnectionPool();
+    gctx.modules[name] = createModuleClient(name, module, pool, options?.rpcOptions);
+  } else {
+    gctx.modules[name] = module;
+  }
 }
 
 /**
@@ -215,4 +252,57 @@ export function getModuleLoader(gctx: GlobalContext): ModuleLoader {
   }
 
   return moduleLoader;
+}
+
+/**
+ * Wrap all modules in global context with RPC clients
+ *
+ * @param gctx - Global context instance
+ * @param options - Optional RPC options
+ *
+ * @example
+ * ```typescript
+ * wrapModulesWithRPC(gctx, { timeout: 10000 });
+ * ```
+ */
+export function wrapModulesWithRPC(
+  gctx: GlobalContext,
+  options?: {
+    rpcOptions?: RPCCallOptions;
+    connectionPool?: ConnectionPool;
+  }
+): void {
+  const pool = options?.connectionPool || getGlobalConnectionPool();
+
+  for (const [name, module] of Object.entries(gctx.modules)) {
+    if (typeof module === 'object' && module !== null) {
+      gctx.modules[name] = createModuleClient(name, module, pool, options?.rpcOptions);
+    }
+  }
+}
+
+/**
+ * Get the connection pool from global context
+ *
+ * @param gctx - Global context instance
+ * @returns ConnectionPool instance
+ *
+ * @example
+ * ```typescript
+ * const pool = getConnectionPool(gctx);
+ * const stats = pool.getStatistics();
+ * ```
+ */
+export function getConnectionPool(gctx: GlobalContext): ConnectionPool {
+  const poolSymbol = Symbol.for('gati:connectionPool');
+  let pool = (gctx as unknown as Record<symbol, unknown>)[
+    poolSymbol
+  ] as ConnectionPool | undefined;
+
+  if (!pool) {
+    pool = getGlobalConnectionPool();
+    (gctx as unknown as Record<symbol, unknown>)[poolSymbol] = pool;
+  }
+
+  return pool;
 }

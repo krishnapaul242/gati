@@ -110,3 +110,39 @@ export type {
   ValidationResult,
   PathSegment,
 } from './gtype/index.js';
+
+// Module RPC system
+export {
+  ModuleRPCClient,
+  ConnectionPool,
+  createModuleRPCClient,
+  createModuleClient,
+  getGlobalConnectionPool,
+  setGlobalConnectionPool,
+  closeGlobalConnectionPool,
+  RPCError,
+  RPCTimeoutError,
+  RPCSerializationError,
+} from './module-rpc.js';
+
+export type {
+  RPCCallOptions,
+  ConnectionPoolConfig,
+  Connection,
+  PoolStats,
+} from './module-rpc.js';
+
+// Global context utilities
+export {
+  createGlobalContext,
+  registerModule,
+  getModule,
+  shutdownGlobalContext,
+  getModuleLoader,
+  wrapModulesWithRPC,
+  getConnectionPool,
+} from './global-context.js';
+
+export type {
+  ExtendedGlobalContextOptions,
+} from './global-context.js';
