@@ -184,7 +184,6 @@ Not applicable - new implementation.
 ## References
 
 - [Runtime Implementation Guide](../architecture/runtime-implementation.md)
-- [Runtime Spec](./.kiro/specs/runtime-architecture/)
 - [Architecture Overview](../architecture/overview.md)
 
 ---

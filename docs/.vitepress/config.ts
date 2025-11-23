@@ -41,6 +41,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Quick Start', link: '/onboarding/quick-start' },
+      { text: 'Packages', link: '/packages' },
       { text: 'Blog', link: '/blog/' },
       { text: 'Vision', link: '/vision/why-gati' },
       { 
@@ -155,11 +156,12 @@ export default defineConfig({
           text: 'Architecture Deep Dive',
           items: [
             { text: 'Overview', link: '/architecture/overview' },
-            { text: 'Design Decisions', link: '/architecture/design-decisions' }
+            { text: 'Design Decisions', link: '/architecture/design-decisions' },
+            { text: 'Runtime Implementation', link: '/architecture/runtime-implementation' }
           ]
         },
         {
-          text: 'Core Systems (Planned)',
+          text: 'Core Systems',
           items: [
             { text: 'Timescape Versioning', link: '/architecture/timescape' },
             { text: 'Type System (Branded Types)', link: '/architecture/type-system' }
@@ -179,6 +181,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/changelog/' },
             { text: 'Current State', link: '/changelog/current-state' },
+            { text: 'Runtime Architecture (Nov 23)', link: '/changelog/2025-11-23-runtime-architecture' },
             { text: 'CI/CD Complete (Nov 22)', link: '/changelog/2025-11-22-ci-cd-complete' },
             { text: 'MVP Completion', link: '/changelog/mvp-completion' }
           ]
@@ -217,7 +220,9 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/krishnapaul242/gati' }
+      { icon: 'github', link: 'https://github.com/krishnapaul242/gati' },
+      { icon: 'npm', link: 'https://www.npmjs.com/~krishna.paul' },
+      { icon: 'x', link: 'https://x.com/SanatanKrishnaP' }
     ],
 
     footer: {

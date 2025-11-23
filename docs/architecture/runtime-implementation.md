@@ -407,7 +407,6 @@ async function handleRequest(req, res) {
 - [Architecture Overview](./overview.md)
 - [Type System](./type-system.md)
 - [Timescape](./timescape.md)
-- [Runtime Spec](./.kiro/specs/runtime-architecture/)
 
 ---
 

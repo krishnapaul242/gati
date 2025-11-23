@@ -14,6 +14,21 @@ See [Current State](./current-state.md) for detailed status.
 
 ## Recent Updates
 
+### November 23, 2025 - Runtime Architecture Implementation 🚀
+
+**Major Progress**: Core runtime components completed with 100% test pass rate!
+
+- ✅ GType System - Runtime type validation (75 tests + 3 property tests)
+- ✅ Local Context - Request-scoped state management (53 tests + 17 property tests)
+- ✅ Global Context - Application-wide context (33 tests + 9 property tests)
+- ✅ Hook Orchestrator - Lifecycle management (23 tests + 6 property tests)
+- ✅ Snapshot/Restore - Debugging support (8 tests + 2 property tests)
+- ✅ Handler Manifest Generation - 80% complete (4 tests + 1 property test)
+
+**Total**: 468 passing tests, 1,850+ property test iterations, 55% overall completion
+
+See [Runtime Architecture](./2025-11-23-runtime-architecture.md) for full details.
+
 ### November 22, 2025 - CI/CD Pipeline Complete 🎉
 
 **Major Achievement**: Automated CI/CD pipeline now operational!
@@ -150,6 +165,14 @@ See [MVP Completion Report](./mvp-completion.md) for full details.
 
 ## Documentation Updates
 
+### November 23, 2025
+
+- ✅ Added Runtime Architecture Implementation guide
+- ✅ Added runtime architecture changelog entry
+- ✅ Updated architecture section with runtime details
+- ✅ Added GType system documentation
+- ✅ Added context management documentation
+
 ### November 22, 2025
 
 - ✅ Updated for CI/CD completion
@@ -220,6 +243,7 @@ const handler: Handler = (req, res) => { ... }
 
 ## Release Notes Archive
 
+- [Runtime Architecture](./2025-11-23-runtime-architecture.md) - Runtime implementation progress (Nov 23, 2025)
 - [CI/CD Complete](./2025-11-22-ci-cd-complete.md) - CI/CD pipeline completion (Nov 22, 2025)
 - [Current State](./current-state.md) - Latest status and features
 - [MVP Completion](./mvp-completion.md) - M1 milestone report
