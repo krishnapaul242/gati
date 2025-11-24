@@ -157,5 +157,18 @@ export type {
   NormalizedHeaders,
   RequestDescriptor,
   RequestIdMetadata,
-  QueueFabric,
 } from './types/ingress.js';
+
+// Queue Fabric
+export { InMemoryQueueFabric, createQueueFabric } from './queue-fabric.js';
+export type {
+  QueueFabric,
+  QueueFabricConfig,
+  MessageHandler,
+  Subscription,
+  PublishOptions,
+  BackpressureStatus,
+  QueueFabricStats,
+  MessageMetadata,
+  DeliverySemantics,
+} from './types/queue-fabric.js';

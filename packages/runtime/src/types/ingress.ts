@@ -176,13 +176,9 @@ export interface IngressConfig {
 
 /**
  * Queue fabric interface for publishing requests
+ * Re-exported from queue-fabric types for convenience
  */
-export interface QueueFabric {
-  /**
-   * Publish a message to a topic
-   */
-  publish(topic: string, payload: RequestDescriptor): Promise<void>;
-}
+export type { QueueFabric } from './queue-fabric.js';
 
 /**
  * Ingress component interface
