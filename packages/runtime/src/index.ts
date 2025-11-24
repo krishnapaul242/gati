@@ -172,3 +172,20 @@ export type {
   MessageMetadata,
   DeliverySemantics,
 } from './types/queue-fabric.js';
+
+// Manifest Store
+export { InMemoryManifestStore, createManifestStore } from './manifest-store.js';
+export type {
+  ManifestStore,
+  HandlerManifest,
+  GType as ManifestGType,
+  GTypeKind as ManifestGTypeKind,
+  GTypeProperty,
+  PrimitiveType as ManifestPrimitiveType,
+  Validator as ManifestValidator,
+  ValidatorType as ManifestValidatorType,
+  Transformer,
+  VersionGraph,
+  VersionNode,
+  TimescapeMetadata,
+} from './types/manifest-store.js';

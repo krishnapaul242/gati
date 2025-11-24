@@ -426,4 +426,187 @@ describe('Queue Fabric', () => {
       expect(messages3).toHaveLength(1);
     });
   });
+
+  describe('Property Tests', () => {
+    const fc = require('fast-check');
+
+    describe('Property 26: Event publishing scope', () => {
+      // Feature: runtime-architecture, Property 26: Event publishing scope
+      // For any event published via Local Context, it should be delivered only to listeners subscribed to that request-scoped topic
+      // Validates: Requirements 7.4
+
+      it('should isolate events to request-scoped topics', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.record({
+                requestId: fc.string({ minLength: 5, maxLength: 20 }),
+                topic: fc.string({ minLength: 3, maxLength: 15 }),
+                payload: fc.anything(),
+              }),
+              { minLength: 2, maxLength: 5 }
+            ),
+            async (events) => {
+              const receivedByRequest = new Map<string, any[]>();
+              
+              // Subscribe to each request-scoped topic
+              for (const event of events) {
+                const scopedTopic = `request:${event.requestId}:${event.topic}`;
+                
+                if (!receivedByRequest.has(event.requestId)) {
+                  receivedByRequest.set(event.requestId, []);
+                }
+                
+                queueFabric.subscribe(scopedTopic, (payload) => {
+                  receivedByRequest.get(event.requestId)!.push(payload);
+                });
+              }
+              
+              // Publish events
+              for (const event of events) {
+                const scopedTopic = `request:${event.requestId}:${event.topic}`;
+                await queueFabric.publish(scopedTopic, event.payload);
+              }
+              
+              await new Promise(resolve => setTimeout(resolve, 150));
+              
+              // Each request should only receive its own events
+              for (const event of events) {
+                const received = receivedByRequest.get(event.requestId) || [];
+                const expectedCount = events.filter(e => e.requestId === event.requestId).length;
+                expect(received.length).toBe(expectedCount);
+              }
+            }
+          ),
+          { numRuns: 20, timeout: 10000 }
+        );
+      }, 15000);
+    });
+
+    describe('Property 31: Global pub/sub delivery', () => {
+      // Feature: runtime-architecture, Property 31: Global pub/sub delivery
+      // For any message published to a global topic, it should be delivered to all subscribers across all active requests
+      // Validates: Requirements 8.4
+
+      it('should deliver global messages to all subscribers', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.record({
+              topic: fc.string({ minLength: 3, maxLength: 15 }),
+              subscriberCount: fc.integer({ min: 1, max: 5 }),
+              messageCount: fc.integer({ min: 1, max: 3 }),
+            }),
+            async ({ topic, subscriberCount, messageCount }) => {
+              const allMessages: any[][] = Array.from({ length: subscriberCount }, () => []);
+              
+              // Create multiple subscribers
+              for (let i = 0; i < subscriberCount; i++) {
+                queueFabric.subscribe(topic, (payload) => {
+                  allMessages[i].push(payload);
+                });
+              }
+              
+              // Publish messages
+              const messages = Array.from({ length: messageCount }, (_, i) => ({ id: i }));
+              for (const msg of messages) {
+                await queueFabric.publish(topic, msg);
+              }
+              
+              await new Promise(resolve => setTimeout(resolve, 200));
+              
+              // All subscribers should receive all messages
+              for (let i = 0; i < subscriberCount; i++) {
+                expect(allMessages[i].length).toBe(messageCount);
+              }
+            }
+          ),
+          { numRuns: 20, timeout: 10000 }
+        );
+      }, 15000);
+    });
+
+    describe('Property 43: Backpressure propagation', () => {
+      // Feature: runtime-architecture, Property 43: Backpressure propagation
+      // For any queue fabric at capacity, the system should enforce backpressure and propagate timeouts
+      // Validates: Requirements 13.3
+
+      it('should enforce backpressure when queue is full', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.integer({ min: 1, max: 3 }),
+            async (capacity) => {
+              const smallQueue = createQueueFabric({ maxQueueDepth: capacity });
+              
+              try {
+                // Fill queue to capacity (no subscribers so messages stay queued)
+                for (let i = 0; i < capacity; i++) {
+                  await smallQueue.publish('test', { id: i });
+                }
+                
+                // Next publish should trigger backpressure
+                await expect(
+                  smallQueue.publish('test', { id: capacity })
+                ).rejects.toThrow('Backpressure active');
+              } finally {
+                await smallQueue.shutdown();
+              }
+            }
+          ),
+          { numRuns: 10, timeout: 20000 }
+        );
+      }, 25000);
+
+      it('should report accurate backpressure status', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.record({
+              maxDepth: fc.integer({ min: 3, max: 10 }),
+              fillCount: fc.integer({ min: 0, max: 10 }),
+            }),
+            async ({ maxDepth, fillCount }) => {
+              const queue = createQueueFabric({ maxQueueDepth: maxDepth });
+              
+              try {
+                // Fill queue
+                const actualFill = Math.min(fillCount, maxDepth);
+                for (let i = 0; i < actualFill; i++) {
+                  await queue.publish('test', { id: i });
+                }
+                
+                const status = queue.getBackpressureStatus();
+                
+                expect(status.queueDepth).toBe(actualFill);
+                expect(status.maxDepth).toBe(maxDepth);
+                expect(status.active).toBe(actualFill >= maxDepth);
+              } finally {
+                await queue.shutdown();
+              }
+            }
+          ),
+          { numRuns: 10, timeout: 20000 }
+        );
+      }, 25000);
+
+      it('should adjust backpressure threshold dynamically', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.double({ min: 0.1, max: 1.0 }),
+            async (threshold) => {
+              const queue = createQueueFabric({ maxQueueDepth: 100 });
+              
+              queue.enforceBackpressure(threshold);
+              
+              const status = queue.getBackpressureStatus();
+              const expectedMax = Math.floor(100 * threshold);
+              
+              expect(status.maxDepth).toBe(expectedMax);
+              
+              await queue.shutdown();
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+    });
+  });
 });

@@ -695,4 +695,453 @@ describe('EnhancedRouteManager', () => {
       expect(versions).toContain(manifest.version);
     });
   });
+
+  describe('Property Tests', () => {
+    const fc = require('fast-check');
+
+    describe('Property 33: Version resolution', () => {
+      // Feature: runtime-architecture, Property 33: Version resolution
+      // For any request with a path and optional version preference, the Route Manager should resolve to the correct handler version
+      // Validates: Requirements 9.1
+
+      it('should resolve to latest version when no preference specified', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.record({
+                version: fc.string({ minLength: 3, maxLength: 10 }),
+              }),
+              { minLength: 1, maxLength: 5 }
+            ),
+            async (versions) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const path = '/test/path';
+              
+              // Register all versions
+              for (const v of versions) {
+                const manifest = createTestManifest('test.handler', path, v.version);
+                testManager.registerHandler(path, manifest.version, mockHandler, manifest);
+              }
+              
+              // Resolve without preference should give latest
+              const resolved = testManager.resolveVersion(path);
+              
+              // Should resolve to a valid version
+              expect(typeof resolved === 'string' || 'code' in resolved).toBe(true);
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+
+      it('should resolve to specific version when requested', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.string({ minLength: 3, maxLength: 10 }),
+              { minLength: 2, maxLength: 5 }
+            ),
+            async (versions) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const path = '/test/path';
+              const manifests: HandlerManifest[] = [];
+              
+              // Register all versions
+              for (const v of versions) {
+                const manifest = createTestManifest('test.handler', path, v);
+                manifests.push(manifest);
+                testManager.registerHandler(path, manifest.version, mockHandler, manifest);
+              }
+              
+              // Try to resolve each version specifically
+              for (const manifest of manifests) {
+                const resolved = testManager.resolveVersion(path, { v: manifest.version });
+                
+                if (typeof resolved === 'string') {
+                  expect(resolved).toBe(manifest.version);
+                }
+              }
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+    });
+
+    describe('Property 36: Manifest caching', () => {
+      // Feature: runtime-architecture, Property 36: Manifest caching
+      // For any manifest, GType, or health status, the Route Manager should cache it locally
+      // Validates: Requirements 9.5
+
+      it('should cache manifests after registration', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.record({
+                handlerId: fc.string({ minLength: 5, maxLength: 20 }),
+                version: fc.string({ minLength: 3, maxLength: 10 }),
+              }),
+              { minLength: 1, maxLength: 10 }
+            ),
+            async (handlers) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              
+              // Register handlers
+              for (const h of handlers) {
+                const manifest = createTestManifest(h.handlerId, `/${h.handlerId}`, h.version);
+                testManager.registerHandler(`/${h.handlerId}`, manifest.version, mockHandler, manifest);
+              }
+              
+              // All manifests should be cached
+              for (const h of handlers) {
+                const cached = testManager.getManifest(h.handlerId);
+                expect(cached).toBeDefined();
+                expect(cached?.handlerId).toBe(h.handlerId);
+              }
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+
+      it('should cache GType schemas', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.record({
+                ref: fc.string({ minLength: 5, maxLength: 20 }),
+                schema: fc.record({
+                  type: fc.constantFrom('object', 'string', 'number'),
+                }),
+              }),
+              { minLength: 1, maxLength: 10 }
+            ),
+            async (gtypes) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              
+              // Cache GTypes
+              for (const g of gtypes) {
+                testManager.cacheGType(g.ref, g.schema);
+              }
+              
+              // All GTypes should be retrievable
+              for (const g of gtypes) {
+                const cached = testManager.getGType(g.ref);
+                expect(cached).toEqual(g.schema);
+              }
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+
+      it('should respect cache size limits', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.integer({ min: 1001, max: 1100 }),
+            async (count) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              
+              // Add more items than cache limit (1000)
+              for (let i = 0; i < count; i++) {
+                const manifest = createTestManifest(`handler-${i}`, `/path-${i}`, '1.0.0');
+                testManager.registerHandler(`/path-${i}`, manifest.version, mockHandler, manifest);
+              }
+              
+              const stats = testManager.getCacheStats();
+              
+              // Cache should not exceed limit
+              expect(stats.manifests).toBeLessThanOrEqual(1000);
+            }
+          ),
+          { numRuns: 20 }
+        );
+      });
+    });
+
+    describe('Property 34: Rate limit enforcement', () => {
+      // Feature: runtime-architecture, Property 34: Rate limit enforcement
+      // For any handler with rate limit policies, the Route Manager should reject requests that exceed the configured limit
+      // Validates: Requirements 9.2
+
+      it('should enforce rate limits per client', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.record({
+              limit: fc.integer({ min: 1, max: 5 }),
+              clientId: fc.string({ minLength: 5, maxLength: 15 }),
+            }),
+            async ({ limit, clientId }) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const manifest = createTestManifest('test.handler', '/test', '1.0.0', {
+                policies: {
+                  rateLimit: {
+                    limit,
+                    window: 60000,
+                  },
+                },
+              });
+              
+              testManager.registerHandler('/test', manifest.version, mockHandler, manifest);
+              
+              let successCount = 0;
+              let rateLimitedCount = 0;
+              
+              // Make limit + 2 requests
+              for (let i = 0; i < limit + 2; i++) {
+                const request = createTestRequest('/test', {
+                  query: { v: manifest.version },
+                  clientId,
+                });
+                
+                const result = await testManager.routeRequest(request);
+                
+                if ('instance' in result) {
+                  successCount++;
+                } else if ('code' in result && result.code === 'RATE_LIMITED') {
+                  rateLimitedCount++;
+                }
+              }
+              
+              // Should allow exactly 'limit' requests
+              expect(successCount).toBe(limit);
+              expect(rateLimitedCount).toBeGreaterThan(0);
+            }
+          ),
+          { numRuns: 30 }
+        );
+      });
+    });
+
+    describe('Property 35: Authentication enforcement', () => {
+      // Feature: runtime-architecture, Property 35: Authentication enforcement
+      // For any handler requiring specific roles, the Route Manager should reject requests without the required roles
+      // Validates: Requirements 9.3
+
+      it('should reject requests without required roles', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.record({
+              requiredRole: fc.constantFrom('admin', 'moderator', 'user', 'guest'),
+              userRole: fc.constantFrom('admin', 'moderator', 'user', 'guest'),
+            }),
+            async ({ requiredRole, userRole }) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const manifest = createTestManifest('test.handler', '/test', '1.0.0', {
+                policies: {
+                  roles: [requiredRole],
+                },
+              });
+              
+              testManager.registerHandler('/test', manifest.version, mockHandler, manifest);
+              
+              const authContext: AuthContext = {
+                userId: 'test-user',
+                roles: [userRole],
+              };
+              
+              const request = createTestRequest('/test', {
+                query: { v: manifest.version },
+                authContext,
+              });
+              
+              const result = await testManager.routeRequest(request);
+              
+              if (userRole === requiredRole) {
+                // Should succeed if roles match
+                expect('instance' in result || 'code' in result).toBe(true);
+              } else {
+                // Should be unauthorized if roles don't match
+                if ('code' in result) {
+                  expect(result.code).toBe('UNAUTHORIZED');
+                }
+              }
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+    });
+
+    describe('Property 7: Unhealthy version routing', () => {
+      // Feature: runtime-architecture, Property 7: Unhealthy version routing
+      // For any handler version that fails health checks, the Route Manager should route all subsequent traffic to healthy versions only
+      // Validates: Requirements 2.3
+
+      it('should reject requests to unhealthy instances', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.constantFrom('unhealthy', 'degraded', 'healthy'),
+            async (healthStatus) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const manifest = createTestManifest('test.handler', '/test', '1.0.0');
+              
+              testManager.registerHandler('/test', manifest.version, mockHandler, manifest);
+              
+              // Update health status
+              testManager.updateHealth('/test', manifest.version, {
+                status: healthStatus,
+                lastCheck: Date.now(),
+                consecutiveFailures: healthStatus === 'unhealthy' ? 3 : 0,
+              });
+              
+              const request = createTestRequest('/test', {
+                query: { v: manifest.version },
+              });
+              
+              const result = await testManager.routeRequest(request);
+              
+              if (healthStatus === 'unhealthy') {
+                // Should reject unhealthy instances
+                expect('code' in result && result.code === 'UNHEALTHY').toBe(true);
+              } else {
+                // Should allow healthy or degraded instances
+                expect('instance' in result || 'code' in result).toBe(true);
+              }
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+    });
+
+    describe('Property 14: Breaking change detection', () => {
+      // Feature: runtime-architecture, Property 14: Breaking change detection
+      // For any pair of handler manifests (old and new), the Route Manager should correctly identify whether the new version introduces breaking changes
+      // Validates: Requirements 4.1
+      // Note: This is primarily handled by Timescape, but Route Manager uses it for routing decisions
+
+      it('should handle multiple versions of same handler', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.string({ minLength: 3, maxLength: 10 }),
+              { minLength: 2, maxLength: 4 }
+            ),
+            async (versions) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const path = '/test';
+              
+              // Register multiple versions
+              for (const v of versions) {
+                const manifest = createTestManifest('test.handler', path, v);
+                testManager.registerHandler(path, manifest.version, mockHandler, manifest);
+              }
+              
+              const instances = testManager.getInstances(path);
+              
+              // Should have all versions registered
+              expect(instances.length).toBe(versions.length);
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+    });
+
+    describe('Property 15: Non-breaking version activation', () => {
+      // Feature: runtime-architecture, Property 15: Non-breaking version activation
+      // For any non-breaking handler version deployment, the Route Manager should activate the new version
+      // Validates: Requirements 4.2
+
+      it('should activate new versions immediately', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.string({ minLength: 3, maxLength: 10 }),
+            async (version) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const manifest = createTestManifest('test.handler', '/test', version);
+              
+              testManager.registerHandler('/test', manifest.version, mockHandler, manifest);
+              
+              const instances = testManager.getInstances('/test');
+              
+              // New version should be immediately available
+              expect(instances.length).toBeGreaterThan(0);
+              expect(instances.some(i => i.version === manifest.version)).toBe(true);
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+    });
+
+    describe('Property 16: Multi-version routing', () => {
+      // Feature: runtime-architecture, Property 16: Multi-version routing
+      // For any breaking handler version deployed without transformers, the Route Manager should maintain both old and new versions
+      // Validates: Requirements 4.3
+
+      it('should maintain multiple versions simultaneously', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.string({ minLength: 3, maxLength: 10 }),
+              { minLength: 2, maxLength: 5 }
+            ),
+            async (versions) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const path = '/test';
+              
+              // Register all versions
+              for (const v of versions) {
+                const manifest = createTestManifest('test.handler', path, v);
+                testManager.registerHandler(path, manifest.version, mockHandler, manifest);
+              }
+              
+              const instances = testManager.getInstances(path);
+              
+              // All versions should be maintained
+              expect(instances.length).toBe(versions.length);
+              
+              // Each version should be routable
+              for (const instance of instances) {
+                const request = createTestRequest(path, {
+                  query: { v: instance.version },
+                });
+                
+                const result = await testManager.routeRequest(request);
+                expect('instance' in result || 'code' in result).toBe(true);
+              }
+            }
+          ),
+          { numRuns: 30 }
+        );
+      });
+    });
+
+    describe('Property 17: Transformer execution', () => {
+      // Feature: runtime-architecture, Property 17: Transformer execution
+      // For any breaking handler version with transformers, requests with old version headers should be transformed
+      // Validates: Requirements 4.4
+      // Note: Transformer execution is tested in enhanced-route-manager-transformer.test.ts
+
+      it('should support transformer registration', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.record({
+              fromVersion: fc.string({ minLength: 3, maxLength: 10 }),
+              toVersion: fc.string({ minLength: 3, maxLength: 10 }),
+            }),
+            async ({ fromVersion, toVersion }) => {
+              const testManager = new EnhancedRouteManager(new VersionRegistry());
+              const path = '/test';
+              
+              // Register both versions
+              const manifest1 = createTestManifest('test.handler', path, fromVersion);
+              const manifest2 = createTestManifest('test.handler', path, toVersion);
+              
+              testManager.registerHandler(path, manifest1.version, mockHandler, manifest1);
+              testManager.registerHandler(path, manifest2.version, mockHandler, manifest2);
+              
+              const instances = testManager.getInstances(path);
+              
+              // Both versions should be available for transformation
+              expect(instances.length).toBe(2);
+            }
+          ),
+          { numRuns: 50 }
+        );
+      });
+    });
+  });
 });

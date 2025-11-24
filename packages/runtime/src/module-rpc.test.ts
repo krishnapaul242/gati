@@ -384,3 +384,170 @@ describe('Error Handling', () => {
     expect(error.cause).toBe(cause);
   });
 });
+
+describe('Property Tests', () => {
+  const fc = require('fast-check');
+  let pool: ConnectionPool;
+
+  beforeEach(() => {
+    pool = new ConnectionPool();
+  });
+
+  afterEach(() => {
+    pool.closeAll();
+  });
+
+  describe('Property 4: Module client type safety', () => {
+    // Feature: runtime-architecture, Property 4: Module client type safety
+    // For any registered module, accessing it via Global Context should return a typed client stub with automatic serialization
+    // Validates: Requirements 1.4
+
+    it('should provide typed client stubs for any module', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.record({
+            moduleName: fc.string({ minLength: 3, maxLength: 15 }),
+            methodName: fc.string({ minLength: 3, maxLength: 15 }),
+            args: fc.array(fc.anything(), { maxLength: 5 }),
+          }),
+          async ({ moduleName, methodName, args }) => {
+            // Create a mock module with the method
+            const mockModule: Record<string, any> = {
+              [methodName]: (...callArgs: any[]) => Promise.resolve({ args: callArgs }),
+            };
+
+            const client = createModuleClient(moduleName, mockModule);
+
+            // Client should have the method
+            expect(typeof (client as any)[methodName]).toBe('function');
+
+            // Method should be callable
+            const result = await (client as any)[methodName](...args);
+            expect(result).toBeDefined();
+          }
+        ),
+        { numRuns: 50 }
+      );
+    });
+
+    it('should handle various return types', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.oneof(
+            fc.string(),
+            fc.integer(),
+            fc.boolean(),
+            fc.record({ key: fc.string() }),
+            fc.array(fc.integer())
+          ),
+          async (returnValue) => {
+            const mockModule = {
+              testMethod: () => Promise.resolve(returnValue),
+            };
+
+            const client = createModuleClient('test', mockModule);
+            const result = await (client as typeof mockModule).testMethod();
+
+            expect(result).toEqual(returnValue);
+          }
+        ),
+        { numRuns: 50 }
+      );
+    });
+  });
+
+  describe('Property 18: Module RPC serialization', () => {
+    // Feature: runtime-architecture, Property 18: Module RPC serialization
+    // For any module call from a handler, the Global Context should provide RPC adapters that automatically serialize arguments and deserialize results
+    // Validates: Requirements 5.2
+
+    it('should serialize and deserialize complex arguments', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.record({
+            name: fc.string(),
+            age: fc.integer({ min: 0, max: 120 }),
+            tags: fc.array(fc.string()),
+            metadata: fc.record({
+              created: fc.integer(),
+              updated: fc.integer(),
+            }),
+          }),
+          async (input) => {
+            const mockModule = {
+              process: (data: typeof input) => Promise.resolve({ ...data, processed: true }),
+            };
+
+            const client = new ModuleRPCClient('test', mockModule, pool);
+            const result = await client.call<typeof input & { processed: boolean }>('process', [input]);
+
+            // Result should match input with processed flag
+            expect(result.name).toBe(input.name);
+            expect(result.age).toBe(input.age);
+            expect(result.tags).toEqual(input.tags);
+            expect(result.metadata).toEqual(input.metadata);
+            expect(result.processed).toBe(true);
+          }
+        ),
+        { numRuns: 50 }
+      );
+    });
+
+    it('should handle serialization of nested objects', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.array(
+            fc.record({
+              id: fc.string(),
+              nested: fc.record({
+                value: fc.integer(),
+                deep: fc.record({
+                  flag: fc.boolean(),
+                }),
+              }),
+            }),
+            { maxLength: 5 }
+          ),
+          async (input) => {
+            const mockModule = {
+              processArray: (data: typeof input) => Promise.resolve(data.map(item => ({ ...item, processed: true }))),
+            };
+
+            const client = new ModuleRPCClient('test', mockModule, pool);
+            const result = await client.call('processArray', [input]);
+
+            // Should preserve structure
+            expect(Array.isArray(result)).toBe(true);
+            expect(result.length).toBe(input.length);
+          }
+        ),
+        { numRuns: 50 }
+      );
+    });
+
+    it('should handle various primitive types', async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.tuple(
+            fc.string(),
+            fc.integer(),
+            fc.boolean(),
+            fc.double().filter(n => !Object.is(n, -0)), // Exclude -0 to avoid serialization quirks
+            fc.constant(null)
+          ),
+          async ([str, int, bool, dbl, nul]) => {
+            const mockModule = {
+              echo: (...args: any[]) => Promise.resolve(args),
+            };
+
+            const client = new ModuleRPCClient('test', mockModule, pool);
+            const result = await client.call('echo', [str, int, bool, dbl, nul]);
+
+            expect(result).toEqual([str, int, bool, dbl, nul]);
+          }
+        ),
+        { numRuns: 50 }
+      );
+    });
+  });
+});

@@ -431,4 +431,122 @@ describe('Ingress', () => {
       expect(queueFabric.publishedMessages[0]).toEqual(descriptor);
     });
   });
+
+  describe('Property Tests', () => {
+    // Import fast-check for property-based testing
+    const fc = require('fast-check');
+
+    describe('Property 3: Request ID uniqueness', () => {
+      // Feature: runtime-architecture, Property 3: Request ID uniqueness
+      // For any set of requests, each request should receive a unique request ID
+      // Validates: Requirements 1.3
+
+      it('should generate unique request IDs for concurrent requests', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.array(
+              fc.record({
+                method: fc.constantFrom('GET', 'POST', 'PUT', 'DELETE'),
+                path: fc.string({ minLength: 1, maxLength: 50 }),
+                body: fc.string(),
+              }),
+              { minLength: 2, maxLength: 20 }
+            ),
+            async (requests) => {
+              const requestIds = new Set<string>();
+              
+              // Process all requests concurrently
+              await Promise.all(
+                requests.map(async (req) => {
+                  const mockReq = createMockRequest({
+                    method: req.method,
+                    url: req.path,
+                    body: req.body,
+                  });
+                  
+                  await ingress.handleRequest(mockReq);
+                })
+              );
+              
+              // Collect all request IDs
+              for (const descriptor of queueFabric.publishedMessages) {
+                requestIds.add(descriptor.requestId);
+              }
+              
+              // All request IDs should be unique
+              expect(requestIds.size).toBe(requests.length);
+              
+              // Clear for next iteration
+              queueFabric.publishedMessages.length = 0;
+            }
+          ),
+          { numRuns: 100 }
+        );
+      });
+
+      it('should generate unique request IDs with same metadata', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.integer({ min: 2, max: 10 }),
+            async (count) => {
+              const requestIds: string[] = [];
+              
+              // Create multiple requests with identical metadata
+              for (let i = 0; i < count; i++) {
+                const mockReq = createMockRequest({
+                  method: 'GET',
+                  url: '/api/test',
+                  headers: { 'x-test': 'same' },
+                });
+                
+                await ingress.handleRequest(mockReq);
+              }
+              
+              // Collect all request IDs
+              for (const descriptor of queueFabric.publishedMessages) {
+                requestIds.push(descriptor.requestId);
+              }
+              
+              // All IDs should be unique despite same metadata
+              const uniqueIds = new Set(requestIds);
+              expect(uniqueIds.size).toBe(count);
+              
+              // Clear for next iteration
+              queueFabric.publishedMessages.length = 0;
+            }
+          ),
+          { numRuns: 100 }
+        );
+      });
+
+      it('should include request ID in headers', async () => {
+        await fc.assert(
+          fc.asyncProperty(
+            fc.record({
+              method: fc.constantFrom('GET', 'POST'),
+              path: fc.string({ minLength: 1 }),
+            }),
+            async (req) => {
+              const mockReq = createMockRequest({
+                method: req.method,
+                url: req.path,
+              });
+              
+              await ingress.handleRequest(mockReq);
+              
+              const descriptor = queueFabric.publishedMessages[queueFabric.publishedMessages.length - 1];
+              
+              // Request ID should be in headers
+              expect(descriptor.headers['x-request-id']).toBe(descriptor.requestId);
+              expect(descriptor.requestId).toMatch(/^req-[0-9a-f-]+$/);
+              
+              // Clear for next iteration
+              queueFabric.publishedMessages.length = 0;
+            }
+          ),
+          { numRuns: 100 }
+        );
+      });
+    });
+  });
 });

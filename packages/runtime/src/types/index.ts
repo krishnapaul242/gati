@@ -70,3 +70,18 @@ export type {
   QueueFabric,
   IngressComponent,
 } from './ingress.js';
+
+export type {
+  ManifestStore,
+  HandlerManifest,
+  GType,
+  GTypeKind,
+  GTypeProperty,
+  PrimitiveType,
+  Validator,
+  ValidatorType,
+  Transformer,
+  VersionGraph,
+  VersionNode,
+  TimescapeMetadata,
+} from './manifest-store.js';

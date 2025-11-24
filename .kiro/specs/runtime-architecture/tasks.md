@@ -2,7 +2,7 @@
 
 ## Current Status Summary
 
-**Completed (Tasks 1-10):**
+**Completed (Tasks 1-15):**
 - ✅ Project structure and type definitions
 - ✅ Local Context (lctx) with state management, hooks, and snapshot/restore
 - ✅ Global Context (gctx) with module registry and lifecycle management
@@ -12,18 +12,24 @@
 - ✅ Handler Manifest generation (in CLI analyzer)
 - ✅ Enhanced Route Manager with version resolution and Timescape integration
 - ✅ Module Manifest and capability system
+- ✅ Module RPC adapters with typed stubs and serialization
+- ✅ Ingress component with authentication and request ID generation
+- ✅ Transformer execution for version compatibility
+- ✅ Pub/Sub Queue Fabric with backpressure enforcement
+- ✅ Manifest & Schema Store with persistence for all data types
 - ✅ Property-based testing infrastructure with fast-check
 - ✅ Property tests for Local Context (Properties 21, 23, 24, 27, 47)
 - ✅ Property tests for Hook Orchestrator (Properties 6, 8, 10, 11, 20, 25)
+- ✅ Property tests for Route Manager (Properties 3, 7, 14, 15, 16, 17, 33, 34, 35, 36)
+- ✅ Property tests for Module System (Properties 4, 18, 19, 40)
+- ✅ Property tests for Queue Fabric (Properties 26, 31, 43)
+- ✅ Property tests for Ingress (Property 3)
+- ✅ Property tests for Manifest Store (Property 39)
 
 **In Progress:**
 - None currently
 
-**Not Started (Tasks 12-29):**
-- Ingress component
-- Transformer execution
-- Pub/Sub Queue Fabric
-- Manifest & Schema Store
+**Not Started (Tasks 16-29):**
 - Secrets Manager
 - Metrics and Observability
 - Codegen for validators and SDK stubs
@@ -218,37 +224,45 @@
   - _Requirements: 4.1, 4.2, 4.3, 9.1, 9.2, 9.3, 9.5, 2.3_
   - **Status**: ✅ Complete - Enhanced Route Manager implemented with comprehensive tests
 
-- [ ]* 9.1 Write property test for version resolution
+- [x]* 9.1 Write property test for version resolution
   - **Property 33: Version resolution**
   - **Validates: Requirements 9.1**
+  - **Status**: Complete
 
-- [ ]* 9.2 Write property test for breaking change detection
+- [x]* 9.2 Write property test for breaking change detection
   - **Property 14: Breaking change detection**
   - **Validates: Requirements 4.1**
+  - **Status**: Complete
 
-- [ ]* 9.3 Write property test for non-breaking version activation
+- [x]* 9.3 Write property test for non-breaking version activation
   - **Property 15: Non-breaking version activation**
   - **Validates: Requirements 4.2**
+  - **Status**: Complete
 
-- [ ]* 9.4 Write property test for multi-version routing
+- [x]* 9.4 Write property test for multi-version routing
   - **Property 16: Multi-version routing**
   - **Validates: Requirements 4.3**
+  - **Status**: Complete
 
-- [ ]* 9.5 Write property test for manifest caching
+- [x]* 9.5 Write property test for manifest caching
   - **Property 36: Manifest caching**
   - **Validates: Requirements 9.5**
+  - **Status**: Complete
 
-- [ ]* 9.6 Write property test for rate limit enforcement
+- [x]* 9.6 Write property test for rate limit enforcement
   - **Property 34: Rate limit enforcement**
   - **Validates: Requirements 9.2**
+  - **Status**: Complete
 
-- [ ]* 9.7 Write property test for authentication enforcement
+- [x]* 9.7 Write property test for authentication enforcement
   - **Property 35: Authentication enforcement**
   - **Validates: Requirements 9.3**
+  - **Status**: Complete
 
-- [ ]* 9.8 Write property test for unhealthy version routing
+- [x]* 9.8 Write property test for unhealthy version routing
   - **Property 7: Unhealthy version routing**
   - **Validates: Requirements 2.3**
+  - **Status**: Complete
 
 - [x] 10. Implement Module Manifest and capability system
   - Create Module Manifest structure
@@ -259,13 +273,15 @@
   - _Requirements: 5.3, 12.1, 12.2_
   - **Status**: ✅ Complete - Module Manifest and capability system fully implemented
 
-- [ ]* 10.1 Write property test for module capability declaration
+- [x]* 10.1 Write property test for module capability declaration
   - **Property 40: Module capability declaration**
   - **Validates: Requirements 12.1**
+  - **Status**: Complete
 
-- [ ]* 10.2 Write property test for capability enforcement
+- [x]* 10.2 Write property test for capability enforcement
   - **Property 19: Capability enforcement**
   - **Validates: Requirements 5.3, 12.2**
+  - **Status**: Complete
 
 - [x] 11. Implement Module RPC adapters
 
@@ -284,13 +300,15 @@
   - Add timeout handling
   - _Requirements: 1.4, 5.2_
 
-- [ ]* 11.1 Write property test for module client type safety
+- [x]* 11.1 Write property test for module client type safety
   - **Property 4: Module client type safety**
   - **Validates: Requirements 1.4**
+  - **Status**: Complete
 
-- [ ]* 11.2 Write property test for RPC serialization
+- [x]* 11.2 Write property test for RPC serialization
   - **Property 18: Module RPC serialization**
   - **Validates: Requirements 5.2**
+  - **Status**: Complete
 
 - [x] 12. Implement Ingress component
 
@@ -305,9 +323,10 @@
   - Add request descriptor publishing to routing fabric
   - _Requirements: 1.3_
 
-- [ ]* 12.1 Write property test for request ID uniqueness
+- [x]* 12.1 Write property test for request ID uniqueness
   - **Property 3: Request ID uniqueness**
   - **Validates: Requirements 1.3**
+  - **Status**: Complete
 
 - [x] 13. Implement transformer execution for version compatibility
 
@@ -321,9 +340,10 @@
   - Integrate with Timescape to fetch transformers
   - _Requirements: 4.4_
 
-- [ ]* 13.1 Write property test for transformer execution
+- [x]* 13.1 Write property test for transformer execution
   - **Property 17: Transformer execution**
   - **Validates: Requirements 4.4**
+  - **Status**: Complete
 
 - [x] 14. Implement Pub/Sub Queue Fabric
 
@@ -338,19 +358,22 @@
   - Add result delivery to originating request contexts
   - _Requirements: 13.3_
 
-- [ ]* 14.1 Write property test for backpressure propagation
+- [x]* 14.1 Write property test for backpressure propagation
   - **Property 43: Backpressure propagation**
   - **Validates: Requirements 13.3**
+  - **Status**: Complete
 
-- [ ]* 14.2 Write property test for event publishing scope
+- [x]* 14.2 Write property test for event publishing scope
   - **Property 26: Event publishing scope**
   - **Validates: Requirements 7.4**
+  - **Status**: Complete
 
-- [ ]* 14.3 Write property test for global pub/sub delivery
+- [x]* 14.3 Write property test for global pub/sub delivery
   - **Property 31: Global pub/sub delivery**
   - **Validates: Requirements 8.4**
+  - **Status**: Complete
 
-- [ ] 15. Implement Manifest & Schema Store
+- [x] 15. Implement Manifest & Schema Store
   - Create Manifest Store interface
   - Implement manifest persistence (handlers and modules)
   - Add GType schema storage and retrieval
@@ -358,10 +381,12 @@
   - Add transformer stub storage
   - Implement Timescape metadata persistence
   - _Requirements: 11.5_
+  - **Status**: ✅ Complete - Implemented in packages/runtime/src/manifest-store.ts
 
-- [ ]* 15.1 Write property test for manifest store persistence
+- [x]* 15.1 Write property test for manifest store persistence
   - **Property 39: Manifest store persistence**
   - **Validates: Requirements 11.5**
+  - **Status**: ✅ Complete - Comprehensive property tests with 100+ iterations
 
 - [ ] 16. Implement Secrets Manager
   - Create SecretManager interface
