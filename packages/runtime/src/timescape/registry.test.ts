@@ -697,19 +697,21 @@ describe('Version Classification', () => {
             });
 
             const tsv: TSV = 'tsv:1732186200-users-001';
-            const halfWindowAgo = Date.now() - 500;
+            const now = Date.now();
+            const halfWindowAgo = now - 400; // Use 400ms to account for execution time
             
             registry.registerVersion('/api/users', tsv, { 
                 hash: 'a', 
                 status: 'hot',
-                requestCount: 200,
+                requestCount: 250, // With ~60% recency factor, estimated requests ~150 >= 100
                 lastAccessed: halfWindowAgo,
             });
 
             registry.reclassifyAllVersions();
 
             const info = registry.getVersionInfo(tsv);
-            // Should still be hot because within window
+            // Should still be hot because within window with sufficient requests
+            // With 250 requests and ~60% recency factor, estimated requests ~150 >= 100
             expect(info?.status).toBe('hot');
         });
     });
