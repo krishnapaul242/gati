@@ -25,14 +25,17 @@ const mockHandler: Handler = async () => {
 function createTestManifest(
   handlerId: string,
   path: string,
-  version: TSV,
+  version: string | TSV,
   options: Partial<HandlerManifest> = {}
 ): HandlerManifest {
+  // Convert simple version to TSV if needed
+  const tsv: TSV = version.startsWith('tsv:') ? (version as TSV) : `tsv:${Date.now()}-${version.replace(/\./g, '')}-1` as TSV;
+  
   return {
     handlerId,
     path,
     method: 'GET',
-    version,
+    version: tsv,
     gtypes: {},
     hash: `hash-${handlerId}-${version}`,
     ...options,
@@ -68,11 +71,11 @@ describe('EnhancedRouteManager', () => {
     it('should register a handler instance', () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const instances = manager.getInstances('/users/:id');
       expect(instances).toHaveLength(1);
-      expect(instances[0].version).toBe('1.0.0');
+      expect(instances[0].version).toBe(manifest.version);
       expect(instances[0].handlerId).toBe('user.get');
     });
 
@@ -80,8 +83,8 @@ describe('EnhancedRouteManager', () => {
       const manifest1 = createTestManifest('user.get', '/users/:id', '1.0.0');
       const manifest2 = createTestManifest('user.get', '/users/:id', '2.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest1);
-      manager.registerHandler('/users/:id', '2.0.0', mockHandler, manifest2);
+      manager.registerHandler('/users/:id', manifest1.version, mockHandler, manifest1);
+      manager.registerHandler('/users/:id', manifest2.version, mockHandler, manifest2);
       
       const instances = manager.getInstances('/users/:id');
       expect(instances).toHaveLength(2);
@@ -90,7 +93,7 @@ describe('EnhancedRouteManager', () => {
     it('should cache manifest on registration', () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const cached = manager.getManifest('user.get');
       expect(cached).toEqual(manifest);
@@ -99,43 +102,46 @@ describe('EnhancedRouteManager', () => {
     it('should initialize handler with healthy status', () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
-      const health = manager.getHealth('/users/:id', '1.0.0');
+      const health = manager.getHealth('/users/:id', manifest.version);
       expect(health?.status).toBe('healthy');
       expect(health?.consecutiveFailures).toBe(0);
     });
   });
 
   describe('Version Resolution', () => {
+    let manifest1: HandlerManifest;
+    let manifest2: HandlerManifest;
+
     beforeEach(() => {
-      const manifest1 = createTestManifest('user.get', '/users/:id', '1.0.0');
-      const manifest2 = createTestManifest('user.get', '/users/:id', '2.0.0');
+      manifest1 = createTestManifest('user.get', '/users/:id', '1.0.0');
+      manifest2 = createTestManifest('user.get', '/users/:id', '2.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest1);
-      manager.registerHandler('/users/:id', '2.0.0', mockHandler, manifest2);
+      manager.registerHandler('/users/:id', manifest1.version, mockHandler, manifest1);
+      manager.registerHandler('/users/:id', manifest2.version, mockHandler, manifest2);
     });
 
     it('should resolve to latest version by default', () => {
       const version = manager.resolveVersion('/users/:id');
       
-      expect(version).toBe('2.0.0');
+      expect(version).toBe(manifest2.version);
     });
 
     it('should resolve to specific version from query parameter', () => {
-      const version = manager.resolveVersion('/users/:id', { v: '1.0.0' });
+      const version = manager.resolveVersion('/users/:id', { v: manifest1.version });
       
-      expect(version).toBe('1.0.0');
+      expect(version).toBe(manifest1.version);
     });
 
     it('should resolve to specific version from header', () => {
       const version = manager.resolveVersion(
         '/users/:id',
         {},
-        { 'x-api-version': '1.0.0' }
+        { 'x-api-version': manifest1.version }
       );
       
-      expect(version).toBe('1.0.0');
+      expect(version).toBe(manifest1.version);
     });
 
     it('should return error for non-existent path', () => {
@@ -147,30 +153,32 @@ describe('EnhancedRouteManager', () => {
   });
 
   describe('Request Routing', () => {
+    let manifest: HandlerManifest;
+
     beforeEach(() => {
-      const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
     });
 
-    it('should route request to correct handler instance', () => {
+    it('should route request to correct handler instance', async () => {
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('instance');
       expect(result).toHaveProperty('manifest');
-      expect(result).toHaveProperty('version', '1.0.0');
+      expect(result).toHaveProperty('version', manifest.version);
       if ('instance' in result) {
         expect(result.instance.handlerId).toBe('user.get');
       }
     });
 
-    it('should return error for non-existent handler', () => {
+    it('should return error for non-existent handler', async () => {
       const request = createTestRequest('/non-existent');
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('code');
       if ('code' in result) {
@@ -178,32 +186,29 @@ describe('EnhancedRouteManager', () => {
       }
     });
 
-    it('should update instance last accessed time', () => {
+    it('should update instance last accessed time', async () => {
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
       });
       
       const instances = manager.getInstances('/users/:id');
       const initialTime = instances[0].lastAccessed;
       
       // Wait a bit to ensure time difference
-      const start = Date.now();
-      while (Date.now() - start < 10) {
-        // Small delay
-      }
+      await new Promise(resolve => setTimeout(resolve, 10));
       
-      manager.routeRequest(request);
+      await manager.routeRequest(request);
       
       const updatedInstances = manager.getInstances('/users/:id');
       expect(updatedInstances[0].lastAccessed).toBeGreaterThan(initialTime);
     });
 
-    it('should track usage metrics', () => {
+    it('should track usage metrics', async () => {
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
       });
       
-      manager.routeRequest(request);
+      await manager.routeRequest(request);
       
       const instances = manager.getInstances('/users/:id');
       const metrics = manager.getUsageMetrics(instances[0].id);
@@ -214,7 +219,7 @@ describe('EnhancedRouteManager', () => {
   });
 
   describe('Rate Limiting', () => {
-    it('should allow requests within rate limit', () => {
+    it('should allow requests within rate limit', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           rateLimit: {
@@ -224,19 +229,19 @@ describe('EnhancedRouteManager', () => {
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         clientId: 'client-1',
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('instance');
     });
 
-    it('should reject requests exceeding rate limit', () => {
+    it('should reject requests exceeding rate limit', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           rateLimit: {
@@ -246,24 +251,24 @@ describe('EnhancedRouteManager', () => {
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         clientId: 'client-1',
       });
       
       // Make requests up to limit
-      manager.routeRequest(request);
-      manager.routeRequest(request);
+      await manager.routeRequest(request);
+      await manager.routeRequest(request);
       
       // This should be rate limited
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('code', 'RATE_LIMITED');
     });
 
-    it('should reset rate limit after window expires', () => {
+    it('should reset rate limit after window expires', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           rateLimit: {
@@ -273,33 +278,33 @@ describe('EnhancedRouteManager', () => {
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         clientId: 'client-1',
       });
       
       // First request should succeed
-      const result1 = manager.routeRequest(request);
+      const result1 = await manager.routeRequest(request);
       expect(result1).toHaveProperty('instance');
       
       // Second request should be rate limited
-      const result2 = manager.routeRequest(request);
+      const result2 = await manager.routeRequest(request);
       expect(result2).toHaveProperty('code', 'RATE_LIMITED');
       
       // Wait for window to expire
       return new Promise<void>((resolve) => {
-        setTimeout(() => {
+        setTimeout(async () => {
           // Third request should succeed after window reset
-          const result3 = manager.routeRequest(request);
+          const result3 = await manager.routeRequest(request);
           expect(result3).toHaveProperty('instance');
           resolve();
         }, 150);
       });
     });
 
-    it('should track rate limits per client', () => {
+    it('should track rate limits per client', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           rateLimit: {
@@ -309,21 +314,21 @@ describe('EnhancedRouteManager', () => {
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const request1 = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         clientId: 'client-1',
       });
       
       const request2 = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         clientId: 'client-2',
       });
       
       // Both clients should be able to make one request
-      const result1 = manager.routeRequest(request1);
-      const result2 = manager.routeRequest(request2);
+      const result1 = await manager.routeRequest(request1);
+      const result2 = await manager.routeRequest(request2);
       
       expect(result1).toHaveProperty('instance');
       expect(result2).toHaveProperty('instance');
@@ -331,46 +336,46 @@ describe('EnhancedRouteManager', () => {
   });
 
   describe('Authentication', () => {
-    it('should allow requests without auth when no roles required', () => {
+    it('should allow requests without auth when no roles required', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('instance');
     });
 
-    it('should reject requests without auth when roles required', () => {
+    it('should reject requests without auth when roles required', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           roles: ['admin'],
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('code', 'UNAUTHORIZED');
     });
 
-    it('should allow requests with required role', () => {
+    it('should allow requests with required role', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           roles: ['admin'],
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const authContext: AuthContext = {
         userId: 'user-1',
@@ -378,23 +383,23 @@ describe('EnhancedRouteManager', () => {
       };
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         authContext,
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('instance');
     });
 
-    it('should reject requests without required role', () => {
+    it('should reject requests without required role', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           roles: ['admin'],
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const authContext: AuthContext = {
         userId: 'user-1',
@@ -402,23 +407,23 @@ describe('EnhancedRouteManager', () => {
       };
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         authContext,
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('code', 'UNAUTHORIZED');
     });
 
-    it('should allow requests with any of multiple required roles', () => {
+    it('should allow requests with any of multiple required roles', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0', {
         policies: {
           roles: ['admin', 'moderator'],
         },
       });
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const authContext: AuthContext = {
         userId: 'user-1',
@@ -426,24 +431,24 @@ describe('EnhancedRouteManager', () => {
       };
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
         authContext,
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('instance');
     });
   });
 
   describe('Health Status', () => {
-    it('should reject requests to unhealthy instances', () => {
+    it('should reject requests to unhealthy instances', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       // Mark instance as unhealthy
-      manager.updateHealth('/users/:id', '1.0.0', {
+      manager.updateHealth('/users/:id', manifest.version, {
         status: 'unhealthy',
         lastCheck: Date.now(),
         consecutiveFailures: 3,
@@ -451,31 +456,31 @@ describe('EnhancedRouteManager', () => {
       });
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('code', 'UNHEALTHY');
     });
 
-    it('should allow requests to degraded instances', () => {
+    it('should allow requests to degraded instances', async () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       // Mark instance as degraded
-      manager.updateHealth('/users/:id', '1.0.0', {
+      manager.updateHealth('/users/:id', manifest.version, {
         status: 'degraded',
         lastCheck: Date.now(),
         consecutiveFailures: 1,
       });
       
       const request = createTestRequest('/users/:id', {
-        query: { v: '1.0.0' },
+        query: { v: manifest.version },
       });
       
-      const result = manager.routeRequest(request);
+      const result = await manager.routeRequest(request);
       
       expect(result).toHaveProperty('instance');
     });
@@ -483,7 +488,7 @@ describe('EnhancedRouteManager', () => {
     it('should update health status', () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const newHealth = {
         status: 'degraded' as const,
@@ -492,9 +497,9 @@ describe('EnhancedRouteManager', () => {
         message: 'Slow response',
       };
       
-      manager.updateHealth('/users/:id', '1.0.0', newHealth);
+      manager.updateHealth('/users/:id', manifest.version, newHealth);
       
-      const health = manager.getHealth('/users/:id', '1.0.0');
+      const health = manager.getHealth('/users/:id', manifest.version);
       expect(health).toEqual(newHealth);
     });
   });
@@ -681,12 +686,13 @@ describe('EnhancedRouteManager', () => {
     it('should register versions in Timescape on handler registration', () => {
       const manifest = createTestManifest('user.get', '/users/:id', '1.0.0');
       
-      manager.registerHandler('/users/:id', '1.0.0', mockHandler, manifest);
+      manager.registerHandler('/users/:id', manifest.version, mockHandler, manifest);
       
       const registry = manager.getRegistry();
-      const versions = registry.getVersions('/users/:id');
+      const versionInfos = registry.getVersions('/users/:id');
+      const versions = versionInfos.map(v => v.tsv);
       
-      expect(versions).toContain('1.0.0');
+      expect(versions).toContain(manifest.version);
     });
   });
 });

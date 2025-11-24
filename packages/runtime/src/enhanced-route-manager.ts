@@ -16,6 +16,7 @@ import type { HttpMethod } from './types/request.js';
 import type { TSV } from './timescape/types.js';
 import { VersionRegistry } from './timescape/registry.js';
 import { VersionResolver } from './timescape/resolver.js';
+import { TransformerEngine, type TransformerPair, type TransformResult } from './timescape/transformer.js';
 
 /**
  * Handler manifest containing metadata and policies
@@ -105,6 +106,9 @@ export interface RoutingResult {
   manifest: HandlerManifest;
   version: TSV;
   cached: boolean;
+  transformedRequest?: TransformResult;
+  requiresResponseTransform?: boolean;
+  originalVersion?: TSV;
 }
 
 /**
@@ -149,6 +153,7 @@ interface RateLimitState {
 export class EnhancedRouteManager {
   private registry: VersionRegistry;
   private resolver: VersionResolver;
+  private transformerEngine: TransformerEngine;
   
   // Handler instances by path and version
   private instances: Map<string, Map<TSV, HandlerInstance>> = new Map();
@@ -176,9 +181,10 @@ export class EnhancedRouteManager {
   private readonly healthCheckInterval = 30000; // 30 seconds
   private readonly rateLimitCleanupInterval = 60000; // 1 minute
 
-  constructor(registry?: VersionRegistry) {
+  constructor(registry?: VersionRegistry, transformerEngine?: TransformerEngine) {
     this.registry = registry || new VersionRegistry();
     this.resolver = new VersionResolver(this.registry);
+    this.transformerEngine = transformerEngine || new TransformerEngine();
     
     // Start background tasks
     this.startHealthCheckLoop();
@@ -252,7 +258,7 @@ export class EnhancedRouteManager {
   /**
    * Route a request to the appropriate handler instance
    */
-  public routeRequest(descriptor: RequestDescriptor): RoutingResult | RoutingError {
+  public async routeRequest(descriptor: RequestDescriptor): Promise<RoutingResult | RoutingError> {
     // 1. Resolve version
     const versionResult = this.resolveVersion(
       descriptor.path,
@@ -295,7 +301,36 @@ export class EnhancedRouteManager {
       return authError;
     }
 
-    // 6. Track usage
+    // 6. Check if request needs transformation
+    const requestedVersion = this.extractRequestedVersion(descriptor.headers);
+    let transformedRequest: TransformResult | undefined;
+    let requiresResponseTransform = false;
+    let originalVersion: TSV | undefined;
+
+    if (requestedVersion && requestedVersion !== version) {
+      // Request is for an old version, but we're routing to a new version
+      // Transform the request from old version to new version
+      const transformResult = await this.transformRequest(
+        descriptor.body,
+        requestedVersion,
+        version,
+        descriptor.path
+      );
+
+      if (!transformResult.success) {
+        return {
+          code: 'NO_VERSION',
+          message: `Failed to transform request from ${requestedVersion} to ${version}: ${transformResult.error?.message}`,
+          details: transformResult,
+        };
+      }
+
+      transformedRequest = transformResult;
+      requiresResponseTransform = true;
+      originalVersion = requestedVersion;
+    }
+
+    // 7. Track usage
     this.trackUsage(instance.id, {
       requestCount: 1,
       errorCount: 0,
@@ -303,10 +338,10 @@ export class EnhancedRouteManager {
       lastAccessed: Date.now(),
     });
 
-    // 7. Update instance last accessed
+    // 8. Update instance last accessed
     instance.lastAccessed = Date.now();
 
-    // 8. Record request in Timescape
+    // 9. Record request in Timescape
     this.registry.recordRequest(version);
 
     return {
@@ -314,6 +349,9 @@ export class EnhancedRouteManager {
       manifest: instance.manifest,
       version,
       cached: this.manifestCache.has(instance.manifest.handlerId),
+      transformedRequest,
+      requiresResponseTransform,
+      originalVersion,
     };
   }
 
@@ -612,11 +650,149 @@ export class EnhancedRouteManager {
       rateLimits: this.rateLimitState.size,
     };
   }
+
+  /**
+   * Register a transformer pair
+   */
+  public registerTransformer(transformer: TransformerPair): void {
+    this.transformerEngine.register(transformer);
+  }
+
+  /**
+   * Get transformer between two versions
+   */
+  public getTransformer(from: TSV, to: TSV): TransformerPair | undefined {
+    return this.transformerEngine.getTransformer(from, to);
+  }
+
+  /**
+   * Check if transformer exists
+   */
+  public hasTransformer(from: TSV, to: TSV): boolean {
+    return this.transformerEngine.hasTransformer(from, to);
+  }
+
+  /**
+   * Transform request data from one version to another
+   */
+  public async transformRequest(
+    data: unknown,
+    fromVersion: TSV,
+    toVersion: TSV,
+    path: string
+  ): Promise<TransformResult> {
+    // Get all versions for this path
+    const versions = this.getVersionsForPath(path);
+    
+    if (versions.length === 0) {
+      return {
+        success: false,
+        error: new Error(`No versions found for path ${path}`),
+        transformedVersions: [],
+        chainLength: 0,
+      };
+    }
+
+    // Execute transformation chain
+    return this.transformerEngine.transformRequest(data, fromVersion, toVersion, versions, {
+      maxHops: 10,
+      timeout: 5000,
+      fallbackOnError: false,
+    });
+  }
+
+  /**
+   * Transform response data from one version to another
+   */
+  public async transformResponse(
+    data: unknown,
+    fromVersion: TSV,
+    toVersion: TSV,
+    path: string
+  ): Promise<TransformResult> {
+    // Get all versions for this path
+    const versions = this.getVersionsForPath(path);
+    
+    if (versions.length === 0) {
+      return {
+        success: false,
+        error: new Error(`No versions found for path ${path}`),
+        transformedVersions: [],
+        chainLength: 0,
+      };
+    }
+
+    // Execute transformation chain
+    return this.transformerEngine.transformResponse(data, fromVersion, toVersion, versions, {
+      maxHops: 10,
+      timeout: 5000,
+      fallbackOnError: false,
+    });
+  }
+
+  /**
+   * Get all versions for a path (sorted by timestamp)
+   */
+  private getVersionsForPath(path: string): TSV[] {
+    const versionMap = this.instances.get(path);
+    if (!versionMap) {
+      return [];
+    }
+
+    return Array.from(versionMap.keys()).sort((a, b) => {
+      const tsA = this.extractTimestamp(a);
+      const tsB = this.extractTimestamp(b);
+      return tsA - tsB;
+    });
+  }
+
+  /**
+   * Extract timestamp from TSV
+   */
+  private extractTimestamp(tsv: TSV): number {
+    const match = tsv.match(/^tsv:(\d+)-/);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
+  /**
+   * Extract requested version from headers
+   */
+  private extractRequestedVersion(headers: Record<string, string | string[] | undefined>): TSV | undefined {
+    const versionHeader = headers['x-gati-version'] || headers['X-Gati-Version'];
+    if (typeof versionHeader === 'string' && versionHeader.startsWith('tsv:')) {
+      return versionHeader as TSV;
+    }
+    return undefined;
+  }
+
+  /**
+   * Get transformer engine for external access
+   */
+  public getTransformerEngine(): TransformerEngine {
+    return this.transformerEngine;
+  }
+
+  /**
+   * Get all registered transformers
+   */
+  public getAllTransformers(): TransformerPair[] {
+    return this.transformerEngine.getAllTransformers();
+  }
+
+  /**
+   * Get transformer count
+   */
+  public getTransformerCount(): number {
+    return this.transformerEngine.getTransformerCount();
+  }
 }
 
 /**
  * Create an enhanced route manager instance
  */
-export function createEnhancedRouteManager(registry?: VersionRegistry): EnhancedRouteManager {
-  return new EnhancedRouteManager(registry);
+export function createEnhancedRouteManager(
+  registry?: VersionRegistry,
+  transformerEngine?: TransformerEngine
+): EnhancedRouteManager {
+  return new EnhancedRouteManager(registry, transformerEngine);
 }
