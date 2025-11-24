@@ -4,10 +4,8 @@
  */
 
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { Resource } from '@opentelemetry/resources';
-import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import * as api from '@opentelemetry/api';
 
 /**
@@ -33,35 +31,18 @@ export class DistributedTracing {
   private sdk?: NodeSDK;
   private tracer: api.Tracer;
 
-  constructor(private config: TracingConfig) {
+  constructor(config: TracingConfig) {
     // Create resource with service information
-    const resource = Resource.default().merge(
-      new Resource({
-        [ATTR_SERVICE_NAME]: config.serviceName,
-        'service.version': config.serviceVersion || '1.0.0',
-        'deployment.environment': config.environment || 'production',
-      })
-    );
-
-    // Initialize Prometheus metrics exporter
-    const prometheusExporter = new PrometheusExporter({
-      port: config.metricsPort || 9464,
+    const resource = resourceFromAttributes({
+      [SEMRESATTRS_SERVICE_NAME]: config.serviceName,
+      'service.version': config.serviceVersion || '1.0.0',
+      'deployment.environment': config.environment || 'production',
     });
 
     // Initialize OpenTelemetry SDK
     if (config.autoInstrument !== false) {
       this.sdk = new NodeSDK({
         resource,
-        instrumentations: [
-          getNodeAutoInstrumentations({
-            '@opentelemetry/instrumentation-http': {
-              enabled: true,
-            },
-            '@opentelemetry/instrumentation-express': {
-              enabled: true,
-            },
-          }),
-        ],
       });
 
       this.sdk.start();

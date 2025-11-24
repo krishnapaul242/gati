@@ -115,7 +115,9 @@
   },
   "homepage": "https://github.com/krishnapaul242/gati#readme",
   "dependencies": {
+    "@gati-framework/contracts": "workspace:*",
     "@gati-framework/core": "^0.4.1",
+    "@opentelemetry/api": "^1.9.0",
     "pino": "^9.5.0"
   },
   "optionalDependencies": {

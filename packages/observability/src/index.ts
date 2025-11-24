@@ -6,6 +6,7 @@
 export * from './prometheus/metrics.js';
 export * from './loki/logger.js';
 export * from './tracing/distributed-tracing.js';
+export * from './adapters/index.js';
 
 import { PrometheusMetrics, createPrometheusMiddleware } from './prometheus/metrics.js';
 import { LokiLogger, createLokiMiddleware, type LokiConfig } from './loki/logger.js';
@@ -59,10 +60,9 @@ export class ObservabilityStack {
     // Initialize distributed tracing
     if (config.tracing) {
       this.tracing = new DistributedTracing({
-        serviceName: config.serviceName,
+        ...config.tracing,
         serviceVersion: config.serviceVersion,
         environment: config.environment,
-        ...config.tracing,
       });
     }
   }
@@ -91,12 +91,12 @@ export class ObservabilityStack {
   /**
    * Expose metrics endpoint
    */
-  async getMetricsHandler(): Promise<(req: any, res: any) => Promise<void>> {
+  async getMetricsHandler(): Promise<(_req: any, res: any) => Promise<void>> {
     if (!this.metrics) {
       throw new Error('Prometheus metrics not enabled');
     }
 
-    return async (req: any, res: any) => {
+    return async (_req: any, res: any) => {
       res.setHeader('Content-Type', 'text/plain');
       res.send(await this.metrics!.getMetrics());
     };

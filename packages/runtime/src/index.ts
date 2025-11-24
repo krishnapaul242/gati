@@ -141,11 +141,20 @@ export {
   getModuleLoader,
   wrapModulesWithRPC,
   getConnectionPool,
+  getMetricsClient,
 } from './global-context.js';
 
 export type {
   ExtendedGlobalContextOptions,
+  MetricsClient,
 } from './global-context.js';
+
+// Metrics and Observability
+export { RuntimeMetricsClient, metricsClient } from './metrics-client.js';
+export type {
+  MetricsClient as IMetricsClient,
+  AuditContext,
+} from './metrics-client.js';
 
 // Ingress component
 export { Ingress, createIngress } from './ingress.js';
@@ -193,6 +202,44 @@ export type {
 // Secrets Manager
 export { SecretsManager } from './secrets-manager.js';
 export { EnvProvider } from './providers/env-provider.js';
+export type {
+  SecretManager,
+  SecretProvider,
+  SecretValue,
+  SecretCacheEntry,
+  SecretAuditLog,
+} from './types/secrets-manager.js';
 
 // Manifest Store
 export { ManifestStore } from './manifest-store.js';
+
+// Enhanced Route Manager
+export { EnhancedRouteManager } from './enhanced-route-manager.js';
+export type {
+  RouteManagerConfig,
+  VersionResolutionResult,
+  HandlerInstance,
+  PolicyEnforcementResult,
+  CacheEntry,
+  RouteManagerStats,
+} from './enhanced-route-manager.js';
+
+// Hook Orchestrator
+export { HookOrchestrator } from './hook-orchestrator.js';
+export type {
+  HookDefinition,
+  HookType,
+  HookExecutionResult,
+  CompensatingAction,
+  LifecycleEvent,
+  HookOrchestratorConfig,
+} from './hook-orchestrator.js';
+
+// Capability Manager
+export { CapabilityManager } from './capability-manager.js';
+export type {
+  ModuleManifest,
+  Capability,
+  NetworkCapability,
+  CapabilityCheckResult,
+} from './capability-manager.js';

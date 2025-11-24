@@ -98,15 +98,17 @@ export class LokiLogger {
    * Create child logger with additional labels
    */
   child(labels: Record<string, string>): LokiLogger {
+    // Create child logger with merged labels
+    const transport = this.lokiTransport as any;
     const childLogger = new LokiLogger({
-      host: this.lokiTransport.options.host,
-      basicAuth: this.lokiTransport.options.basicAuth,
+      host: transport.host || 'http://localhost:3100',
+      basicAuth: transport.basicAuth,
       labels: {
-        ...this.lokiTransport.options.labels,
+        ...(transport.labels || {}),
         ...labels,
       },
-      batching: this.lokiTransport.options.batching,
-      interval: this.lokiTransport.options.interval,
+      batching: transport.batching !== false,
+      interval: transport.interval || 5000,
     });
 
     return childLogger;

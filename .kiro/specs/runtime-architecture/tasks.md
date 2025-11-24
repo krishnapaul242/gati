@@ -407,24 +407,28 @@
   - **Validates: Requirements 12.4**
   - **Status**: ✅ Complete - 7 property tests with audit logging validation
 
-- [ ] 17. Implement Metrics and Observability integration
+- [x] 17. Implement Metrics and Observability integration
   - Create MetricsClient with OpenTelemetry integration
   - Implement counter, gauge, and histogram methods
   - Add tracing with request ID, handler ID, and version in spans
   - Implement structured logging with request context
   - _Requirements: 6.5, 8.3, 12.5_
+  - **Status**: ✅ Complete - Implemented RuntimeMetricsClient with comprehensive tests
 
-- [ ]* 17.1 Write property test for metrics emission
+- [x]* 17.1 Write property test for metrics emission
   - **Property 30: Metrics emission**
   - **Validates: Requirements 8.3**
+  - **Status**: ✅ Complete - 3 property tests with 150 runs total
 
-- [ ]* 17.2 Write property test for tracing metadata
+- [x]* 17.2 Write property test for tracing metadata
   - **Property 22: Tracing metadata**
   - **Validates: Requirements 6.5**
+  - **Status**: ✅ Complete - 3 property tests with 70 runs total
 
-- [ ]* 17.3 Write property test for audit logging completeness
+- [x]* 17.3 Write property test for audit logging completeness
   - **Property 42: Audit logging completeness**
   - **Validates: Requirements 12.5**
+  - **Status**: ✅ Complete - 4 property tests with 140 runs total
 
 - [ ] 18. Implement Codegen for validators and SDK stubs
   - Create validator function generator from GType schemas

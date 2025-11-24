@@ -10,6 +10,7 @@ import type { VersionRegistry } from '../timescape/registry.js';
 import type { TimelineStore } from '../timescape/timeline-store.js';
 import type { ExecutionContextResolver } from '../timescape/resolver.js';
 import type { TSV, VersionRegistryState } from '../timescape/types.js';
+import type { MetricsClient } from '../metrics-client.js';
 
 /**
  * Module registry for dependency injection
@@ -237,6 +238,11 @@ export interface GlobalContext {
      */
     coordinator?: LifecycleCoordinator;
   };
+
+  /**
+   * Metrics and observability client
+   */
+  metrics: MetricsClient;
 
   /**
    * Timescape Versioning System

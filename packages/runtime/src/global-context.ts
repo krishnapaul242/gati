@@ -20,6 +20,10 @@ import {
   type ConnectionPool,
   type RPCCallOptions,
 } from './module-rpc.js';
+import { RuntimeMetricsClient, type MetricsClient } from './metrics-client.js';
+import { createMetricsClient } from './observability-factory.js';
+
+export { type MetricsClient } from './metrics-client.js';
 
 /**
  * Extended global context options with module loader and coordinator
@@ -52,6 +56,17 @@ export interface ExtendedGlobalContextOptions extends GlobalContextOptions {
    * Default: true
    */
   enableRPC?: boolean;
+
+  /**
+   * Optional metrics client instance
+   * If not provided, a new one will be created
+   */
+  metricsClient?: MetricsClient;
+
+  /**
+   * Observability configuration
+   */
+  observability?: import('./observability-factory.js').ObservabilityConfig;
 }
 
 /**
@@ -73,8 +88,10 @@ export function createGlobalContext(
 ): GlobalContext {
   const moduleLoader = options.moduleLoader || createModuleLoader();
   const lifecycleManager = new LifecycleManager(options.coordinator);
+  const metricsClient = options.metricsClient || createMetricsClient(options.observability) || new RuntimeMetricsClient();
   const moduleLoaderSymbol = Symbol.for('gati:moduleLoader');
   const lifecycleSymbol = Symbol.for('gati:lifecycle');
+  const metricsSymbol = Symbol.for('gati:metrics');
 
   const gctx: GlobalContext = {
     instance: {
@@ -124,6 +141,7 @@ export function createGlobalContext(
       isShuttingDown: () => lifecycleManager.isShuttingDown(),
       coordinator: options.coordinator,
     },
+    metrics: metricsClient,
     timescape: {
       registry: new VersionRegistry(),
       timeline: (() => {
@@ -137,9 +155,10 @@ export function createGlobalContext(
     },
   };
 
-  // Store module loader and lifecycle manager for later access
+  // Store module loader, lifecycle manager, and metrics client for later access
   (gctx as unknown as Record<symbol, unknown>)[moduleLoaderSymbol] = moduleLoader;
   (gctx as unknown as Record<symbol, unknown>)[lifecycleSymbol] = lifecycleManager;
+  (gctx as unknown as Record<symbol, unknown>)[metricsSymbol] = metricsClient;
 
   return gctx;
 }
@@ -305,4 +324,20 @@ export function getConnectionPool(gctx: GlobalContext): ConnectionPool {
   }
 
   return pool;
+}
+
+/**
+ * Get the metrics client from global context
+ *
+ * @param gctx - Global context instance
+ * @returns MetricsClient instance
+ *
+ * @example
+ * ```typescript
+ * const metrics = getMetricsClient(gctx);
+ * metrics.incrementCounter('requests_total', { method: 'GET' });
+ * ```
+ */
+export function getMetricsClient(gctx: GlobalContext): MetricsClient {
+  return gctx.metrics;
 }
