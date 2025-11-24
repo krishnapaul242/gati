@@ -2,7 +2,7 @@
 
 ## Current Status Summary
 
-**Completed (Tasks 1-15):**
+**Completed (Tasks 1-16):**
 - ✅ Project structure and type definitions
 - ✅ Local Context (lctx) with state management, hooks, and snapshot/restore
 - ✅ Global Context (gctx) with module registry and lifecycle management
@@ -17,6 +17,7 @@
 - ✅ Transformer execution for version compatibility
 - ✅ Pub/Sub Queue Fabric with backpressure enforcement
 - ✅ Manifest & Schema Store with persistence for all data types
+- ✅ Secrets Manager with TTL-based caching and audit logging
 - ✅ Property-based testing infrastructure with fast-check
 - ✅ Property tests for Local Context (Properties 21, 23, 24, 27, 47)
 - ✅ Property tests for Hook Orchestrator (Properties 6, 8, 10, 11, 20, 25)
@@ -25,12 +26,12 @@
 - ✅ Property tests for Queue Fabric (Properties 26, 31, 43)
 - ✅ Property tests for Ingress (Property 3)
 - ✅ Property tests for Manifest Store (Property 39)
+- ✅ Property tests for Secrets Manager (Properties 29, 41)
 
 **In Progress:**
 - None currently
 
-**Not Started (Tasks 16-29):**
-- Secrets Manager
+**Not Started (Tasks 17-29):**
 - Metrics and Observability
 - Codegen for validators and SDK stubs
 - Handler Worker execution engine
@@ -388,20 +389,23 @@
   - **Validates: Requirements 11.5**
   - **Status**: ✅ Complete - Comprehensive property tests with 100+ iterations
 
-- [ ] 16. Implement Secrets Manager
+- [x] 16. Implement Secrets Manager
   - Create SecretManager interface
   - Implement secure secret retrieval
   - Add short-lived caching with TTL
   - Ensure secrets are not directly accessible to handlers
   - _Requirements: 8.2, 12.4_
+  - **Status**: ✅ Complete - Implemented with comprehensive tests and documentation
 
-- [ ]* 16.1 Write property test for secrets caching
+- [x]* 16.1 Write property test for secrets caching
   - **Property 29: Secrets caching**
   - **Validates: Requirements 8.2**
+  - **Status**: ✅ Complete - 6 property tests with TTL validation
 
-- [ ]* 16.2 Write property test for secrets manager access control
+- [x]* 16.2 Write property test for secrets manager access control
   - **Property 41: Secrets manager access control**
   - **Validates: Requirements 12.4**
+  - **Status**: ✅ Complete - 7 property tests with audit logging validation
 
 - [ ] 17. Implement Metrics and Observability integration
   - Create MetricsClient with OpenTelemetry integration

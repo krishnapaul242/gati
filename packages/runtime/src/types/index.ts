@@ -85,3 +85,15 @@ export type {
   VersionNode,
   TimescapeMetadata,
 } from './manifest-store.js';
+
+export type {
+  Secret,
+  SecretProvider,
+  SecretsManagerConfig,
+  SecretAccessRequest,
+  SecretAccessResult,
+  SecretsManager,
+  SecretAuditEntry,
+} from './secrets-manager.js';
+
+export { SecretsManagerError } from './secrets-manager.js';

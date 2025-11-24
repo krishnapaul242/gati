@@ -189,3 +189,10 @@ export type {
   VersionNode,
   TimescapeMetadata,
 } from './types/manifest-store.js';
+
+// Secrets Manager
+export { SecretsManager } from './secrets-manager.js';
+export { EnvProvider } from './providers/env-provider.js';
+
+// Manifest Store
+export { ManifestStore } from './manifest-store.js';
