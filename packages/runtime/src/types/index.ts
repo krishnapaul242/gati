@@ -59,3 +59,14 @@ export {
   ModuleNotFoundError,
   ModuleInitializationError,
 } from './module.js';
+
+export type {
+  AuthMethod,
+  AuthResult,
+  NormalizedHeaders,
+  RequestDescriptor,
+  RequestIdMetadata,
+  IngressConfig,
+  QueueFabric,
+  IngressComponent,
+} from './ingress.js';

@@ -146,3 +146,16 @@ export {
 export type {
   ExtendedGlobalContextOptions,
 } from './global-context.js';
+
+// Ingress component
+export { Ingress, createIngress } from './ingress.js';
+export type {
+  IngressComponent,
+  IngressConfig,
+  AuthMethod,
+  AuthResult,
+  NormalizedHeaders,
+  RequestDescriptor,
+  RequestIdMetadata,
+  QueueFabric,
+} from './types/ingress.js';
