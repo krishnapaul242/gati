@@ -238,13 +238,14 @@ export class TransformerEngine {
 
                 if (transformFn) {
                     // Apply transformation with timeout
+                    const result = transformFn(currentData);
                     if (options.timeout) {
                         currentData = await this.withTimeout(
-                            transformFn(currentData),
+                            Promise.resolve(result),
                             options.timeout
                         );
                     } else {
-                        currentData = await transformFn(currentData);
+                        currentData = await Promise.resolve(result);
                     }
                 }
 

@@ -75,17 +75,17 @@ export class RuntimeMetricsClient implements MetricsClient {
     this.metrics = {
       createCounter: (name: string, help: string, labelNames: string[] = []) => ({
         inc: (labels: Record<string, string> = {}, value: number = 1) => {
-          logger.debug('Counter incremented', { name, labels, value });
+          logger.debug({ name, labels, value }, 'Counter incremented');
         }
       }),
       createGauge: (name: string, help: string, labelNames: string[] = []) => ({
         set: (labels: Record<string, string> = {}, value: number) => {
-          logger.debug('Gauge set', { name, labels, value });
+          logger.debug({ name, labels, value }, 'Gauge set');
         }
       }),
       createHistogram: (name: string, help: string, labelNames: string[] = [], buckets?: number[]) => ({
         observe: (labels: Record<string, string> = {}, value: number) => {
-          logger.debug('Histogram observed', { name, labels, value });
+          logger.debug({ name, labels, value }, 'Histogram observed');
         }
       })
     };
@@ -104,7 +104,7 @@ export class RuntimeMetricsClient implements MetricsClient {
       counter.inc(labels, value);
     }
     
-    logger.debug('Counter incremented', { name, labels, value });
+    logger.debug({ name, labels, value }, 'Counter incremented');
   }
 
   setGauge(name: string, value: number, labels: Record<string, string> = {}): void {
@@ -120,7 +120,7 @@ export class RuntimeMetricsClient implements MetricsClient {
       gauge.set(labels, value);
     }
     
-    logger.debug('Gauge set', { name, labels, value });
+    logger.debug({ name, labels, value }, 'Gauge set');
   }
 
   recordHistogram(name: string, value: number, labels: Record<string, string> = {}): void {
@@ -136,7 +136,7 @@ export class RuntimeMetricsClient implements MetricsClient {
       histogram.observe(labels, value);
     }
     
-    logger.debug('Histogram recorded', { name, labels, value });
+    logger.debug({ name, labels, value }, 'Histogram recorded');
   }
 
   createSpan(name: string, attributes?: api.Attributes): api.Span {
@@ -177,7 +177,7 @@ export class RuntimeMetricsClient implements MetricsClient {
       spanId: span.spanContext().spanId,
     } : {};
     
-    logger[level](message, { ...context, ...traceContext });
+    logger[level]({ ...context, ...traceContext }, message);
   }
 
   recordAudit(event: string, context: AuditContext): void {
@@ -194,7 +194,7 @@ export class RuntimeMetricsClient implements MetricsClient {
       metadata: context.metadata,
     };
     
-    logger.info('Audit event', auditLog);
+    logger.info(auditLog, 'Audit event');
     
     // Increment audit counter
     this.incrementCounter('audit_events_total', {
