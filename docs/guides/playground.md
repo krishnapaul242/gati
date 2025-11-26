@@ -245,6 +245,74 @@ export const debugHandler: Handler = async (req, res, gctx, lctx) => {
 };
 ```
 
+## Hook Playback
+
+The Playground automatically records and visualizes hook execution for debugging and performance analysis.
+
+### Enabling Hook Recording
+
+```typescript
+import { HookOrchestrator } from '@gati-framework/runtime';
+
+const orchestrator = new HookOrchestrator();
+const playback = orchestrator.enablePlayback();
+
+// Hooks are now recorded during execution
+```
+
+### Viewing Hook Traces
+
+Access hook execution traces via the Playground API:
+
+```typescript
+// Get trace for a specific request
+const trace = playback.getHookTrace(requestId);
+
+console.log(`Executed ${trace?.traces.length} hooks`);
+trace?.traces.forEach(hook => {
+  console.log(`${hook.hookId}: ${hook.duration}ms`);
+});
+```
+
+### Hook Visualization
+
+In **Tracking Mode**, hooks are visualized as:
+- **Before hooks** - Blue nodes before handler execution
+- **After hooks** - Green nodes after handler execution  
+- **Catch hooks** - Red nodes on error paths
+
+Each hook displays:
+- Execution time
+- Success/failure status
+- Error details (if failed)
+- Execution order
+
+### Performance Analysis
+
+```typescript
+// Analyze hook performance
+const allTraces = playback.getAllTraces();
+
+const slowHooks = allTraces
+  .flatMap(t => t.traces)
+  .filter(h => h.duration > 100)
+  .sort((a, b) => b.duration - a.duration);
+
+console.log('Slow hooks:', slowHooks);
+```
+
+### Debugging Failed Hooks
+
+```typescript
+// Find failed hooks
+const trace = playback.getHookTrace(requestId);
+const failures = trace?.traces.filter(h => !h.success);
+
+failures?.forEach(hook => {
+  console.error(`Hook ${hook.hookId} failed:`, hook.error);
+});
+```
+
 ## Troubleshooting
 
 ### Playground not loading
@@ -267,7 +335,8 @@ export const debugHandler: Handler = async (req, res, gctx, lctx) => {
 
 ## Next Steps
 
-- 📖 [Middleware Guide](/guides/middleware) — Add custom middleware
+- 📖 [Hooks Guide](/guides/hooks) — Learn about hook lifecycle
+- 📚 [Manifest API](/api-reference/manifest) — Hook manifest reference
 - 🏗️ [Module Guide](/guides/modules) — Create custom modules
 - 🐛 [Error Handling](/guides/error-handling) — Handle errors gracefully
 
