@@ -1,6 +1,6 @@
 /**
  * @module runtime/manifest-store
- * @description In-memory Manifest Store implementation for Gati framework
+ * @description Manifest Store with pluggable storage backend
  * 
  * This implements Task 15 from the runtime architecture spec:
  * - Manifest persistence (handlers and modules)
@@ -8,6 +8,7 @@
  * - Version graph storage
  * - Transformer stub storage
  * - Timescape metadata persistence
+ * - Pluggable storage contract (Task 21 Phase 3)
  * 
  * Requirements: 11.5
  */
@@ -15,36 +16,33 @@
 import type {
   ManifestStore,
   HandlerManifest,
+  HookManifest,
   GType,
   Transformer,
   VersionGraph,
   TimescapeMetadata,
 } from './types/manifest-store.js';
+import type { StorageContract } from './types/storage-contract.js';
+import { createInMemoryStorage } from './storage/in-memory-storage.js';
 
 /**
- * In-memory implementation of ManifestStore
+ * Manifest Store implementation with pluggable storage backend
  * 
- * Provides fast lookup with caching for development and testing.
- * Production deployments should use a persistent store (PostgreSQL, etcd, etc.)
+ * Delegates all storage operations to a StorageContract implementation.
+ * Defaults to in-memory storage if no storage backend is provided.
  */
 export class InMemoryManifestStore implements ManifestStore {
-  private manifests: Map<string, Map<string, HandlerManifest>> = new Map();
-  private gtypes: Map<string, GType> = new Map();
-  private transformers: Map<string, Transformer> = new Map();
-  private versionGraphs: Map<string, VersionGraph> = new Map();
-  private timescapeMetadata: Map<string, TimescapeMetadata> = new Map();
+  private storage: StorageContract;
+
+  constructor(storage?: StorageContract) {
+    this.storage = storage ?? createInMemoryStorage();
+  }
 
   /**
    * Store a handler or module manifest
    */
   async storeManifest(manifest: HandlerManifest): Promise<void> {
-    const { handlerId, version } = manifest;
-
-    if (!this.manifests.has(handlerId)) {
-      this.manifests.set(handlerId, new Map());
-    }
-
-    this.manifests.get(handlerId)!.set(version, manifest);
+    return this.storage.storeManifest(manifest);
   }
 
   /**
@@ -54,63 +52,42 @@ export class InMemoryManifestStore implements ManifestStore {
     id: string,
     version?: string
   ): Promise<HandlerManifest | undefined> {
-    const versions = this.manifests.get(id);
-    if (!versions) {
-      return undefined;
-    }
-
-    if (version) {
-      return versions.get(version);
-    }
-
-    // Return latest version if no version specified
-    const allVersions = Array.from(versions.values());
-    if (allVersions.length === 0) {
-      return undefined;
-    }
-
-    // Sort by createdAt descending to get latest
-    return allVersions.sort((a, b) => b.createdAt - a.createdAt)[0];
+    return this.storage.getManifest(id, version);
   }
 
   /**
    * Get all versions of a manifest
    */
   async getAllManifestVersions(id: string): Promise<HandlerManifest[]> {
-    const versions = this.manifests.get(id);
-    if (!versions) {
-      return [];
-    }
-
-    return Array.from(versions.values()).sort((a, b) => a.createdAt - b.createdAt);
+    return this.storage.getAllManifestVersions(id);
   }
 
   /**
    * Store a GType schema
    */
   async storeGType(gtype: GType): Promise<void> {
-    this.gtypes.set(gtype.ref, gtype);
+    return this.storage.storeGType(gtype);
   }
 
   /**
    * Retrieve a GType schema by reference
    */
   async getGType(ref: string): Promise<GType | undefined> {
-    return this.gtypes.get(ref);
+    return this.storage.getGType(ref);
   }
 
   /**
    * Store a transformer stub
    */
   async storeTransformer(transformer: Transformer): Promise<void> {
-    this.transformers.set(transformer.id, transformer);
+    return this.storage.storeTransformer(transformer);
   }
 
   /**
    * Retrieve a transformer by ID
    */
   async getTransformer(id: string): Promise<Transformer | undefined> {
-    return this.transformers.get(id);
+    return this.storage.getTransformer(id);
   }
 
   /**
@@ -121,41 +98,28 @@ export class InMemoryManifestStore implements ManifestStore {
     fromVersion: string,
     toVersion: string
   ): Promise<Transformer[]> {
-    const results: Transformer[] = [];
-
-    for (const transformer of this.transformers.values()) {
-      if (
-        transformer.handlerId === handlerId &&
-        transformer.fromVersion === fromVersion &&
-        transformer.toVersion === toVersion
-      ) {
-        results.push(transformer);
-      }
-    }
-
-    return results;
+    return this.storage.getTransformersForVersions(handlerId, fromVersion, toVersion);
   }
 
   /**
    * Store or update a version graph
    */
   async storeVersionGraph(graph: VersionGraph): Promise<void> {
-    this.versionGraphs.set(graph.handlerId, graph);
+    return this.storage.storeVersionGraph(graph);
   }
 
   /**
    * Retrieve a version graph for a handler
    */
   async getVersionGraph(handlerId: string): Promise<VersionGraph | undefined> {
-    return this.versionGraphs.get(handlerId);
+    return this.storage.getVersionGraph(handlerId);
   }
 
   /**
    * Store Timescape metadata
    */
   async storeTimescapeMetadata(metadata: TimescapeMetadata): Promise<void> {
-    const key = `${metadata.handlerId}:${metadata.version}`;
-    this.timescapeMetadata.set(key, metadata);
+    return this.storage.storeTimescapeMetadata(metadata);
   }
 
   /**
@@ -165,43 +129,50 @@ export class InMemoryManifestStore implements ManifestStore {
     handlerId: string,
     version: string
   ): Promise<TimescapeMetadata | undefined> {
-    const key = `${handlerId}:${version}`;
-    return this.timescapeMetadata.get(key);
+    return this.storage.getTimescapeMetadata(handlerId, version);
+  }
+
+  /**
+   * Store a hook manifest
+   */
+  async storeHookManifest(manifest: HookManifest): Promise<void> {
+    return this.storage.storeHookManifest(manifest);
+  }
+
+  /**
+   * Retrieve a hook manifest by handler ID
+   */
+  async getHookManifest(handlerId: string): Promise<HookManifest | null> {
+    return this.storage.getHookManifest(handlerId);
+  }
+
+  /**
+   * List all hook manifests
+   */
+  async listHookManifests(): Promise<HookManifest[]> {
+    return this.storage.listHookManifests();
   }
 
   /**
    * Clear all stored data (for testing)
    */
   async clear(): Promise<void> {
-    this.manifests.clear();
-    this.gtypes.clear();
-    this.transformers.clear();
-    this.versionGraphs.clear();
-    this.timescapeMetadata.clear();
+    return this.storage.clear();
   }
 
   /**
    * Get store statistics
    */
   getStats() {
-    let manifestCount = 0;
-    for (const versions of this.manifests.values()) {
-      manifestCount += versions.size;
-    }
-
-    return {
-      manifestCount,
-      gtypeCount: this.gtypes.size,
-      transformerCount: this.transformers.size,
-      versionGraphCount: this.versionGraphs.size,
-      timescapeMetadataCount: this.timescapeMetadata.size,
-    };
+    return this.storage.getStats();
   }
 }
 
 /**
- * Create a new in-memory manifest store
+ * Create a new manifest store with optional storage backend
+ * 
+ * @param storage - Optional storage backend (defaults to in-memory)
  */
-export function createManifestStore(): ManifestStore {
-  return new InMemoryManifestStore();
+export function createManifestStore(storage?: StorageContract): ManifestStore {
+  return new InMemoryManifestStore(storage);
 }

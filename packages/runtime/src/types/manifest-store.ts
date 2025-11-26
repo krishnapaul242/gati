@@ -477,6 +477,92 @@ export interface TimescapeMetadata {
 }
 
 /**
+ * Hook Definition
+ * 
+ * Metadata about a single hook extracted from handler code.
+ * Used for manifest recording and Playground playback.
+ */
+export interface HookDefinition {
+  /**
+   * Unique hook identifier
+   */
+  id: string;
+
+  /**
+   * Hook type (lifecycle phase)
+   */
+  type: 'before' | 'after' | 'catch';
+
+  /**
+   * Hook execution level
+   */
+  level: 'global' | 'handler' | 'request';
+
+  /**
+   * Whether hook function is async
+   */
+  isAsync: boolean;
+
+  /**
+   * Optional timeout in milliseconds
+   */
+  timeout?: number;
+
+  /**
+   * Optional retry count
+   */
+  retries?: number;
+
+  /**
+   * Source code location
+   */
+  sourceLocation?: {
+    /**
+     * File path
+     */
+    file: string;
+
+    /**
+     * Line number
+     */
+    line: number;
+
+    /**
+     * Column number
+     */
+    column: number;
+  };
+}
+
+/**
+ * Hook Manifest
+ * 
+ * Complete collection of hooks for a handler.
+ * Generated during handler analysis and used for Playground playback.
+ */
+export interface HookManifest {
+  /**
+   * Handler ID this manifest belongs to
+   */
+  handlerId: string;
+
+  /**
+   * Array of hook definitions
+   */
+  hooks: HookDefinition[];
+
+  /**
+   * Timestamp when manifest was created
+   */
+  createdAt: number;
+
+  /**
+   * Handler version
+   */
+  version: string;
+}
+
+/**
  * Manifest Store Interface
  * 
  * Provides persistence and retrieval for manifests, GTypes, version graphs,
@@ -586,6 +672,28 @@ export interface ManifestStore {
   ): Promise<TimescapeMetadata | undefined>;
 
   /**
+   * Store a hook manifest
+   * 
+   * @param manifest - Hook manifest to store
+   */
+  storeHookManifest(manifest: HookManifest): Promise<void>;
+
+  /**
+   * Retrieve a hook manifest by handler ID
+   * 
+   * @param handlerId - Handler ID
+   * @returns Hook manifest or null if not found
+   */
+  getHookManifest(handlerId: string): Promise<HookManifest | null>;
+
+  /**
+   * List all hook manifests
+   * 
+   * @returns Array of all hook manifests
+   */
+  listHookManifests(): Promise<HookManifest[]>;
+
+  /**
    * Clear all stored data (for testing)
    */
   clear(): Promise<void>;
@@ -599,5 +707,6 @@ export interface ManifestStore {
     transformerCount: number;
     versionGraphCount: number;
     timescapeMetadataCount: number;
+    hookManifestCount: number;
   };
 }

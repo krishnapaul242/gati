@@ -9,6 +9,7 @@ import { createManifestStore } from './manifest-store.js';
 import type {
   ManifestStore,
   HandlerManifest,
+  HookManifest,
   GType,
   Transformer,
   VersionGraph,
@@ -308,6 +309,103 @@ describe('Manifest Store', () => {
       const stats = store.getStats();
       expect(stats.manifestCount).toBe(1);
       expect(stats.gtypeCount).toBe(1);
+    });
+
+    it('should store and retrieve hook manifests', async () => {
+      const hookManifest: HookManifest = {
+        handlerId: 'user.create',
+        hooks: [
+          {
+            id: 'auth',
+            type: 'before',
+            level: 'handler',
+            isAsync: true,
+            timeout: 5000,
+            retries: 3,
+            sourceLocation: {
+              file: '/handlers/user.ts',
+              line: 10,
+              column: 5,
+            },
+          },
+          {
+            id: 'log',
+            type: 'after',
+            level: 'handler',
+            isAsync: false,
+          },
+        ],
+        createdAt: Date.now(),
+        version: '1.0.0',
+      };
+
+      await store.storeHookManifest(hookManifest);
+      const retrieved = await store.getHookManifest('user.create');
+
+      expect(retrieved).toEqual(hookManifest);
+    });
+
+    it('should list all hook manifests', async () => {
+      const hookManifest1: HookManifest = {
+        handlerId: 'user.create',
+        hooks: [],
+        createdAt: Date.now(),
+        version: '1.0.0',
+      };
+
+      const hookManifest2: HookManifest = {
+        handlerId: 'user.update',
+        hooks: [],
+        createdAt: Date.now(),
+        version: '1.0.0',
+      };
+
+      await store.storeHookManifest(hookManifest1);
+      await store.storeHookManifest(hookManifest2);
+
+      const list = await store.listHookManifests();
+      expect(list).toHaveLength(2);
+    });
+
+    it('should return null for non-existent hook manifest', async () => {
+      const retrieved = await store.getHookManifest('nonexistent');
+      expect(retrieved).toBeNull();
+    });
+
+    it('should update existing hook manifest', async () => {
+      const hookManifest1: HookManifest = {
+        handlerId: 'user.create',
+        hooks: [],
+        createdAt: Date.now(),
+        version: '1.0.0',
+      };
+
+      const hookManifest2: HookManifest = {
+        handlerId: 'user.create',
+        hooks: [{ id: 'auth', type: 'before', level: 'handler', isAsync: true }],
+        createdAt: Date.now(),
+        version: '2.0.0',
+      };
+
+      await store.storeHookManifest(hookManifest1);
+      await store.storeHookManifest(hookManifest2);
+
+      const retrieved = await store.getHookManifest('user.create');
+      expect(retrieved).toEqual(hookManifest2);
+    });
+
+    it('should include hook manifests in stats', async () => {
+      const hookManifest: HookManifest = {
+        handlerId: 'test',
+        hooks: [],
+        createdAt: Date.now(),
+        version: '1.0.0',
+      };
+
+      await store.storeHookManifest(hookManifest);
+
+      const stats = store.getStats();
+      expect(stats.hookManifestCount).toBe(1);
     });
   });
 

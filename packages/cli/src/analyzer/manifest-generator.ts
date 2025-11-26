@@ -14,6 +14,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import { extractHooks, type ExtractedHook } from './hook-extractor.js';
 
 /**
  * Handler manifest structure
@@ -280,8 +281,28 @@ export class ManifestGenerator {
       catch: [],
     };
 
-    // TODO: Analyze function body for lctx.before(), lctx.after(), lctx.catch() calls
-    // This requires more complex AST traversal
+    // Get the source file containing this function
+    const sourceFile = node.getSourceFile();
+    if (!sourceFile) {
+      return hooks;
+    }
+
+    // Extract hooks using hook-extractor
+    const extractedHooks = extractHooks(sourceFile);
+    
+    // Group hooks by type
+    for (const hook of extractedHooks) {
+      if (hook.type === 'before') {
+        hooks.before.push(hook.id);
+      } else if (hook.type === 'after') {
+        hooks.after.push(hook.id);
+      } else if (hook.type === 'catch') {
+        if (!hooks.catch) {
+          hooks.catch = [];
+        }
+        hooks.catch.push(hook.id);
+      }
+    }
 
     return hooks;
   }
