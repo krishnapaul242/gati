@@ -2,7 +2,7 @@
 
 ## Current Status Summary
 
-**Completed (Tasks 1-16):**
+**Completed (Tasks 1-19):**
 - ✅ Project structure and type definitions
 - ✅ Local Context (lctx) with state management, hooks, and snapshot/restore
 - ✅ Global Context (gctx) with module registry and lifecycle management
@@ -18,6 +18,9 @@
 - ✅ Pub/Sub Queue Fabric with backpressure enforcement
 - ✅ Manifest & Schema Store with persistence for all data types
 - ✅ Secrets Manager with TTL-based caching and audit logging
+- ✅ Metrics and Observability with OpenTelemetry integration
+- ✅ Codegen for validators, types, SDK, and bundles with CLI integration
+- ✅ Handler Worker execution engine
 - ✅ Property-based testing infrastructure with fast-check
 - ✅ Property tests for Local Context (Properties 21, 23, 24, 27, 47)
 - ✅ Property tests for Hook Orchestrator (Properties 6, 8, 10, 11, 20, 25)
@@ -27,14 +30,14 @@
 - ✅ Property tests for Ingress (Property 3)
 - ✅ Property tests for Manifest Store (Property 39)
 - ✅ Property tests for Secrets Manager (Properties 29, 41)
+- ✅ Property tests for Metrics (Properties 22, 30, 42)
+- ✅ Property tests for Codegen (Properties 5, 38)
+- ✅ Property tests for Handler Worker (Property 1)
 
 **In Progress:**
 - None currently
 
-**Not Started (Tasks 17-29):**
-- Metrics and Observability
-- Codegen for validators and SDK stubs
-- Handler Worker execution engine
+**Not Started (Tasks 20-29):**
 - Playground request inspection
 - Hook manifest recording
 - Testing harness (@gati/testing)
@@ -430,20 +433,24 @@
   - **Validates: Requirements 12.5**
   - **Status**: ✅ Complete - 4 property tests with 140 runs total
 
-- [ ] 18. Implement Codegen for validators and SDK stubs
+- [x] 18. Implement Codegen for validators and SDK stubs
   - Create validator function generator from GType schemas
   - Implement TypeScript type definition generator from manifests
   - Add SDK client stub generator for handlers
   - Generate manifest bundles for operator deployment
+  - Add CLI commands with watch mode
   - _Requirements: 1.5, 3.5, 11.2, 11.3_
+  - **Status**: ✅ Complete - All generators, orchestrator, property tests, and CLI integration
 
-- [ ]* 18.1 Write property test for TypeScript definition generation
+- [x]* 18.1 Write property test for TypeScript definition generation
   - **Property 5: TypeScript definition generation**
   - **Validates: Requirements 1.5**
+  - **Status**: ✅ Complete - 114 test cases passing
 
-- [ ]* 18.2 Write property test for SDK client stub generation
+- [x]* 18.2 Write property test for SDK client stub generation
   - **Property 38: SDK client stub generation**
   - **Validates: Requirements 11.3**
+  - **Status**: ✅ Complete - 115 test cases passing
 
 - [x] 19. Implement Handler Worker execution engine
   - Create HandlerWorker class
