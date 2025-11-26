@@ -13,6 +13,7 @@ import { generateTypesCommand } from './commands/generate-types.js';
 import { analyzeCommand } from './commands/analyze.js';
 import { generateManifestsCommand } from './commands/generate-manifests.js';
 import { playgroundCommand } from './commands/playground.js';
+import { generateCommand } from './commands/generate.js';
 // import { timescapeCommand } from './commands/timescape.js';
 
 const program = new Command();
@@ -26,6 +27,7 @@ program
 program.addCommand(createCommand);
 program.addCommand(devCommand);
 program.addCommand(buildCommand);
+program.addCommand(generateCommand);
 program.addCommand(generateTypesCommand);
 program.addCommand(analyzeCommand);
 program.addCommand(generateManifestsCommand);
