@@ -217,3 +217,7 @@ export type {
 
 // Capability Manager
 export { CapabilityManager } from './capability-manager.js';
+
+// Handler Worker
+export { HandlerWorker } from './handler-worker.js';
+export type { HandlerWorkerConfig } from './handler-worker.js';
