@@ -89,8 +89,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc --build",
-    "clean": "tsc --build --clean",
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -35,7 +35,7 @@
     "gati": "node packages/cli/dist/index.js",
     "cli": "node packages/cli/dist/index.js",
     "dev": "pnpm --filter @gati-framework/core dev",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "pnpm -r --filter=./packages/* run build",
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "release:version": "changeset version",
     "release:publish": "changeset publish",
