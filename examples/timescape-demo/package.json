@@ -1,6 +1,6 @@
 {
   "name": "timescape-demo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Demo application for Gati Timescape Versioning System",
   "main": "index.ts",
   "type": "module",

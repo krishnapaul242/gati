@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/cloud-aws",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AWS cloud provider plugin for Gati framework",
   "keywords": [
     "gati",

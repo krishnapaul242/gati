@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/cloud-azure",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Azure cloud provider plugin for Gati framework",
   "keywords": [
     "gati",

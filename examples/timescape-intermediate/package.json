@@ -1,6 +1,6 @@
 {
   "name": "@gati-examples/timescape-intermediate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Intermediate example for Timescape API versioning - E-commerce with breaking changes",
   "private": true,
   "type": "module",

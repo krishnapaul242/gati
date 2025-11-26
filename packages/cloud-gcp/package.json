@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/cloud-gcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "GCP cloud provider plugin for Gati framework",
   "keywords": [
     "gati",

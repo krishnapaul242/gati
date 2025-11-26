@@ -1,6 +1,6 @@
-# @gati-framework/cloud-gcp
+# @gati-framework/cloud-aws
 
-## 1.0.3
+## 1.0.1
 
 ### Patch Changes
 
@@ -10,17 +10,3 @@
   - Exclude incomplete Timescape features from CLI build
   - Correct import paths in cloud provider packages
   - Fix Pino logger format
-
-## 1.0.2
-
-### Patch Changes
-
-- Updated dependencies [cab87b8]
-  - @gati-framework/core@0.4.5
-
-## 1.0.1
-
-### Patch Changes
-
-- Updated dependencies
-  - @gati-framework/core@0.4.4

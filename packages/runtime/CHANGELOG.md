@@ -1,5 +1,16 @@
 # @gati-framework/runtime
 
+## 2.0.5
+
+### Patch Changes
+
+- Fix critical build issues and improve stability
+  - Remove exports for excluded metrics-client functionality
+  - Fix ManifestStore type export
+  - Exclude incomplete Timescape features from CLI build
+  - Correct import paths in cloud provider packages
+  - Fix Pino logger format
+
 ## 2.0.4
 
 ### Patch Changes

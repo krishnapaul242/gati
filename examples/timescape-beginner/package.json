@@ -1,6 +1,6 @@
 {
   "name": "@gati-examples/timescape-beginner",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Beginner example for Timescape API versioning - Simple blog API",
   "private": true,
   "type": "module",
