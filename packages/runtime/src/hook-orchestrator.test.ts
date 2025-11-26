@@ -987,6 +987,88 @@ describe('HookOrchestrator', () => {
       expect(state.recordCreated).toBe(false);
     });
   });
+
+  describe('Hook Playback Integration', () => {
+    it('should record hook execution when playback is enabled', async () => {
+      const playback = orchestrator.enablePlayback();
+      playback.startRequest(lctx.requestId);
+
+      orchestrator.registerBefore({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+      playback.endRequest(lctx.requestId);
+
+      const trace = playback.getHookTrace(lctx.requestId);
+      expect(trace).toBeDefined();
+      expect(trace?.traces).toHaveLength(1);
+      expect(trace?.traces[0].hookId).toBe('test-hook');
+      expect(trace?.traces[0].success).toBe(true);
+    });
+
+    it('should not record when playback is disabled', async () => {
+      orchestrator.registerBefore({
+        id: 'test-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+
+      const playback = orchestrator.getPlayback();
+      expect(playback).toBeNull();
+    });
+
+    it('should record full lifecycle with before, after, and catch hooks', async () => {
+      const playback = orchestrator.enablePlayback();
+      playback.startRequest(lctx.requestId);
+
+      orchestrator.registerBefore({
+        id: 'before-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      orchestrator.registerAfter({
+        id: 'after-hook',
+        fn: () => {},
+        level: 'global',
+      });
+
+      await orchestrator.executeBefore(lctx, gctx);
+      await orchestrator.executeAfter(lctx, gctx);
+      playback.endRequest(lctx.requestId);
+
+      const trace = playback.getHookTrace(lctx.requestId);
+      expect(trace?.traces).toHaveLength(2);
+      expect(trace?.traces[0].hookId).toBe('before-hook');
+      expect(trace?.traces[1].hookId).toBe('after-hook');
+    });
+
+    it('should record error hooks with failure status', async () => {
+      const playback = orchestrator.enablePlayback();
+      playback.startRequest(lctx.requestId);
+
+      orchestrator.registerBefore({
+        id: 'failing-hook',
+        fn: () => {
+          throw new Error('Hook failed');
+        },
+        level: 'global',
+      });
+
+      await expect(orchestrator.executeBefore(lctx, gctx)).rejects.toThrow();
+      playback.endRequest(lctx.requestId);
+
+      const trace = playback.getHookTrace(lctx.requestId);
+      expect(trace?.traces).toHaveLength(1);
+      expect(trace?.traces[0].success).toBe(false);
+      expect(trace?.traces[0].error).toBeDefined();
+    });
+  });
 });
 
 // Feature: runtime-architecture, Property 25: Hook execution order

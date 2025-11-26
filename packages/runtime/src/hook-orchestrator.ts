@@ -13,6 +13,7 @@ import type { LocalContext, GlobalContext } from './types/context.js';
 import type { Request } from './types/index.js';
 import type { GType } from './gtype/index.js';
 import { validate, ValidationException } from './gtype/index.js';
+import { HookPlayback } from './playground/hook-playback.js';
 
 /**
  * Hook function signature
@@ -153,6 +154,7 @@ export class HookOrchestrator {
   private catchHooks: Hook[] = [];
   private compensatingActions: CompensatingActionEntry[] = [];
   private config: Required<Omit<HookOrchestratorConfig, 'onAlert'>> & { onAlert?: (message: string, error: Error, metadata?: Record<string, unknown>) => void };
+  private playback: HookPlayback | null = null;
   
   constructor(config: HookOrchestratorConfig = {}) {
     this.config = {
@@ -162,6 +164,33 @@ export class HookOrchestrator {
       onEvent: config.onEvent ?? (() => {}),
       onAlert: config.onAlert,
     };
+  }
+  
+  /**
+   * Enable hook playback recording
+   */
+  enablePlayback(): HookPlayback {
+    if (!this.playback) {
+      this.playback = new HookPlayback();
+    }
+    this.playback.enable();
+    return this.playback;
+  }
+  
+  /**
+   * Disable hook playback recording
+   */
+  disablePlayback(): void {
+    if (this.playback) {
+      this.playback.disable();
+    }
+  }
+  
+  /**
+   * Get playback instance
+   */
+  getPlayback(): HookPlayback | null {
+    return this.playback;
   }
   
   /**
@@ -478,7 +507,8 @@ export class HookOrchestrator {
           hook.timeout || this.config.defaultTimeout
         );
         
-        const duration = Date.now() - start;
+        const end = Date.now();
+        const duration = end - start;
         
         this.emitEvent({
           type: 'hook:end',
@@ -489,10 +519,24 @@ export class HookOrchestrator {
           metadata: { level: hook.level },
         });
         
+        // Record successful execution
+        if (this.playback?.isEnabled()) {
+          this.playback.recordHookExecution(
+            lctx.requestId,
+            hook.id,
+            this.getHookType(hook),
+            hook.level,
+            start,
+            end,
+            true
+          );
+        }
+        
         return; // Success
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        const duration = Date.now() - start;
+        const end = Date.now();
+        const duration = end - start;
         
         this.emitEvent({
           type: 'hook:error',
@@ -503,6 +547,20 @@ export class HookOrchestrator {
           duration,
           metadata: { level: hook.level, attempt },
         });
+        
+        // Record failed execution
+        if (this.playback?.isEnabled()) {
+          this.playback.recordHookExecution(
+            lctx.requestId,
+            hook.id,
+            this.getHookType(hook),
+            hook.level,
+            start,
+            end,
+            false,
+            lastError
+          );
+        }
         
         // If this was the last attempt, throw
         if (attempt === maxAttempts - 1) {
@@ -560,6 +618,15 @@ export class HookOrchestrator {
     if (this.config.emitEvents) {
       this.config.onEvent(event);
     }
+  }
+  
+  /**
+   * Get hook type from hook arrays
+   */
+  private getHookType(hook: Hook): 'before' | 'after' | 'catch' {
+    if (this.beforeHooks.includes(hook)) return 'before';
+    if (this.afterHooks.includes(hook)) return 'after';
+    return 'catch';
   }
   
   /**
