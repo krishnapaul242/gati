@@ -1,5 +1,12 @@
 # @gati-framework/runtime
 
+## 2.0.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @gati-framework/contracts@1.1.0
+
 ## 2.0.0
 
 ### Major Changes

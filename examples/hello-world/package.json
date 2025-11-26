@@ -1,6 +1,6 @@
 {
   "name": "@gati/hello-world-example",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hello World example application for Gati framework",
   "private": true,
   "type": "module",

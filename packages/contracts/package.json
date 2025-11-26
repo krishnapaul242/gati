@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/contracts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Type-safe contracts for Gati framework integrations",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/observability",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Observability stack for Gati framework - Prometheus, Grafana, Loki, and Tracing",
   "keywords": [
     "gati",
@@ -37,7 +37,7 @@
     "winston-loki": "^6.1.2"
   },
   "peerDependencies": {
-    "@gati-framework/observability-adapters": "^1.0.0"
+    "@gati-framework/observability-adapters": "^1.1.0"
   },
   "peerDependenciesMeta": {
     "@gati-framework/observability-adapters": {

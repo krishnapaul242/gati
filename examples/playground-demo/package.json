@@ -1,6 +1,6 @@
 {
   "name": "gati-playground-demo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Demo application showcasing Gati Playground features",
   "type": "module",
   "scripts": {
