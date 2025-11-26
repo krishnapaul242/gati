@@ -1,0 +1,19 @@
+{
+  "name": "observability-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gati observability providers demonstration",
+  "scripts": {
+    "dev": "gati dev",
+    "build": "gati build"
+  },
+  "dependencies": {
+    "@gati-framework/core": "workspace:*",
+    "@gati-framework/runtime": "workspace:*",
+    "@gati-framework/observability": "workspace:*"
+  },
+  "devDependencies": {
+    "@gati-framework/cli": "workspace:*",
+    "typescript": "^5.3.3"
+  }
+}
