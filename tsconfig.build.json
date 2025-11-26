@@ -7,7 +7,11 @@
     "removeComments": true,
     "noEmit": false,
     "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
