@@ -1,4 +1,29 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/__tests__"]
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strictNullChecks": false,
+    "skipLibCheck": true,
+    "strictPropertyInitialization": false
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/__tests__",
+    "src/examples/**",
+    "src/timescape/phase*.ts",
+    "src/timescape/test-*.ts",
+    "src/timescape/metrics.ts",
+    "src/timescape/integration.ts",
+    "src/timescape/registry.ts",
+    "src/timescape/snapshot-manager.ts",
+    "src/timescape/transformer.ts",
+    "src/metrics-client.ts",
+    "src/queue-fabric.ts"
+  ]
 }

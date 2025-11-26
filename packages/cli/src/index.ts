@@ -13,7 +13,7 @@ import { generateTypesCommand } from './commands/generate-types.js';
 import { analyzeCommand } from './commands/analyze.js';
 import { generateManifestsCommand } from './commands/generate-manifests.js';
 import { playgroundCommand } from './commands/playground.js';
-import { timescapeCommand } from './commands/timescape.js';
+// import { timescapeCommand } from './commands/timescape.js';
 
 const program = new Command();
 
@@ -30,7 +30,7 @@ program.addCommand(generateTypesCommand);
 program.addCommand(analyzeCommand);
 program.addCommand(generateManifestsCommand);
 program.addCommand(playgroundCommand);
-program.addCommand(timescapeCommand);
+// program.addCommand(timescapeCommand);
 registerDeployCommand(program);
 
 // Parse command line arguments

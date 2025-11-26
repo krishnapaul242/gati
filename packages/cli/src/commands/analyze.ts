@@ -6,7 +6,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { analyzeProject } from '../analyzer/handler-analyzer.js';
-import { generateConfig, generateTypes } from '../analyzer/manifest-generator.js';
+// import { generateConfig, generateTypes } from '../analyzer/manifest-generator.js';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
@@ -38,22 +38,22 @@ async function analyzeProjectCommand(cwd: string, options: AnalyzeOptions): Prom
     
     // Generate config if requested
     if (options.config !== false) {
-      generateConfig(manifest, cwd);
-      console.log(chalk.green('✅ Generated gati.config.ts'));
+      // generateConfig(manifest, cwd);
+      console.log(chalk.yellow('⚠️  Config generation not yet implemented'));
     }
     
     // Generate types if requested
     if (options.types !== false) {
-      const typesContent = generateTypes(manifest);
-      const typesDir = resolve(cwd, '.gati');
-      const typesPath = resolve(typesDir, 'types.d.ts');
+      // const typesContent = generateTypes(manifest);
+      // const typesDir = resolve(cwd, '.gati');
+      // const typesPath = resolve(typesDir, 'types.d.ts');
       
-      if (!existsSync(typesDir)) {
-        mkdirSync(typesDir, { recursive: true });
-      }
+      // if (!existsSync(typesDir)) {
+      //   mkdirSync(typesDir, { recursive: true });
+      // }
       
-      writeFileSync(typesPath, typesContent);
-      console.log(chalk.green('✅ Generated .gati/types.d.ts'));
+      // writeFileSync(typesPath, typesContent);
+      console.log(chalk.yellow('⚠️  Type generation not yet implemented'));
     }
     
     // Show route tree

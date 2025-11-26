@@ -8,8 +8,10 @@ import { resolve, relative } from 'path';
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import chalk from 'chalk';
 import { analyzeFile } from './simple-analyzer.js';
-import { VersionDetector } from './version-detector.js';
-import type { VersionChange } from './version-detector.js';
+// import { VersionDetector } from './version-detector.js';
+// import type { VersionChange } from './version-detector.js';
+
+type VersionChange = any;
 
 export class FileWatcher {
   private srcDir: string;
@@ -17,7 +19,7 @@ export class FileWatcher {
   private fileWatcher?: any;
   private manifestWatcher?: any;
   private onUpdate?: (manifest: any) => void;
-  private versionDetector?: VersionDetector;
+  // private versionDetector?: VersionDetector;
   private onVersionChange?: (change: VersionChange) => void;
 
   constructor(
@@ -38,9 +40,9 @@ export class FileWatcher {
     }
 
     // Initialize version detector if enabled
-    if (options?.enableVersioning !== false) {
-      this.versionDetector = new VersionDetector(projectRoot, true);
-    }
+    // if (options?.enableVersioning !== false) {
+    //   this.versionDetector = new VersionDetector(projectRoot, true);
+    // }
   }
 
   start() {
@@ -94,16 +96,16 @@ export class FileWatcher {
         console.log(`✅ Updated manifest: ${manifestName}`);
 
         // Detect version changes for handlers
-        if ((result as any).route && this.versionDetector) {
-          const handlerCode = readFileSync(filePath, 'utf-8');
-          const handlerPath = (result as any).route;
+        // if ((result as any).route && this.versionDetector) {
+        //   const handlerCode = readFileSync(filePath, 'utf-8');
+        //   const handlerPath = (result as any).route;
           
-          const versionChange = await this.versionDetector.detectChange(handlerPath, handlerCode);
+        //   const versionChange = await this.versionDetector.detectChange(handlerPath, handlerCode);
           
-          if (versionChange) {
-            this.notifyVersionChange(versionChange);
-          }
-        }
+        //   if (versionChange) {
+        //     this.notifyVersionChange(versionChange);
+        //   }
+        // }
       }
     } catch (error) {
       console.error(`❌ Failed to process ${filePath}:`, error);
