@@ -37,9 +37,8 @@
 **In Progress:**
 - None currently
 
-**Not Started (Tasks 20-29):**
+**Not Started (Tasks 20, 22-29):**
 - Playground request inspection
-- Hook manifest recording
 - Testing harness (@gati/testing)
 - Runtime simulation (@gati/simulate)
 - Kubernetes Operator
@@ -484,15 +483,17 @@
   - **Property 44: Snapshot storage**
   - **Validates: Requirements 15.1**
 
-- [ ] 21. Implement hook manifest recording
+- [x] 21. Implement hook manifest recording
   - Add hook definition recording to manifest generation
   - Store hook metadata (sync/async, timeout, retries)
   - Enable playback in Playground
   - _Requirements: 10.4_
+  - **Status**: ✅ Complete - Hook extraction, storage, playback, and documentation
 
-- [ ]* 21.1 Write property test for hook manifest recording
+- [x]* 21.1 Write property test for hook manifest recording
   - **Property 37: Hook manifest recording**
   - **Validates: Requirements 10.4**
+  - **Status**: ✅ Complete - 100 iterations validating completeness
 
 - [ ] 22. Create testing harness (@gati/testing)
   - Implement createTestHarness function
