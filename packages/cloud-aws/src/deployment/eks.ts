@@ -29,7 +29,7 @@ import type {
   NodePoolInfo,
   DeploymentResult,
   ValidationResult,
-} from '@gati-framework/core/cloud-provider';
+} from '@gati-framework/core';
 
 /**
  * EKS deployment manager

@@ -14,7 +14,7 @@ import type {
   SecretConfig,
   DeploymentResult,
   ValidationResult,
-} from '@gati-framework/core/cloud-provider';
+} from '@gati-framework/core';
 import { EKSDeployment } from './deployment/eks.js';
 import { AWSSecretsManager } from './secrets/secrets-manager.js';
 import { AWSLoadBalancer } from './networking/load-balancer.js';

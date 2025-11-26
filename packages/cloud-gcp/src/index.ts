@@ -15,7 +15,7 @@ import type {
   DeploymentResult,
   ValidationResult,
   NodePoolInfo,
-} from '@gati-framework/core/cloud-provider';
+} from '@gati-framework/core';
 
 /**
  * GCP cloud provider implementation

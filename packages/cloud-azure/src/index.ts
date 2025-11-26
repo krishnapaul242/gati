@@ -14,7 +14,7 @@ import type {
   SecretConfig,
   DeploymentResult,
   ValidationResult,
-} from '@gati-framework/core/cloud-provider';
+} from '@gati-framework/core';
 
 /**
  * Azure cloud provider implementation

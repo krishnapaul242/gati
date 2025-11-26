@@ -12,7 +12,7 @@ import {
   DescribeSecretCommand,
   type GetSecretValueCommandOutput,
 } from '@aws-sdk/client-secrets-manager';
-import type { SecretConfig } from '@gati-framework/core/cloud-provider';
+import type { SecretConfig } from '@gati-framework/core';
 
 /**
  * AWS Secrets Manager client wrapper

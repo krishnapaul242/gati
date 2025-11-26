@@ -17,7 +17,7 @@ import {
 import type {
   LoadBalancerConfig,
   LoadBalancerInfo,
-} from '@gati-framework/core/cloud-provider';
+} from '@gati-framework/core';
 
 /**
  * AWS Application Load Balancer manager
