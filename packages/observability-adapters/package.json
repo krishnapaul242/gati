@@ -1,0 +1,66 @@
+{
+  "name": "@gati-framework/observability-adapters",
+  "version": "1.0.0",
+  "description": "Cloud provider and APM adapters for Gati observability",
+  "keywords": [
+    "gati",
+    "observability",
+    "aws",
+    "cloudwatch",
+    "xray",
+    "datadog",
+    "newrelic",
+    "jaeger",
+    "zipkin",
+    "sentry"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./aws": "./dist/aws/index.js",
+    "./apm": "./dist/apm/index.js",
+    "./oss": "./dist/oss/index.js",
+    "./error-tracking": "./dist/error-tracking/index.js",
+    "./presets": "./dist/presets/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@gati-framework/contracts": "workspace:^"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.0.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.0.0",
+    "@sentry/node": "^8.0.0",
+    "@sentry/tracing": "^7.0.0",
+    "aws-xray-sdk-core": "^3.0.0",
+    "dd-trace": "^5.0.0",
+    "jaeger-client": "^3.0.0",
+    "newrelic": "^12.0.0",
+    "zipkin": "^0.22.0",
+    "zipkin-context-cls": "^0.22.0",
+    "zipkin-transport-http": "^0.22.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-cloudwatch": { "optional": true },
+    "@aws-sdk/client-cloudwatch-logs": { "optional": true },
+    "@sentry/node": { "optional": true },
+    "@sentry/tracing": { "optional": true },
+    "aws-xray-sdk-core": { "optional": true },
+    "dd-trace": { "optional": true },
+    "jaeger-client": { "optional": true },
+    "newrelic": { "optional": true },
+    "zipkin": { "optional": true },
+    "zipkin-context-cls": { "optional": true },
+    "zipkin-transport-http": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  }
+}
