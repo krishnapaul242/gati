@@ -30,7 +30,10 @@
   "homepage": "https://github.com/krishnapaul242/gati#readme",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "@gati-framework/runtime": "^2.0.3",
@@ -40,6 +43,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.40.0",
     "@types/ws": "^8.5.8",
     "typescript": "^5.2.2"
   }
