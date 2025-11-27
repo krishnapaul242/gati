@@ -1,0 +1,49 @@
+{
+  "name": "@gati-framework/operator",
+  "version": "0.1.0",
+  "description": "Kubernetes Operator for Gati handler and module deployment",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "gati-operator": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "crds",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/cli.js"
+  },
+  "keywords": [
+    "gati",
+    "operator",
+    "kubernetes",
+    "deployment",
+    "orchestration"
+  ],
+  "author": "Krishna Paul",
+  "license": "MIT",
+  "dependencies": {
+    "@kubernetes/client-node": "^0.20.0",
+    "pino": "^8.16.0"
+  },
+  "peerDependencies": {
+    "@gati-framework/contracts": "workspace:*",
+    "@gati-framework/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2"
+  }
+}

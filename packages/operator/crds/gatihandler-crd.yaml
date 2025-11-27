@@ -1,0 +1,100 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gatihandlers.gati.dev
+spec:
+  group: gati.dev
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - handlerPath
+                - version
+                - replicas
+                - image
+                - port
+              properties:
+                handlerPath:
+                  type: string
+                version:
+                  type: string
+                replicas:
+                  type: integer
+                  minimum: 0
+                image:
+                  type: string
+                port:
+                  type: integer
+                resources:
+                  type: object
+                  properties:
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                env:
+                  type: object
+                  additionalProperties:
+                    type: string
+                timescape:
+                  type: object
+                  properties:
+                    breaking:
+                      type: boolean
+                    routingWeight:
+                      type: integer
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum:
+                    - Pending
+                    - Running
+                    - Failed
+                    - Decommissioned
+                replicas:
+                  type: integer
+                readyReplicas:
+                  type: integer
+                lastUpdated:
+                  type: string
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                      reason:
+                        type: string
+                      message:
+                        type: string
+      subresources:
+        status: {}
+  scope: Namespaced
+  names:
+    plural: gatihandlers
+    singular: gatihandler
+    kind: GatiHandler
+    shortNames:
+      - gh

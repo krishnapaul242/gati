@@ -1,0 +1,90 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gatimodules.gati.dev
+spec:
+  group: gati.dev
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - moduleName
+                - moduleType
+                - runtime
+                - replicas
+                - image
+                - port
+              properties:
+                moduleName:
+                  type: string
+                moduleType:
+                  type: string
+                  enum:
+                    - node
+                    - wasm
+                    - oci
+                runtime:
+                  type: string
+                replicas:
+                  type: integer
+                  minimum: 0
+                image:
+                  type: string
+                port:
+                  type: integer
+                resources:
+                  type: object
+                  properties:
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                capabilities:
+                  type: array
+                  items:
+                    type: string
+                env:
+                  type: object
+                  additionalProperties:
+                    type: string
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum:
+                    - Pending
+                    - Running
+                    - Failed
+                replicas:
+                  type: integer
+                readyReplicas:
+                  type: integer
+                lastUpdated:
+                  type: string
+      subresources:
+        status: {}
+  scope: Namespaced
+  names:
+    plural: gatimodules
+    singular: gatimodule
+    kind: GatiModule
+    shortNames:
+      - gm
