@@ -39,8 +39,7 @@
 **In Progress:**
 - None currently
 
-**Not Started (Tasks 20, 22-29):**
-- Playground request inspection
+**Not Started (Tasks 22-29):**
 - Testing harness (@gati/testing)
 - Runtime simulation (@gati/simulate)
 - Kubernetes Operator
@@ -50,11 +49,12 @@
 
 **Note:** Property-based tests (marked with *) are optional and can be implemented after core functionality is complete.
 
-**Latest Completion:** Task 21 - Hook Manifest Recording (2025-01-24)
-- 15/15 steps complete
-- 105 tests passing (13 extractor + 27 manifest + 15 playback + 50 orchestrator)
-- 6 hours actual vs 18 hours estimated (67% time savings)
-- Full documentation added
+**Latest Completion:** Task 20 - Playground Request Inspection (2025-01-24)
+- 20/20 subtasks complete (including integration & E2E tests)
+- 103 tests total (70 unit + 6 integration + 27 E2E)
+- 24 files created (runtime: 7, playground: 6, tests: 6, docs: 5)
+- Full trace collection, storage, replay, and debug gate system
+- Comprehensive documentation and test coverage
 
 ---
 
@@ -472,12 +472,13 @@
   - **Validates: Requirements 1.1**
   - **Status**: ✅ Complete - 2 property tests with 150 runs total, 20 unit tests, 2 integration tests
 
-- [ ] 20. Implement Playground request inspection
+- [x] 20. Implement Playground request inspection
   - Create Playground API for request trace inspection
   - Implement request path visualization (ingress → RM → LCC → handler → modules)
   - Add snapshot viewing and comparison
   - Implement debug gate functionality to pause execution
   - _Requirements: 15.2, 15.3_
+  - **Status**: ✅ Complete - All components, tests, and documentation (103 tests passing)
 
 - [ ]* 20.1 Write property test for request replay execution
   - **Property 45: Request replay execution**
@@ -509,6 +510,112 @@
   - Create module mock utilities
   - Add helper functions for handler testing
   - _Requirements: 14.2_
+  - **Estimated Time**: 3 hours 25 minutes
+  - **Plan**: See `.kiro/specs/runtime-architecture/task-22-testing-harness-plan.md`
+
+- [x] 22.1 Package setup and configuration
+  - Create packages/testing/ directory structure
+  - Create package.json with dependencies (@gati-framework/runtime, @gati-framework/core as peers)
+  - Create tsconfig.json and tsconfig.build.json
+  - Create initial README.md and src/index.ts
+  - _Estimated: 15 minutes_
+  - _Dependencies: None_
+  - **Status**: ✅ Complete - Package structure created, builds successfully
+
+- [x] 22.2 Implement createTestHarness core function
+  - Define TestHarness interface with executeHandler, getLocalContext, getGlobalContext, cleanup methods
+  - Implement createTestHarness function using real LocalContext and GlobalContext
+  - Add ExecuteOptions interface for request, modules, config customization
+  - Implement TestResult interface with response, lctx, error, events
+  - Add lifecycle event capture functionality
+  - Implement cleanup method for resource management
+  - _Estimated: 30 minutes_
+  - _Dependencies: 22.1_
+  - **Status**: ✅ Complete - Core test harness implemented with minimal code
+
+- [x] 22.3 Implement Fake LocalContext builder
+  - Create FakeLocalContextBuilder class with fluent API
+  - Implement withRequestId, withTraceId, withClientId, withState, withMetadata methods
+  - Create createFakeLocalContext helper function
+  - Provide test-friendly defaults (predictable IDs, no-op functions)
+  - Add sensible defaults for test scenarios
+  - _Estimated: 20 minutes_
+  - _Dependencies: 22.1_
+  - **Status**: ✅ Complete - Builder pattern with 5 methods, helper function with defaults
+
+- [x] 22.4 Implement Fake GlobalContext builder
+  - Create FakeGlobalContextBuilder class with fluent API
+  - Implement withModule, withConfig, withInstanceId, withRegion methods
+  - Create createFakeGlobalContext helper function
+  - Wrap real createGlobalContext with test-friendly defaults
+  - Add easy module registration for tests
+  - _Estimated: 20 minutes_
+  - _Dependencies: 22.1_
+  - **Status**: ✅ Complete - Builder pattern with 4 methods, uses real createGlobalContext
+
+- [x] 22.5 Implement module mock utilities
+  - Create createMockModule function with spy functionality
+  - Implement MockModule interface with module, calls, reset properties
+  - Create createStubModule function for predefined return values
+  - Add call tracking for method invocations (args, result, error, timestamp)
+  - Support async methods in mocks
+  - Implement reset functionality to clear call history
+  - _Estimated: 25 minutes_
+  - _Dependencies: 22.1_
+  - **Status**: ✅ Complete - Mock and stub utilities with call tracking
+
+- [x] 22.6 Implement helper functions
+  - Create createTestRequest function with sensible defaults
+  - Create createTestResponse function
+  - Implement testHandler convenience function for minimal setup
+  - Add assertStatus helper for response status assertions
+  - Add assertBody helper for response body assertions
+  - Ensure type safety across all helpers
+  - _Estimated: 20 minutes_
+  - _Dependencies: 22.2, 22.3, 22.4_
+  - **Status**: ✅ Complete - 5 helper functions for simplified testing
+
+- [x] 22.7 Write comprehensive documentation
+  - Write installation instructions in README.md
+  - Create quick start guide with basic example
+  - Document API reference for all exported functions and classes
+  - Add usage examples: basic handler test, testing with modules, error scenarios
+  - Document best practices for handler testing
+  - _Estimated: 15 minutes_
+  - _Dependencies: 22.2-22.6_
+  - **Status**: ✅ Complete - Full README with API docs, examples, and best practices
+
+- [ ] 22.8 Write unit tests for testing harness
+  - Test createTestHarness with defaults and custom options
+  - Test executeHandler success and error scenarios
+  - Test lifecycle event capture
+  - Test context access (getLocalContext, getGlobalContext)
+  - Test cleanup functionality
+  - Test FakeLocalContextBuilder and FakeGlobalContextBuilder
+  - Test module mock utilities (createMockModule, createStubModule)
+  - Test helper functions (createTestRequest, createTestResponse, testHandler)
+  - Test isolation between test executions
+  - _Estimated: 30 minutes_
+  - _Dependencies: 22.2-22.6_
+
+- [ ] 22.9 Write integration tests
+  - Test handler with database module mock
+  - Test handler with before/after hooks
+  - Test handler error handling with catch hooks
+  - Test concurrent handler executions
+  - Test state isolation between tests
+  - Test real-world scenarios (CRUD operations, authentication, validation)
+  - _Estimated: 20 minutes_
+  - _Dependencies: 22.8_
+
+- [ ] 22.10 Finalize package and exports
+  - Update src/index.ts with all public exports
+  - Configure TypeScript build (tsconfig.build.json)
+  - Build package and verify output
+  - Test imports work correctly from external packages
+  - Update root README if needed with testing package reference
+  - _Estimated: 10 minutes_
+  - _Dependencies: 22.9_
 
 - [ ] 23. Create runtime simulation package (@gati/simulate)
   - Implement simulateRuntime function
