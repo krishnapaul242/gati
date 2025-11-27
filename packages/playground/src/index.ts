@@ -24,6 +24,55 @@ export {
   metadata as playgroundHandlerMetadata
 } from './handlers.js';
 
+// Trace API endpoints
+export {
+  listTracesHandler,
+  getTraceHandler,
+  getSnapshotsHandler,
+  getStageSnapshotHandler,
+  replayTraceHandler,
+  createGateHandler,
+  listGatesHandler,
+  removeGateHandler,
+  releaseGateHandler,
+  deleteTraceHandler,
+  metadata as traceHandlerMetadata,
+  type TraceModule
+} from './api/trace-endpoints.js';
+
+// Debug gate WebSocket
+export {
+  DebugGateWebSocketServer,
+  createDebugGateWebSocket
+} from './api/debug-gate-websocket.js';
+
+// UI Components
+export {
+  RequestFlowDiagram,
+  createRequestFlowDiagram,
+  type DiagramConfig
+} from './components/RequestFlowDiagram.js';
+
+export {
+  SnapshotViewer,
+  createSnapshotViewer,
+  type ViewerConfig
+} from './components/SnapshotViewer.js';
+
+export {
+  SnapshotDiff,
+  createSnapshotDiff,
+  type DiffConfig,
+  type DiffViewMode
+} from './components/SnapshotDiff.js';
+
+export {
+  DebugGateControls,
+  createDebugGateControls,
+  type GateEvent,
+  type GateEventCallback
+} from './components/DebugGateControls.js';
+
 // Static UI serving
 export { servePlaygroundUI } from './ui-server.js';
 

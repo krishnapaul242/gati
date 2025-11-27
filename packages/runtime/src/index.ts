@@ -185,6 +185,8 @@ export { InMemoryManifestStore, createManifestStore } from './manifest-store.js'
 export type {
   ManifestStore,
   HandlerManifest,
+  HookDefinition,
+  HookManifest,
   GType as ManifestGType,
   GTypeKind as ManifestGTypeKind,
   GTypeProperty,
@@ -196,6 +198,13 @@ export type {
   VersionNode,
   TimescapeMetadata,
 } from './types/manifest-store.js';
+
+// Storage Contract
+export { createInMemoryStorage } from './storage/in-memory-storage.js';
+export type {
+  StorageContract,
+  StorageStats,
+} from './types/storage-contract.js';
 
 // Secrets Manager
 export { SecretsManager } from './secrets-manager.js';
@@ -221,3 +230,37 @@ export { CapabilityManager } from './capability-manager.js';
 // Handler Worker
 export { HandlerWorker } from './handler-worker.js';
 export type { HandlerWorkerConfig } from './handler-worker.js';
+
+// Trace types for request inspection
+export type {
+  RequestTrace,
+  TraceStage,
+  TraceStatus,
+  StageName,
+  DebugGate,
+  GateStatus,
+  DiffOperation,
+  SnapshotDiff,
+  TraceFilter,
+  ReplayOptions,
+  ReplayResult,
+} from './types/trace.js';
+
+// Trace collection
+export { TraceCollector, createTraceCollector } from './trace-collector.js';
+export type { TraceCollectorConfig } from './trace-collector.js';
+
+// Trace storage
+export { InMemoryTraceStorage, createTraceStorage } from './trace-storage.js';
+export type { TraceStorage, TraceStorageConfig } from './trace-storage.js';
+
+// Diff engine
+export { computeDiff, applyDiff } from './diff-engine.js';
+
+// Request replayer
+export { RequestReplayer, createRequestReplayer } from './request-replayer.js';
+export type { RequestReplayerConfig } from './request-replayer.js';
+
+// Debug gate manager
+export { DebugGateManager, createDebugGateManager } from './debug-gate-manager.js';
+export type { DebugGateManagerConfig, GateTriggerEvent } from './debug-gate-manager.js';

@@ -36,4 +36,3 @@ export class CloudProviderFactory {
         return Array.from(this.providers.keys());
     }
 }
-//# sourceMappingURL=cloud-provider.js.map
