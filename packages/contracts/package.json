@@ -13,6 +13,10 @@
     "./observability": {
       "types": "./dist/observability/index.d.ts",
       "import": "./dist/observability/index.js"
+    },
+    "./deployment": {
+      "types": "./dist/deployment/index.d.ts",
+      "import": "./dist/deployment/index.js"
     }
   },
   "files": [
@@ -30,7 +34,9 @@
     "interfaces",
     "observability",
     "metrics",
-    "tracing"
+    "tracing",
+    "deployment",
+    "kubernetes"
   ],
   "author": "Krishna Paul",
   "license": "MIT",

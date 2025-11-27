@@ -1,11 +1,61 @@
 # @gati-framework/contracts
 
-Type-safe contracts for Gati framework integrations. This package defines interfaces that allow pluggable implementations of observability, storage, and other infrastructure concerns.
+Type-safe contracts for Gati framework integrations. This package defines interfaces that allow pluggable implementations of observability, deployment, and other infrastructure concerns.
 
 ## Installation
 
 ```bash
 npm install @gati-framework/contracts
+```
+
+## Deployment Contracts
+
+### Deployment Target
+
+```typescript
+import { IDeploymentTarget, DeploymentResource } from '@gati-framework/contracts/deployment';
+
+class MyDeploymentTarget implements IDeploymentTarget {
+  async apply(resource: DeploymentResource): Promise<void> {
+    // Your implementation
+  }
+  
+  async delete(kind: string, namespace: string, name: string): Promise<void> {
+    // Your implementation
+  }
+  
+  async get(kind: string, namespace: string, name: string): Promise<DeploymentResource | null> {
+    // Your implementation
+  }
+  
+  async list(kind: string, namespace: string, labels?: Record<string, string>): Promise<DeploymentResource[]> {
+    // Your implementation
+  }
+  
+  async watch(kind: string, namespace: string, callback: WatchCallback): Promise<void> {
+    // Your implementation
+  }
+}
+```
+
+### Manifest Generator
+
+```typescript
+import { IManifestGenerator, HandlerSpec, ModuleSpec } from '@gati-framework/contracts/deployment';
+
+class MyManifestGenerator implements IManifestGenerator {
+  generateDeployment(spec: HandlerSpec | ModuleSpec): DeploymentSpec {
+    // Your implementation
+  }
+  
+  generateService(spec: HandlerSpec | ModuleSpec): ServiceSpec {
+    // Your implementation
+  }
+  
+  generateConfigMap(spec: HandlerSpec | ModuleSpec): ConfigMapSpec {
+    // Your implementation
+  }
+}
 ```
 
 ## Observability Contracts
@@ -74,6 +124,7 @@ class MyLogger implements ILogger {
 
 ## Compatible Implementations
 
+- **Deployment**: Kubernetes, Helm, GitOps (ArgoCD/Flux), Terraform
 - **Metrics**: Prometheus, Datadog, CloudWatch, New Relic
 - **Tracing**: OpenTelemetry, Jaeger, Zipkin, Datadog APM
 - **Logging**: Pino, Winston, Loki, CloudWatch Logs

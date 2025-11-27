@@ -4,3 +4,4 @@
  */
 
 export * from './observability/index.js';
+export * from './deployment/index.js';
