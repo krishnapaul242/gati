@@ -1,28 +1,59 @@
-import { KubeConfig, AppsV1Api, CoreV1Api, CustomObjectsApi, Watch } from '@kubernetes/client-node';
+import { KubeConfig, AppsV1Api, CoreV1Api, Watch } from '@kubernetes/client-node';
 import type { IDeploymentTarget, DeploymentResource, WatchCallback, WatchEvent } from '@gati-framework/contracts';
 import pino from 'pino';
+
+interface RetryOptions {
+  maxRetries: number;
+  initialDelayMs: number;
+  maxDelayMs: number;
+}
 
 export class KubernetesDeploymentTarget implements IDeploymentTarget {
   private kc: KubeConfig;
   private appsApi: AppsV1Api;
   private coreApi: CoreV1Api;
-  private customApi: CustomObjectsApi;
   private logger: pino.Logger;
+
+  private retryOptions: RetryOptions = {
+    maxRetries: 3,
+    initialDelayMs: 100,
+    maxDelayMs: 5000,
+  };
 
   constructor() {
     this.kc = new KubeConfig();
     this.kc.loadFromDefault();
     this.appsApi = this.kc.makeApiClient(AppsV1Api);
     this.coreApi = this.kc.makeApiClient(CoreV1Api);
-    this.customApi = this.kc.makeApiClient(CustomObjectsApi);
     this.logger = pino({ name: 'kubernetes-target' });
   }
 
+  private async withRetry<T>(fn: () => Promise<T>, operation: string): Promise<T> {
+    let lastError: any;
+    for (let attempt = 0; attempt <= this.retryOptions.maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error: any) {
+        lastError = error;
+        if (error.statusCode === 404 || error.statusCode === 409 || attempt === this.retryOptions.maxRetries) {
+          throw error;
+        }
+        const delay = Math.min(
+          this.retryOptions.initialDelayMs * Math.pow(2, attempt),
+          this.retryOptions.maxDelayMs
+        );
+        this.logger.warn({ attempt, delay, operation, error: error.message }, 'Retrying operation');
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    throw lastError;
+  }
+
   async apply(resource: DeploymentResource): Promise<void> {
-    const { kind, metadata, spec } = resource;
+    const { kind, metadata } = resource;
     const { namespace, name } = metadata;
 
-    try {
+    await this.withRetry(async () => {
       const existing = await this.get(kind, namespace, name);
 
       if (existing) {
@@ -32,10 +63,7 @@ export class KubernetesDeploymentTarget implements IDeploymentTarget {
         await this.create(kind, namespace, resource);
         this.logger.info({ kind, namespace, name }, 'Resource created');
       }
-    } catch (error) {
-      this.logger.error({ error, kind, namespace, name }, 'Failed to apply resource');
-      throw error;
-    }
+    }, `apply-${kind}`);
   }
 
   private async create(kind: string, namespace: string, resource: DeploymentResource): Promise<void> {

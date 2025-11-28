@@ -1,10 +1,19 @@
 import type { IManifestGenerator, DeploymentSpec, ServiceSpec, ConfigMapSpec, HandlerSpec, ModuleSpec } from '@gati-framework/contracts';
 
 export class ManifestGenerator implements IManifestGenerator {
+  private calculateResources(spec: HandlerSpec | ModuleSpec) {
+    if (spec.resources) return spec.resources;
+    
+    // Default resource limits
+    return {
+      requests: { cpu: '100m', memory: '128Mi' },
+      limits: { cpu: '500m', memory: '512Mi' },
+    };
+  }
+
   generateDeployment(spec: HandlerSpec | ModuleSpec): DeploymentSpec {
     const isHandler = 'handlerPath' in spec;
-    const name = isHandler ? `handler-${spec.version}` : `module-${(spec as ModuleSpec).moduleName}`;
-    const labels = isHandler 
+    const labels: Record<string, string> = isHandler 
       ? { app: 'gati-handler', version: spec.version }
       : { app: 'gati-module', module: (spec as ModuleSpec).moduleName };
 
@@ -19,16 +28,20 @@ export class ManifestGenerator implements IManifestGenerator {
             image: spec.image,
             ports: [{ containerPort: spec.port, protocol: 'TCP' }],
             env: spec.env ? Object.entries(spec.env).map(([name, value]) => ({ name, value })) : [],
-            resources: spec.resources,
+            resources: this.calculateResources(spec),
             readinessProbe: {
               httpGet: { path: '/health', port: spec.port },
               initialDelaySeconds: 5,
               periodSeconds: 10,
+              timeoutSeconds: 3,
+              failureThreshold: 3,
             },
             livenessProbe: {
               httpGet: { path: '/health', port: spec.port },
               initialDelaySeconds: 15,
               periodSeconds: 20,
+              timeoutSeconds: 5,
+              failureThreshold: 3,
             },
           }],
         },
@@ -38,7 +51,7 @@ export class ManifestGenerator implements IManifestGenerator {
 
   generateService(spec: HandlerSpec | ModuleSpec): ServiceSpec {
     const isHandler = 'handlerPath' in spec;
-    const labels = isHandler 
+    const labels: Record<string, string> = isHandler 
       ? { app: 'gati-handler', version: spec.version }
       : { app: 'gati-module', module: (spec as ModuleSpec).moduleName };
 
