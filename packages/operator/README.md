@@ -2,6 +2,12 @@
 
 Kubernetes Operator for automated deployment and orchestration of Gati handlers and modules.
 
+## Installation
+
+```bash
+npm install @gati-framework/operator
+```
+
 ## Architecture
 
 The Gati Operator uses a contracts-based architecture to support multiple deployment targets:
@@ -105,6 +111,14 @@ Configure via `DEPLOYMENT_TARGET` environment variable.
 - ✅ Automatic version decommissioning after traffic drains
 - ✅ Structured logging and Prometheus metrics
 - ✅ Graceful shutdown and error handling
+
+## Documentation
+
+- [Architecture](./docs/architecture.md)
+- [Deployment Guide](./docs/deployment.md)
+- [CRD Reference](./docs/crds.md)
+- [Deployment Targets](./docs/targets.md)
+- [Troubleshooting](./docs/troubleshooting.md)
 
 ## License
 
