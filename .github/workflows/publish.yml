@@ -1,0 +1,74 @@
+name: Publish Packages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/*/package.json'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm -r --filter './packages/*' run build
+
+      - name: Publish changed packages
+        run: |
+          pnpm -r --filter './packages/*' exec bash -c '
+            PACKAGE_NAME=$(node -p "require(\"./package.json\").name")
+            PACKAGE_VERSION=$(node -p "require(\"./package.json\").version")
+            
+            # Check if version exists on npm
+            if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+              echo "⏭️  $PACKAGE_NAME@$PACKAGE_VERSION already published"
+            else
+              echo "📦 Publishing $PACKAGE_NAME@$PACKAGE_VERSION"
+              npm publish --access public
+            fi
+          '
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create git tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          pnpm -r --filter './packages/*' exec bash -c '
+            PACKAGE_NAME=$(node -p "require(\"./package.json\").name")
+            PACKAGE_VERSION=$(node -p "require(\"./package.json\").version")
+            TAG_NAME="${PACKAGE_NAME}@${PACKAGE_VERSION}"
+            
+            if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+              echo "Tag $TAG_NAME already exists"
+            else
+              git tag "$TAG_NAME"
+              echo "Created tag $TAG_NAME"
+            fi
+          '
+          
+          git push --tags || true

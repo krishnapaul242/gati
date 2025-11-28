@@ -1,0 +1,45 @@
+name: Sync Template Versions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/core/package.json'
+      - 'packages/runtime/package.json'
+      - 'packages/cli/package.json'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Sync versions
+        run: node scripts/sync-versions.js
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add packages/cli/src/utils/file-generator.ts
+            git commit -m "chore: sync CLI template versions"
+            git push
+          fi
