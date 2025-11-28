@@ -1,0 +1,131 @@
+{
+  "$id": "https://gati.dev/schemas/gtype.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gati Type System Schema",
+  "description": "JSON Schema definition for GType type system",
+  "definitions": {
+    "GTypeBase": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "object", "array", "union", "enum", "ref", "tuple", "null"]
+        },
+        "nullable": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "GPrimitiveType": {
+      "allOf": [
+        { "$ref": "#/definitions/GTypeBase" },
+        {
+          "properties": {
+            "kind": {
+              "enum": ["string", "number", "boolean"]
+            },
+            "brand": {
+              "type": "string"
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "minLength": {
+              "type": "integer"
+            },
+            "maxLength": {
+              "type": "integer"
+            },
+            "pattern": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "GObjectType": {
+      "allOf": [
+        { "$ref": "#/definitions/GTypeBase" },
+        {
+          "required": ["properties"],
+          "properties": {
+            "kind": {
+              "const": "object"
+            },
+            "properties": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/GType"
+              }
+            },
+            "required": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "GArrayType": {
+      "allOf": [
+        { "$ref": "#/definitions/GTypeBase" },
+        {
+          "required": ["items"],
+          "properties": {
+            "kind": {
+              "const": "array"
+            },
+            "items": {
+              "$ref": "#/definitions/GType"
+            },
+            "minItems": {
+              "type": "integer"
+            },
+            "maxItems": {
+              "type": "integer"
+            }
+          }
+        }
+      ]
+    },
+    "GRefType": {
+      "allOf": [
+        { "$ref": "#/definitions/GTypeBase" },
+        {
+          "required": ["refId"],
+          "properties": {
+            "kind": {
+              "const": "ref"
+            },
+            "refId": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "GType": {
+      "oneOf": [
+        { "$ref": "#/definitions/GPrimitiveType" },
+        { "$ref": "#/definitions/GObjectType" },
+        { "$ref": "#/definitions/GArrayType" },
+        { "$ref": "#/definitions/GRefType" }
+      ]
+    }
+  }
+}

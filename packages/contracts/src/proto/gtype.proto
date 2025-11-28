@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package gati;
+
+// GTypeKind - Type discriminator
+enum GTypeKind {
+  GTYPE_KIND_UNSPECIFIED = 0;
+  GTYPE_KIND_STRING = 1;
+  GTYPE_KIND_NUMBER = 2;
+  GTYPE_KIND_BOOLEAN = 3;
+  GTYPE_KIND_OBJECT = 4;
+  GTYPE_KIND_ARRAY = 5;
+  GTYPE_KIND_UNION = 6;
+  GTYPE_KIND_ENUM = 7;
+  GTYPE_KIND_REF = 8;
+  GTYPE_KIND_TUPLE = 9;
+  GTYPE_KIND_NULL = 10;
+}
+
+// GTypeBase - Base type information
+message GTypeBase {
+  GTypeKind kind = 1;
+  bool nullable = 2;
+  string description = 3;
+  bytes metadata = 4;
+}
+
+// GPrimitiveType - Primitive type with constraints
+message GPrimitiveType {
+  GTypeBase base = 1;
+  string brand = 2;
+  double min = 3;
+  double max = 4;
+  int32 min_length = 5;
+  int32 max_length = 6;
+  string pattern = 7;
+}
+
+// GObjectType - Object type with properties
+message GObjectType {
+  GTypeBase base = 1;
+  map<string, GType> properties = 2;
+  repeated string required = 3;
+  bool additional_properties = 4;
+}
+
+// GArrayType - Array type
+message GArrayType {
+  GTypeBase base = 1;
+  GType items = 2;
+  int32 min_items = 3;
+  int32 max_items = 4;
+}
+
+// GRefType - Reference type
+message GRefType {
+  GTypeBase base = 1;
+  string ref_id = 2;
+}
+
+// GType - Union of all type variants
+message GType {
+  oneof type {
+    GPrimitiveType primitive = 1;
+    GObjectType object = 2;
+    GArrayType array = 3;
+    GRefType ref = 4;
+  }
+}

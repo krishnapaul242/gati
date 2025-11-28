@@ -1,0 +1,145 @@
+{
+  "$id": "https://gati.dev/schemas/envelope.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gati Envelope Schemas",
+  "description": "JSON Schema definitions for GatiRequestEnvelope, GatiResponseEnvelope, and GatiError",
+  "definitions": {
+    "GatiRequestEnvelope": {
+      "type": "object",
+      "required": ["id", "method", "path", "headers", "receivedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique request identifier"
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method"
+        },
+        "path": {
+          "type": "string",
+          "description": "Request path"
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "HTTP headers"
+        },
+        "receivedAt": {
+          "type": "integer",
+          "description": "Request received timestamp (epoch milliseconds)"
+        },
+        "query": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          },
+          "description": "Query parameters"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Path parameters"
+        },
+        "body": {
+          "description": "Request body"
+        },
+        "version": {
+          "type": "string",
+          "description": "Timescape version ID or timestamp"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Request priority (1 = highest)"
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Debug/feature flags"
+        },
+        "clientIp": {
+          "type": "string",
+          "description": "Client IP address"
+        },
+        "ingestMeta": {
+          "type": "object",
+          "description": "Ingress-specific metadata"
+        }
+      }
+    },
+    "GatiResponseEnvelope": {
+      "type": "object",
+      "required": ["requestId", "status", "producedAt"],
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "description": "Correlates with request envelope ID"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599,
+          "description": "HTTP status code"
+        },
+        "producedAt": {
+          "type": "integer",
+          "description": "Response produced timestamp (epoch milliseconds)"
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Response headers"
+        },
+        "body": {
+          "description": "Response body"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Non-fatal warnings"
+        }
+      }
+    },
+    "GatiError": {
+      "type": "object",
+      "required": ["message"],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Human-readable error message"
+        },
+        "code": {
+          "type": "string",
+          "description": "Machine-readable error code (dot-notation)"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599,
+          "description": "HTTP status code"
+        },
+        "details": {
+          "description": "Structured error details"
+        },
+        "traceId": {
+          "type": "string",
+          "description": "Correlation with request ID"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package gati;
+
+// Header key-value pair
+message Header {
+  string key = 1;
+  string value = 2;
+}
+
+// Query parameter value (string or array of strings)
+message QueryValue {
+  oneof value {
+    string single = 1;
+    StringArray multiple = 2;
+  }
+}
+
+message StringArray {
+  repeated string values = 1;
+}
+
+// GatiRequestEnvelope - Standardized request structure
+message GatiRequestEnvelope {
+  string id = 1;
+  string method = 2;
+  string path = 3;
+  repeated Header headers = 4;
+  int64 received_at = 5;
+  
+  map<string, QueryValue> query = 6;
+  map<string, string> params = 7;
+  bytes body = 8;
+  string version = 9;
+  int32 priority = 10;
+  repeated string flags = 11;
+  string client_ip = 12;
+  bytes ingest_meta = 13;
+}
+
+// GatiResponseEnvelope - Standardized response structure
+message GatiResponseEnvelope {
+  string request_id = 1;
+  int32 status = 2;
+  int64 produced_at = 3;
+  
+  repeated Header headers = 4;
+  bytes body = 5;
+  repeated string warnings = 6;
+}
+
+// GatiError - Standardized error structure
+message GatiError {
+  string message = 1;
+  string code = 2;
+  int32 status = 3;
+  bytes details = 4;
+  string trace_id = 5;
+}

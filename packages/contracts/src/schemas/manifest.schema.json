@@ -1,0 +1,113 @@
+{
+  "$id": "https://gati.dev/schemas/manifest.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gati Manifest Schemas",
+  "description": "JSON Schema definitions for HandlerVersion and ModuleManifest",
+  "definitions": {
+    "HandlerVersion": {
+      "type": "object",
+      "required": ["handlerId", "versionId", "createdAt"],
+      "properties": {
+        "handlerId": {
+          "type": "string",
+          "description": "Handler identifier"
+        },
+        "versionId": {
+          "type": "string",
+          "description": "Version identifier"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Version creation timestamp (epoch milliseconds)"
+        },
+        "image": {
+          "type": "string",
+          "description": "Container image reference"
+        },
+        "entrypoint": {
+          "type": "string",
+          "description": "Handler entrypoint path"
+        },
+        "exportedFunctions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Exported function names"
+        },
+        "manifestHash": {
+          "type": "string",
+          "description": "Manifest hash for integrity verification"
+        },
+        "schemaRefs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Schema references for Timescape"
+        }
+      }
+    },
+    "ModuleManifest": {
+      "type": "object",
+      "required": ["name", "id", "version", "type", "exports"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Module name"
+        },
+        "id": {
+          "type": "string",
+          "description": "Module identifier"
+        },
+        "version": {
+          "type": "string",
+          "description": "Module version"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["node", "oci", "wasm", "binary", "external"],
+          "description": "Module runtime type"
+        },
+        "exports": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "inputRef": {
+                "type": "string"
+              },
+              "outputRef": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Exported methods with schema references"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required capabilities/permissions"
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string"
+            },
+            "mem": {
+              "type": "string"
+            }
+          },
+          "description": "Resource requirements"
+        },
+        "signature": {
+          "type": "string",
+          "description": "Cryptographic signature for verification"
+        }
+      }
+    }
+  }
+}

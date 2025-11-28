@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package gati;
+
+// HandlerVersion - Handler version metadata
+message HandlerVersion {
+  string handler_id = 1;
+  string version_id = 2;
+  int64 created_at = 3;
+  
+  string image = 4;
+  string entrypoint = 5;
+  repeated string exported_functions = 6;
+  string manifest_hash = 7;
+  repeated string schema_refs = 8;
+}
+
+// ModuleExport - Module method export definition
+message ModuleExport {
+  string input_ref = 1;
+  string output_ref = 2;
+}
+
+// ModuleResources - Resource requirements
+message ModuleResources {
+  string cpu = 1;
+  string mem = 2;
+}
+
+// ModuleType - Module runtime type
+enum ModuleType {
+  MODULE_TYPE_UNSPECIFIED = 0;
+  MODULE_TYPE_NODE = 1;
+  MODULE_TYPE_OCI = 2;
+  MODULE_TYPE_WASM = 3;
+  MODULE_TYPE_BINARY = 4;
+  MODULE_TYPE_EXTERNAL = 5;
+}
+
+// ModuleManifest - Module metadata
+message ModuleManifest {
+  string name = 1;
+  string id = 2;
+  string version = 3;
+  ModuleType type = 4;
+  
+  map<string, ModuleExport> exports = 5;
+  repeated string capabilities = 6;
+  ModuleResources resources = 7;
+  string signature = 8;
+}
