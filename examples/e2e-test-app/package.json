@@ -1,0 +1,32 @@
+{
+  "name": "@gati/e2e-test-app",
+  "version": "1.0.0",
+  "description": "E2E test application for Gati framework",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "gati dev",
+    "build": "gati build",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "gati",
+    "e2e-test",
+    "typescript"
+  ],
+  "author": "Krishna Paul",
+  "license": "MIT",
+  "dependencies": {
+    "@gati-framework/core": "file:../../.kiro/local-packages/gati-framework-core-0.4.5.tgz",
+    "@gati-framework/types": "file:../../.kiro/local-packages/gati-framework-types-1.0.1.tgz",
+    "@gati-framework/contracts": "file:../../.kiro/local-packages/gati-framework-contracts-1.1.0.tgz",
+    "@gati-framework/runtime": "file:../../.kiro/local-packages/gati-framework-runtime-2.0.5.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
