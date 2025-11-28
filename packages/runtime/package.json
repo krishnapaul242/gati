@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/runtime",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Gati runtime execution engine for running handler-based applications",
   "type": "module",
   "main": "./dist/index.js",

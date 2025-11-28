@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/simulate",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Runtime simulation for testing Gati applications with in-process Route Manager, LCC, and Module RPC emulation",
   "type": "module",
   "main": "./dist/index.js",
