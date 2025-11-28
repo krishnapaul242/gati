@@ -1,0 +1,87 @@
+{
+  "examples": {
+    "stringType": {
+      "kind": "string",
+      "description": "User email address",
+      "minLength": 5,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    },
+    "numberType": {
+      "kind": "number",
+      "description": "User age",
+      "min": 0,
+      "max": 150
+    },
+    "booleanType": {
+      "kind": "boolean",
+      "description": "User active status"
+    },
+    "objectType": {
+      "kind": "object",
+      "description": "User object",
+      "properties": {
+        "id": {
+          "kind": "string",
+          "brand": "UserId"
+        },
+        "name": {
+          "kind": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "email": {
+          "kind": "string",
+          "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        },
+        "age": {
+          "kind": "number",
+          "min": 0,
+          "max": 150
+        },
+        "active": {
+          "kind": "boolean"
+        }
+      },
+      "required": ["id", "name", "email"],
+      "additionalProperties": false
+    },
+    "arrayType": {
+      "kind": "array",
+      "description": "List of users",
+      "items": {
+        "kind": "ref",
+        "refId": "User"
+      },
+      "minItems": 0,
+      "maxItems": 100
+    },
+    "refType": {
+      "kind": "ref",
+      "refId": "User",
+      "description": "Reference to User schema"
+    },
+    "nestedObject": {
+      "kind": "object",
+      "properties": {
+        "user": {
+          "kind": "object",
+          "properties": {
+            "profile": {
+              "kind": "object",
+              "properties": {
+                "bio": {
+                  "kind": "string",
+                  "maxLength": 500
+                },
+                "avatar": {
+                  "kind": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

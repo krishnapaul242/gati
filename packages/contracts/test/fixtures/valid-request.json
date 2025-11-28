@@ -1,0 +1,9 @@
+{
+  "id": "req_test123",
+  "method": "GET",
+  "path": "/api/test",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "receivedAt": 1704067200000
+}

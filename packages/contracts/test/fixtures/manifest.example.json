@@ -1,0 +1,77 @@
+{
+  "examples": {
+    "handlerVersion": {
+      "handlerId": "users-get",
+      "versionId": "v1.2.3",
+      "createdAt": 1704067200000,
+      "image": "registry.example.com/users-handler:v1.2.3",
+      "entrypoint": "dist/handlers/users/get.js",
+      "exportedFunctions": ["handler"],
+      "manifestHash": "sha256:abc123def456",
+      "schemaRefs": ["user-schema-v1", "response-schema-v2"]
+    },
+    "nodeModule": {
+      "name": "database-module",
+      "id": "db-v1",
+      "version": "1.0.0",
+      "type": "node",
+      "exports": {
+        "findUser": {
+          "inputRef": "find-user-input-v1",
+          "outputRef": "user-output-v1"
+        },
+        "createUser": {
+          "inputRef": "create-user-input-v1",
+          "outputRef": "user-output-v1"
+        }
+      },
+      "capabilities": ["database.read", "database.write"],
+      "resources": {
+        "cpu": "500m",
+        "mem": "512Mi"
+      },
+      "signature": "sha256:def456ghi789"
+    },
+    "ociModule": {
+      "name": "redis-cache",
+      "id": "cache-v1",
+      "version": "2.0.0",
+      "type": "oci",
+      "exports": {
+        "get": {
+          "inputRef": "cache-key-v1",
+          "outputRef": "cache-value-v1"
+        },
+        "set": {
+          "inputRef": "cache-set-input-v1"
+        }
+      },
+      "capabilities": ["cache.read", "cache.write"]
+    },
+    "wasmModule": {
+      "name": "crypto-utils",
+      "id": "crypto-v1",
+      "version": "1.5.0",
+      "type": "wasm",
+      "exports": {
+        "hash": {
+          "inputRef": "hash-input-v1",
+          "outputRef": "hash-output-v1"
+        }
+      }
+    },
+    "externalModule": {
+      "name": "payment-gateway",
+      "id": "payment-v1",
+      "version": "3.0.0",
+      "type": "external",
+      "exports": {
+        "processPayment": {
+          "inputRef": "payment-input-v1",
+          "outputRef": "payment-output-v1"
+        }
+      },
+      "capabilities": ["payment.process"]
+    }
+  }
+}

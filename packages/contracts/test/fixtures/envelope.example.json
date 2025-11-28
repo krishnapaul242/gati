@@ -1,0 +1,67 @@
+{
+  "examples": {
+    "validRequest": {
+      "id": "req_abc123xyz",
+      "method": "POST",
+      "path": "/api/users",
+      "headers": {
+        "content-type": "application/json",
+        "authorization": "Bearer token123"
+      },
+      "receivedAt": 1704067200000,
+      "query": {
+        "page": "1",
+        "limit": "10"
+      },
+      "params": {
+        "id": "user123"
+      },
+      "body": {
+        "name": "Alice",
+        "email": "alice@example.com"
+      },
+      "version": "v1.2.3",
+      "priority": 1,
+      "flags": ["debug", "playground"],
+      "clientIp": "192.168.1.100"
+    },
+    "minimalRequest": {
+      "id": "req_minimal",
+      "method": "GET",
+      "path": "/api/health",
+      "headers": {},
+      "receivedAt": 1704067200000
+    },
+    "validResponse": {
+      "requestId": "req_abc123xyz",
+      "status": 200,
+      "producedAt": 1704067201000,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "user": {
+          "id": "user123",
+          "name": "Alice"
+        }
+      }
+    },
+    "minimalResponse": {
+      "requestId": "req_minimal",
+      "status": 204,
+      "producedAt": 1704067201000
+    },
+    "errorResponse": {
+      "requestId": "req_error",
+      "status": 404,
+      "producedAt": 1704067201000,
+      "body": {
+        "message": "User not found",
+        "code": "user.not_found",
+        "status": 404,
+        "traceId": "req_error"
+      },
+      "warnings": ["Deprecated API version"]
+    }
+  }
+}
