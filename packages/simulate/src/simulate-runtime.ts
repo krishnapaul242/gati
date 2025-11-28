@@ -63,18 +63,17 @@ function createRequest(method: string, path: string, params: Record<string, stri
 
 function createResponse(): any {
   let statusCode = 200;
-  let body: any = null;
+  let responseBody: any = null;
   let headers: Record<string, string> = {};
   let sent = false;
 
   const res: any = {
-    statusCode,
-    body,
-    headers,
+    get statusCode() { return statusCode; },
+    get body() { return responseBody; },
+    get headers() { return headers; },
     
     status(code: number) {
       statusCode = code;
-      res.statusCode = code;
       return res;
     },
 
@@ -83,7 +82,7 @@ function createResponse(): any {
       return res;
     },
 
-    headers(hdrs: Record<string, string | string[] | number>) {
+    setHeaders(hdrs: Record<string, string | string[] | number>) {
       for (const [key, value] of Object.entries(hdrs)) {
         headers[key] = String(value);
       }
@@ -91,22 +90,19 @@ function createResponse(): any {
     },
 
     json(data: unknown) {
-      body = data;
-      res.body = data;
+      responseBody = data;
       headers['Content-Type'] = 'application/json';
       sent = true;
     },
 
     text(data: string) {
-      body = data;
-      res.body = data;
+      responseBody = data;
       headers['Content-Type'] = 'text/plain';
       sent = true;
     },
 
     send(data: string | Buffer) {
-      body = data;
-      res.body = data;
+      responseBody = data;
       sent = true;
     },
 

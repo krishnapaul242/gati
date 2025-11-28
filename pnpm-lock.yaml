@@ -370,6 +370,13 @@ importers:
         version: 5.9.3
 
   packages/contracts:
+    dependencies:
+      ajv:
+        specifier: ^8.12.0
+        version: 8.17.1
+      ajv-formats:
+        specifier: ^2.1.1
+        version: 2.1.1(ajv@8.17.1)
     devDependencies:
       '@types/node':
         specifier: ^20.10.0
@@ -377,6 +384,9 @@ importers:
       typescript:
         specifier: ^5.3.2
         version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1(@types/node@20.19.24)
 
   packages/core:
     devDependencies:
@@ -6253,6 +6263,17 @@ packages:
   /agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
+    dev: false
+
+  /ajv-formats@2.1.1(ajv@8.17.1):
+    resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+    dependencies:
+      ajv: 8.17.1
     dev: false
 
   /ajv@6.12.6:
