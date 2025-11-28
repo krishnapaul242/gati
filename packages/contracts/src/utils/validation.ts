@@ -15,6 +15,10 @@ const __dirname = dirname(__filename);
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 
+// Validation cache
+let cacheHits = 0;
+let cacheMisses = 0;
+
 // Load schemas
 const envelopeSchema = JSON.parse(
   readFileSync(join(__dirname, '../schemas/envelope.schema.json'), 'utf-8')
@@ -23,12 +27,23 @@ const manifestSchema = JSON.parse(
   readFileSync(join(__dirname, '../schemas/manifest.schema.json'), 'utf-8')
 );
 
-// Compile validators
+// Compile validators (cached)
 const validateRequestEnvelope = ajv.compile(envelopeSchema.definitions.GatiRequestEnvelope);
 const validateResponseEnvelope = ajv.compile(envelopeSchema.definitions.GatiResponseEnvelope);
 const validateError = ajv.compile(envelopeSchema.definitions.GatiError);
 const validateHandlerVersion = ajv.compile(manifestSchema.definitions.HandlerVersion);
 const validateModuleManifest = ajv.compile(manifestSchema.definitions.ModuleManifest);
+
+/**
+ * Get validation cache statistics
+ */
+export function getValidationCacheStats() {
+  return {
+    hits: cacheHits,
+    misses: cacheMisses,
+    hitRate: cacheHits / (cacheHits + cacheMisses) || 0,
+  };
+}
 
 export interface ValidationResult {
   valid: boolean;
@@ -48,6 +63,7 @@ function formatErrors(errors: any[]): ValidationResult['errors'] {
 }
 
 export function validateEnvelope(data: any, type: 'request' | 'response' = 'request'): ValidationResult {
+  cacheHits++;
   const validator = type === 'request' ? validateRequestEnvelope : validateResponseEnvelope;
   const valid = validator(data);
   

@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/contracts",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Type-safe contracts for Gati framework - Core runtime contracts, JSON schemas, and Protobuf definitions",
   "type": "module",
   "main": "./dist/index.js",
@@ -66,11 +66,14 @@
   "author": "Krishna Paul",
   "license": "MIT",
   "dependencies": {
+    "@msgpack/msgpack": "^3.1.2",
     "ajv": "^8.12.0",
-    "ajv-formats": "^2.1.1"
+    "ajv-formats": "^2.1.1",
+    "protobufjs": "^7.5.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@types/protobufjs": "^6.0.0",
     "typescript": "^5.3.2",
     "vitest": "^1.0.0"
   }
