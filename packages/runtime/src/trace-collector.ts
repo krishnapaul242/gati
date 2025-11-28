@@ -3,7 +3,8 @@
  * @description Collects request traces through the pipeline
  */
 
-import type { Request, Response } from './types/request.js';
+import type { Request } from './types/request.js';
+import type { Response } from './types/response.js';
 import type { LocalContext } from './types/context.js';
 import type { RequestTrace, TraceStage, StageName, TraceStatus } from './types/trace.js';
 

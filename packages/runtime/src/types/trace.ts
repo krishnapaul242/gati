@@ -3,7 +3,8 @@
  * @description Type definitions for request tracing and inspection
  */
 
-import type { Request, Response } from './request.js';
+import type { Request } from './request.js';
+import type { Response } from './response.js';
 import type { SnapshotToken } from './context.js';
 
 /**

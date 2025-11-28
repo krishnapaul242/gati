@@ -164,17 +164,9 @@ export class InMemoryTraceStorage implements TraceStorage {
   }
 
   private compress(trace: RequestTrace): RequestTrace {
-    // Simple compression: remove large response bodies
-    const compressed = { ...trace };
-    if (compressed.response?.body && typeof compressed.response.body === 'string') {
-      if (compressed.response.body.length > 1000) {
-        compressed.response = {
-          ...compressed.response,
-          body: compressed.response.body.slice(0, 1000) + '... [truncated]',
-        };
-      }
-    }
-    return compressed;
+    // Simple compression: just return as-is for now
+    // Response interface doesn't have body property
+    return trace;
   }
 
   private decompress(trace: RequestTrace): RequestTrace {

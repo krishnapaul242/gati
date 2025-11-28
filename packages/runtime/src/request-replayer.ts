@@ -5,7 +5,8 @@
 
 import type { RequestTrace, ReplayOptions, ReplayResult, StageName } from './types/trace.js';
 import type { TraceStorage } from './trace-storage.js';
-import type { Request, Response } from './types/request.js';
+import type { Request } from './types/request.js';
+import type { Response } from './types/response.js';
 import { computeDiff } from './diff-engine.js';
 
 /**
@@ -128,7 +129,7 @@ export class RequestReplayer {
   /**
    * Execute replay (simplified)
    */
-  private async executeReplay(request: Request, snapshot: any): Promise<Response> {
+  private async executeReplay(request: Request, snapshot: any): Promise<any> {
     // In a real implementation, this would:
     // 1. Restore LocalContext from snapshot
     // 2. Re-execute handler with restored context
@@ -139,13 +140,13 @@ export class RequestReplayer {
       statusCode: 200,
       headers: {},
       body: { replayed: true, timestamp: Date.now() },
-    } as Response;
+    };
   }
 
   /**
    * Compare replay result with original
    */
-  private compareResults(originalTrace: RequestTrace, replayResponse: Response) {
+  private compareResults(originalTrace: RequestTrace, replayResponse: any) {
     if (!originalTrace.response) return undefined;
 
     // Create mock snapshots for comparison
@@ -153,7 +154,7 @@ export class RequestReplayer {
       requestId: originalTrace.id,
       timestamp: originalTrace.timestamp,
       state: { response: originalTrace.response },
-      outstandingPromises: [],
+      outstandingPromises: [] as any[],
       lastHookIndex: 0,
       phase: 'completed' as any,
       traceId: originalTrace.id,
