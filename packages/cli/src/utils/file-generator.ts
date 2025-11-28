@@ -106,11 +106,11 @@ async function generateDefaultTemplate(
           lint: 'eslint . --ext .ts',
         },
         dependencies: {
-          '@gati-framework/core': '^0.4.2',
-          '@gati-framework/runtime': '^2.0.2',
+          '@gati-framework/core': '^0.4.5',
+          '@gati-framework/runtime': '^2.0.7',
         },
         devDependencies: {
-          '@gati-framework/cli': '^1.0.1',
+          '@gati-framework/cli': '^1.0.14',
           '@types/node': '^20.10.0',
           typescript: '^5.3.2',
           vitest: '^1.0.0',
@@ -695,11 +695,11 @@ async function generateMinimalTemplate(
           typecheck: 'tsc --noEmit',
         },
         dependencies: {
-          '@gati-framework/core': '^0.4.2',
-          '@gati-framework/runtime': '^2.0.2',
+          '@gati-framework/core': '^0.4.5',
+          '@gati-framework/runtime': '^2.0.7',
         },
         devDependencies: {
-          '@gati-framework/cli': '^1.0.1',
+          '@gati-framework/cli': '^1.0.14',
           '@types/node': '^20.10.0',
           typescript: '^5.3.2',
         },
