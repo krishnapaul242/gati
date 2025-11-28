@@ -131,6 +131,28 @@ importers:
         specifier: ^1.0.4
         version: 1.6.1(@types/node@20.19.24)
 
+  examples/e2e-test-app:
+    dependencies:
+      '@gati-framework/contracts':
+        specifier: file:../../.kiro/local-packages/gati-framework-contracts-1.1.0.tgz
+        version: file:.kiro/local-packages/gati-framework-contracts-1.1.0.tgz
+      '@gati-framework/core':
+        specifier: file:../../.kiro/local-packages/gati-framework-core-0.4.5.tgz
+        version: file:.kiro/local-packages/gati-framework-core-0.4.5.tgz
+      '@gati-framework/runtime':
+        specifier: file:../../.kiro/local-packages/gati-framework-runtime-2.0.5.tgz
+        version: file:.kiro/local-packages/gati-framework-runtime-2.0.5.tgz
+      '@gati-framework/types':
+        specifier: file:../../.kiro/local-packages/gati-framework-types-1.0.1.tgz
+        version: file:.kiro/local-packages/gati-framework-types-1.0.1.tgz(typescript@5.9.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.24
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/hello-world:
     dependencies:
       '@gati-framework/playground':
@@ -3055,6 +3077,11 @@ packages:
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
+
+  /@gati-framework/core@0.4.5:
+    resolution: {integrity: sha512-ps2oRIT0UILF+VQrA6mpvmYx/x/UhJoFdZ788kA8chtXeROi2d3V2eErgKDc+JEYj+D3BgVM78NaKQt1rGZLNw==}
+    engines: {node: '>=18.0.0'}
+    dev: false
 
   /@google-cloud/compute@4.12.0:
     resolution: {integrity: sha512-N3isWbxIMd02qzdlFFxHxEM+2B/vNgn9N7WMpteY2sfwN1yT9PJHcilKDLyw+uIwuQAoErNxBM+JOLq3r/Tv+Q==}
@@ -10595,7 +10622,6 @@ packages:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /typical@7.3.0:
     resolution: {integrity: sha512-ya4mg/30vm+DOWfBg4YK3j2WD6TWtRkCbasOJr40CseYENzCUby/7rIvXA99JGsQHeNxLbnXdyLLxKSv3tauFw==}
@@ -11005,4 +11031,47 @@ packages:
 
   /zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+    dev: false
+
+  file:.kiro/local-packages/gati-framework-contracts-1.1.0.tgz:
+    resolution: {integrity: sha512-Q/86hHen9h3yaAwRxDaoNmEUnmJQf/SwIHmFUnkvv4M4PhL/BZ01l4qKJotDFkYo2LNVtagAh+3hOToYGIUBkw==, tarball: file:.kiro/local-packages/gati-framework-contracts-1.1.0.tgz}
+    name: '@gati-framework/contracts'
+    version: 1.1.0
+    hasBin: true
+    dependencies:
+      ajv: 8.17.1
+      ajv-formats: 2.1.1(ajv@8.17.1)
+    dev: false
+
+  file:.kiro/local-packages/gati-framework-core-0.4.5.tgz:
+    resolution: {integrity: sha512-As67S6H6H7Cf8sXwt6qals2laJ3qpEVHt6XxphnfvwXi97OySYSDrqKPJejO49NvFBiTgreRdztRWUGifBptmg==, tarball: file:.kiro/local-packages/gati-framework-core-0.4.5.tgz}
+    name: '@gati-framework/core'
+    version: 0.4.5
+    engines: {node: '>=18.0.0'}
+    dev: false
+
+  file:.kiro/local-packages/gati-framework-runtime-2.0.5.tgz:
+    resolution: {integrity: sha512-eAtNsGy7qwE8f5L27HHIOCByR0/bAYbsmqyPLk2HDwPKQeLXsZzdNndWxZzACBymktxwWPSBTJPub80lvg1oxg==, tarball: file:.kiro/local-packages/gati-framework-runtime-2.0.5.tgz}
+    name: '@gati-framework/runtime'
+    version: 2.0.5
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      '@gati-framework/contracts': link:packages/contracts
+      '@gati-framework/core': 0.4.5
+      '@opentelemetry/api': 1.9.0
+      pino: 9.14.0
+    optionalDependencies:
+      better-sqlite3: 9.6.0
+    dev: false
+
+  file:.kiro/local-packages/gati-framework-types-1.0.1.tgz(typescript@5.9.3):
+    resolution: {integrity: sha512-vL4Qqy18yA1EgC6u8LBynFEFTLgLK2YT5EA//9U/ah9qqnzJKLODdWL7SBwLjOKQQwPWVwTQH+zdzcPxk41KOw==, tarball: file:.kiro/local-packages/gati-framework-types-1.0.1.tgz}
+    id: file:.kiro/local-packages/gati-framework-types-1.0.1.tgz
+    name: '@gati-framework/types'
+    version: 1.0.1
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      typescript: ^5.3.0
+    dependencies:
+      typescript: 5.9.3
     dev: false
