@@ -1,0 +1,2 @@
+ ERROR  Unknown option: 'run'
+For help, run: pnpm help test
