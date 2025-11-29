@@ -1,0 +1,263 @@
+---
+# Source: gati/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gati-dev
+  labels:
+    app.kubernetes.io/name: gati
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: gati/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gati-ingress
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: gati/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gati-route-manager
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-route-manager
+    app.kubernetes.io/component: route-manager
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: gati/templates/configmap-ingress.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gati-ingress-config
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: Helm
+data:
+  FEATURE_PLAYGROUND: "true"
+  LOG_LEVEL: "debug"
+  ROUTE_MANAGER_ADDR: "gati-route-manager:50051"
+  TIMESCAPE_ADDR: "timescape:50052"
+---
+# Source: gati/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gati
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+---
+# Source: gati/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gati-ingress
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gati
+subjects:
+- kind: ServiceAccount
+  name: gati-ingress
+  namespace: gati-dev
+---
+# Source: gati/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gati-route-manager
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-route-manager
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gati
+subjects:
+- kind: ServiceAccount
+  name: gati-route-manager
+  namespace: gati-dev
+---
+# Source: gati/templates/service-ingress.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gati-ingress
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+---
+# Source: gati/templates/service-route-manager.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gati-route-manager
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-route-manager
+    app.kubernetes.io/component: route-manager
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - port: 50051
+    targetPort: 50051
+    protocol: TCP
+    name: grpc
+  selector:
+    app.kubernetes.io/name: gati-route-manager
+    app.kubernetes.io/component: route-manager
+---
+# Source: gati/templates/deployment-ingress.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gati-ingress
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gati-ingress
+      app.kubernetes.io/component: ingress
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gati-ingress
+        app.kubernetes.io/component: ingress
+    spec:
+      serviceAccountName: gati-ingress
+      containers:
+      - name: ingress
+        image: "gati/ingress:latest"
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: gati-ingress-config
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+      terminationGracePeriodSeconds: 30
+---
+# Source: gati/templates/deployment-route-manager.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gati-route-manager
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-route-manager
+    app.kubernetes.io/component: route-manager
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gati-route-manager
+      app.kubernetes.io/component: route-manager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gati-route-manager
+        app.kubernetes.io/component: route-manager
+    spec:
+      serviceAccountName: gati-route-manager
+      containers:
+      - name: route-manager
+        image: "gati/route-manager:latest"
+        imagePullPolicy: Always
+        ports:
+        - name: grpc
+          containerPort: 50051
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+---
+# Source: gati/templates/scaledobject-ingress.yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: gati-ingress
+  namespace: gati-dev
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: Helm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gati-ingress
+  minReplicaCount: 0
+  maxReplicaCount: 5
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server:9090
+      metricName: http_requests_per_second
+      query: |
+        sum(rate(http_requests_total{service="gati-ingress"}[1m]))
+      threshold: "100"
