@@ -1,83 +1,89 @@
 /**
- * @module testing/helpers
- * @description Helper functions for handler testing
+ * @module @gati-framework/testing/helpers
+ * @description Test helper functions
  */
 
-import type { Handler, Request, Response } from '@gati-framework/core';
-import { createTestHarness } from './test-harness.js';
-import type { TestResult } from './test-harness.js';
+import type { Request } from '@gati-framework/runtime';
 
 /**
- * Create a test request with sensible defaults
+ * Request builder for creating test requests
  */
-export function createTestRequest(options?: Partial<Request>): Request {
-  return {
+export class RequestBuilder {
+  private req: Partial<Request> = {
     method: 'GET',
     path: '/',
     params: {},
     query: {},
-    body: undefined,
-    ...options,
+    headers: {},
+    body: null
   };
-}
 
-/**
- * Create a test response
- */
-export function createTestResponse(): Response & { statusCode: number; body: unknown } {
-  let statusCode = 200;
-  let body: unknown = undefined;
-  
-  const response: any = {
-    statusCode,
-    body,
-    status: (code: number) => {
-      statusCode = code;
-      response.statusCode = code;
-      return response;
-    },
-    json: (data: unknown) => {
-      body = data;
-      response.body = data;
-    },
-    send: (data: unknown) => {
-      body = data;
-      response.body = data;
-    },
-  };
-  
-  return response;
-}
-
-/**
- * Execute handler with minimal setup
- */
-export async function testHandler(
-  handler: Handler,
-  request?: Partial<Request>,
-  modules?: Record<string, unknown>
-): Promise<TestResult> {
-  const harness = createTestHarness({ modules });
-  return harness.executeHandler(handler, { request });
-}
-
-/**
- * Assert response status
- */
-export function assertStatus(response: Response & { statusCode?: number }, expected: number): void {
-  if (response.statusCode !== expected) {
-    throw new Error(`Expected status ${expected}, got ${response.statusCode}`);
+  method(method: string): this {
+    this.req.method = method;
+    return this;
   }
-}
 
-/**
- * Assert response body
- */
-export function assertBody(response: Response & { body?: unknown }, expected: unknown): void {
-  const actual = JSON.stringify(response.body);
-  const exp = JSON.stringify(expected);
-  
-  if (actual !== exp) {
-    throw new Error(`Expected body ${exp}, got ${actual}`);
+  path(path: string): this {
+    this.req.path = path;
+    return this;
+  }
+
+  get(path: string): this {
+    this.req.method = 'GET';
+    this.req.path = path;
+    return this;
+  }
+
+  post(path: string): this {
+    this.req.method = 'POST';
+    this.req.path = path;
+    return this;
+  }
+
+  put(path: string): this {
+    this.req.method = 'PUT';
+    this.req.path = path;
+    return this;
+  }
+
+  delete(path: string): this {
+    this.req.method = 'DELETE';
+    this.req.path = path;
+    return this;
+  }
+
+  body(body: any): this {
+    this.req.body = body;
+    return this;
+  }
+
+  json(data: any): this {
+    this.req.body = data;
+    this.req.headers!['content-type'] = 'application/json';
+    return this;
+  }
+
+  header(name: string, value: string): this {
+    this.req.headers![name] = value;
+    return this;
+  }
+
+  auth(token: string): this {
+    this.req.headers!['authorization'] = token;
+    return this;
+  }
+
+  query(params: Record<string, string>): this {
+    this.req.query = params;
+    return this;
+  }
+
+  params(params: Record<string, string>): this {
+    this.req.params = params;
+    return this;
+  }
+
+  build(): Partial<Request> {
+    return this.req;
   }
 }

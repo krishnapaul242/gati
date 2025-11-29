@@ -1,231 +1,128 @@
 /**
- * @module testing/test-harness
- * @description Core test harness for handler testing
+ * @module @gati-framework/testing/test-harness
+ * @description Test harness for Gati handlers
  */
 
-import type { Handler, Request, Response } from '@gati-framework/core';
-import type { LocalContext, GlobalContext, LifecycleEvent } from '@gati-framework/runtime';
-import { createGlobalContext, HookOrchestrator } from '@gati-framework/runtime';
+import type { Handler, Request, Response } from '@gati-framework/runtime';
+import { createFakeLocalContext } from './fake-local-context.js';
+import { createFakeGlobalContext } from './fake-global-context.js';
 
-/**
- * Options for executing a handler
- */
-export interface ExecuteOptions {
-  request?: Partial<Request>;
-  modules?: Record<string, unknown>;
-  config?: Record<string, unknown>;
+export interface TestAppOptions {
+  modules?: Record<string, any>;
+  config?: Record<string, any>;
+}
+
+export interface TestResponse {
+  status: number;
+  body: any;
+  headers: Record<string, string>;
+}
+
+export interface TestApp {
+  request(path: string, options?: Partial<Request>): Promise<TestResponse>;
+  get(path: string, handler: Handler): void;
+  post(path: string, handler: Handler): void;
+  put(path: string, handler: Handler): void;
+  delete(path: string, handler: Handler): void;
+  use(handler: Handler): void;
 }
 
 /**
- * Result of handler execution
+ * Create test app for handler testing
  */
-export interface TestResult {
-  response: Response;
-  lctx: LocalContext;
-  error?: Error;
-  events: LifecycleEvent[];
-}
+export function createTestApp(options: TestAppOptions = {}): TestApp {
+  const handlers = new Map<string, Handler>();
+  const middleware: Handler[] = [];
 
-/**
- * Test harness for handler testing
- */
-export interface TestHarness {
-  executeHandler(handler: Handler, options?: ExecuteOptions): Promise<TestResult>;
-  getLocalContext(): LocalContext;
-  getGlobalContext(): GlobalContext;
-  cleanup(): Promise<void>;
-}
-
-/**
- * Create a test harness for handler testing
- */
-export function createTestHarness(options: {
-  modules?: Record<string, unknown>;
-  config?: Record<string, unknown>;
-} = {}): TestHarness {
-  const gctx = createGlobalContext({
+  const gctx = createFakeGlobalContext({
     modules: options.modules || {},
-    config: options.config || {},
+    config: options.config || {}
   });
-  
-  let lctx: LocalContext = {
-    requestId: 'test-req',
-    timestamp: Date.now(),
-    traceId: 'test-trace',
-    clientId: 'test-client',
-    refs: {},
-    client: { ip: 'test', userAgent: 'test', region: 'test' },
-    meta: {
-      timestamp: Date.now(),
-      instanceId: 'test',
-      region: 'test',
-      method: 'GET',
-      path: '/',
-      phase: 0 as any,
-      startTime: Date.now(),
-    },
-    state: {},
-    websocket: {
-      waitForEvent: async () => ({ type: '', requestId: '', timestamp: 0 }),
-      emitEvent: () => {},
-    },
-    lifecycle: {
-      onCleanup: () => {},
-      onTimeout: () => {},
-      onError: () => {},
-      onPhaseChange: () => {},
-      setPhase: () => {},
-      executeCleanup: async () => {},
-      isCleaningUp: () => false,
-      isTimedOut: () => false,
-    },
-    timescape: {
-      resolver: {} as any,
-      resolvedState: undefined,
-    },
-    snapshot: {
-      create: () => ({} as any),
-      restore: () => {},
-    },
-  };
-  const events: LifecycleEvent[] = [];
-  
-  const orchestrator = new HookOrchestrator({
-    emitEvents: true,
-    onEvent: (event) => events.push(event),
-  });
-  
+
   return {
-    async executeHandler(handler: Handler, execOptions: ExecuteOptions = {}): Promise<TestResult> {
-      // Create fresh context for this execution
-      const reqId = `test-${Date.now()}`;
-      lctx = {
-        requestId: reqId,
-        timestamp: Date.now(),
-        traceId: `trace-${reqId}`,
-        clientId: `client-${reqId}`,
-        refs: {},
-        client: { ip: 'test', userAgent: 'test', region: 'test' },
-        meta: {
-          timestamp: Date.now(),
-          instanceId: 'test',
-          region: 'test',
-          method: execOptions.request?.method || 'GET',
-          path: execOptions.request?.path || '/',
-          phase: 0 as any,
-          startTime: Date.now(),
-        },
-        state: {},
-        websocket: {
-          waitForEvent: async () => ({ type: '', requestId: reqId, timestamp: 0 }),
-          emitEvent: () => {},
-        },
-        lifecycle: {
-          onCleanup: () => {},
-          onTimeout: () => {},
-          onError: () => {},
-          onPhaseChange: () => {},
-          setPhase: () => {},
-          executeCleanup: async () => {},
-          isCleaningUp: () => false,
-          isTimedOut: () => false,
-        },
-        timescape: {
-          resolver: {} as any,
-          resolvedState: undefined,
-        },
-        snapshot: {
-          create: () => ({} as any),
-          restore: () => {},
-        },
-      };
-      events.length = 0;
-      orchestrator.clear();
-      
-      // Merge modules if provided
-      const testGctx = execOptions.modules
-        ? createGlobalContext({
-            modules: { ...gctx.modules, ...execOptions.modules },
-            config: { ...gctx.config, ...(execOptions.config || {}) },
-          })
-        : gctx;
-      
-      // Create request
+    async request(path: string, reqOptions: Partial<Request> = {}): Promise<TestResponse> {
+      const method = reqOptions.method || 'GET';
+      const key = `${method}:${path}`;
+      const handler = handlers.get(key);
+
+      if (!handler) {
+        return { status: 404, body: { error: 'Not found' }, headers: {} };
+      }
+
+      const lctx = createFakeLocalContext();
       const req: Request = {
-        method: 'GET',
-        path: '/',
+        method,
+        path,
         params: {},
         query: {},
-        body: undefined,
-        ...execOptions.request,
+        headers: {},
+        body: null,
+        ...reqOptions
+      } as Request;
+
+      let responseData: TestResponse = {
+        status: 200,
+        body: null,
+        headers: {}
       };
-      
-      // Create response with mutable state
-      let statusCode = 200;
-      let responseBody: unknown = undefined;
-      const responseHeaders: Record<string, string> = {};
-      
+
       const res: Response = {
-        status: (code: number) => {
-          statusCode = code;
-          return res;
+        status(code: number) {
+          responseData.status = code;
+          return this;
         },
-        json: (data: unknown) => {
-          responseBody = data;
-          responseHeaders['content-type'] = 'application/json';
+        json(data: any) {
+          responseData.body = data;
+          responseData.headers['content-type'] = 'application/json';
+          return this;
         },
-        send: (data: unknown) => {
-          responseBody = data;
+        send(data: any) {
+          responseData.body = data;
+          return this;
         },
-      };
-      
-      let error: Error | undefined;
-      
-      try {
-        // Execute before hooks
-        await orchestrator.executeBefore(lctx, testGctx);
-        
-        // Execute handler
-        await Promise.resolve(handler(req, res, testGctx as any, lctx));
-        
-        // Execute after hooks
-        await orchestrator.executeAfter(lctx, testGctx);
-      } catch (err) {
-        error = err instanceof Error ? err : new Error(String(err));
-        
-        // Execute catch hooks
-        await orchestrator.executeCatch(error, lctx, testGctx);
-        
-        // Set error response if not already set
-        if (statusCode === 200) {
-          statusCode = 500;
+        header(name: string, value: string) {
+          responseData.headers[name.toLowerCase()] = value;
+          return this;
         }
+      } as Response;
+
+      try {
+        // Run middleware
+        for (const mw of middleware) {
+          let nextCalled = false;
+          const next = () => { nextCalled = true; };
+          await mw(req, res, gctx, lctx, next);
+          if (!nextCalled) return responseData;
+        }
+
+        // Run handler
+        await handler(req, res, gctx, lctx);
+      } catch (error: any) {
+        responseData.status = 500;
+        responseData.body = { error: error.message };
       }
-      
-      return {
-        response: {
-          ...res,
-          statusCode,
-          body: responseBody,
-          headers: responseHeaders,
-        } as Response & { statusCode: number; body: unknown; headers: Record<string, string> },
-        lctx,
-        error,
-        events: [...events],
-      };
+
+      return responseData;
     },
-    
-    getLocalContext(): LocalContext {
-      return lctx;
+
+    get(path: string, handler: Handler) {
+      handlers.set(`GET:${path}`, handler);
     },
-    
-    getGlobalContext(): GlobalContext {
-      return gctx;
+
+    post(path: string, handler: Handler) {
+      handlers.set(`POST:${path}`, handler);
     },
-    
-    async cleanup(): Promise<void> {
-      orchestrator.clear();
-      events.length = 0;
+
+    put(path: string, handler: Handler) {
+      handlers.set(`PUT:${path}`, handler);
     },
+
+    delete(path: string, handler: Handler) {
+      handlers.set(`DELETE:${path}`, handler);
+    },
+
+    use(handler: Handler) {
+      middleware.push(handler);
+    }
   };
 }

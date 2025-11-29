@@ -1,101 +1,82 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { createTestHarness } from './test-harness';
-import type { Handler } from '@gati-framework/core';
+import { describe, it, expect } from 'vitest';
+import { createTestApp } from './test-harness.js';
 
-describe('createTestHarness', () => {
-  it('creates harness with defaults', () => {
-    const harness = createTestHarness();
-    expect(harness).toBeDefined();
-    expect(harness.getLocalContext()).toBeDefined();
-    expect(harness.getGlobalContext()).toBeDefined();
+describe('TestHarness', () => {
+  it('should create test app', () => {
+    const app = createTestApp();
+    expect(app).toBeDefined();
+    expect(app.request).toBeInstanceOf(Function);
   });
 
-  it('executes handler successfully', async () => {
-    const harness = createTestHarness();
-    const handler: Handler = (req, res) => {
-      res.json({ message: 'success' });
-    };
-
-    const result = await harness.executeHandler(handler);
-    expect(result.response.statusCode).toBe(200);
-    expect(result.error).toBeUndefined();
-  });
-
-  it('captures lifecycle events', async () => {
-    const harness = createTestHarness();
-    const handler: Handler = (req, res) => {
-      res.json({ ok: true });
-    };
-
-    const result = await harness.executeHandler(handler);
-    expect(result.events).toBeDefined();
-    expect(Array.isArray(result.events)).toBe(true);
-  });
-
-  it('provides access to contexts', async () => {
-    const harness = createTestHarness();
-    const handler: Handler = (req, res, gctx, lctx) => {
-      expect(gctx).toBe(harness.getGlobalContext());
-      expect(lctx).toBe(harness.getLocalContext());
-      res.json({ ok: true });
-    };
-
-    await harness.executeHandler(handler);
-  });
-
-  it('handles handler errors', async () => {
-    const harness = createTestHarness();
-    const handler: Handler = () => {
-      throw new Error('test error');
-    };
-
-    const result = await harness.executeHandler(handler);
-    expect(result.error).toBeDefined();
-    expect(result.error?.message).toBe('test error');
-  });
-
-  it('supports custom request', async () => {
-    const harness = createTestHarness();
-    const handler: Handler = (req, res) => {
-      res.json({ path: req.path });
-    };
-
-    const result = await harness.executeHandler(handler, {
-      request: { path: '/test' }
+  it('should handle GET requests', async () => {
+    const app = createTestApp();
+    app.get('/test', (req, res) => {
+      res.json({ message: 'hello' });
     });
-    expect(result.response.statusCode).toBe(200);
+
+    const response = await app.request('/test');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ message: 'hello' });
   });
 
-  it('supports custom modules', async () => {
-    const mockDb = { query: () => 'result' };
-    const harness = createTestHarness();
-    const handler: Handler = (req, res, gctx) => {
-      const result = gctx.modules['db'].query();
-      res.json({ result });
-    };
-
-    const result = await harness.executeHandler(handler, {
-      modules: { db: mockDb }
+  it('should handle POST requests', async () => {
+    const app = createTestApp();
+    app.post('/users', (req, res) => {
+      res.status(201).json({ id: '123', ...req.body });
     });
-    expect(result.response.statusCode).toBe(200);
+
+    const response = await app.request('/users', {
+      method: 'POST',
+      body: { name: 'John' }
+    });
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({ id: '123', name: 'John' });
   });
 
-  it('isolates test executions', async () => {
-    const harness = createTestHarness();
-    const handler: Handler = (req, res, gctx, lctx) => {
-      lctx.state.counter = (lctx.state.counter || 0) + 1;
-      res.json({ counter: lctx.state.counter });
-    };
+  it('should return 404 for unknown routes', async () => {
+    const app = createTestApp();
+    const response = await app.request('/unknown');
+    expect(response.status).toBe(404);
+  });
 
-    await harness.executeHandler(handler);
-    const result2 = await harness.executeHandler(handler);
+  it('should handle middleware', async () => {
+    const app = createTestApp();
     
-    // Each execution should have fresh context
-    expect(result2.lctx.state.counter).toBe(1);
+    app.use((req, res, gctx, lctx, next) => {
+      if (!req.headers.authorization) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      next();
+    });
+
+    app.get('/protected', (req, res) => {
+      res.json({ data: 'secret' });
+    });
+
+    const unauthorized = await app.request('/protected');
+    expect(unauthorized.status).toBe(401);
+
+    const authorized = await app.request('/protected', {
+      headers: { authorization: 'Bearer token' }
+    });
+    expect(authorized.status).toBe(200);
   });
 
-  it('cleans up resources', async () => {
-    const harness = createTestHarness();
-    await expect(harness.cleanup()).resolves.not.toThrow();
+  it('should provide modules from options', async () => {
+    const mockDb = {
+      users: {
+        findById: async (id: string) => ({ id, name: 'John' })
+      }
+    };
+
+    const app = createTestApp({ modules: { db: mockDb } });
+    app.get('/users/123', async (req, res, gctx) => {
+      const user = await gctx.modules['db'].users.findById('123');
+      res.json({ user });
+    });
+
+    const response = await app.request('/users/123');
+    expect(response.body.user).toEqual({ id: '123', name: 'John' });
   });
 });
