@@ -264,3 +264,7 @@ export type { RequestReplayerConfig } from './request-replayer.js';
 // Debug gate manager
 export { DebugGateManager, createDebugGateManager } from './debug-gate-manager.js';
 export type { DebugGateManagerConfig, GateTriggerEvent } from './debug-gate-manager.js';
+
+// E2E Integration
+export { createE2EIntegration } from './e2e-integration.js';
+export type { E2EIntegration, E2EIntegrationConfig } from './e2e-integration.js';

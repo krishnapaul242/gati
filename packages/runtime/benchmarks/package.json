@@ -1,0 +1,9 @@
+{
+  "name": "@gati-framework/runtime-benchmarks",
+  "private": true,
+  "scripts": {
+    "bench": "vitest bench",
+    "bench:baseline": "vitest bench --reporter=json > baseline.json",
+    "bench:compare": "vitest bench --reporter=json > current.json && node compare.js"
+  }
+}
