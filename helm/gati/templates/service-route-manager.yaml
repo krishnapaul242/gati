@@ -1,0 +1,28 @@
+{{- if .Values.routeManager.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: gati-route-manager
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: gati-route-manager
+    app.kubernetes.io/component: route-manager
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.routeManager.service.type }}
+  ports:
+  - port: {{ .Values.routeManager.service.port }}
+    targetPort: {{ .Values.routeManager.service.port }}
+    protocol: TCP
+    name: grpc
+  selector:
+    app.kubernetes.io/name: gati-route-manager
+    app.kubernetes.io/component: route-manager
+{{- end }}

@@ -1,0 +1,28 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: gati-ingress
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.ingress.service.type }}
+  ports:
+  - port: {{ .Values.ingress.service.port }}
+    targetPort: {{ .Values.ingress.service.targetPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+{{- end }}

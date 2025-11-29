@@ -1,0 +1,22 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gati-ingress-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  {{- range $key, $value := .Values.ingress.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
