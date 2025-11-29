@@ -1,0 +1,9 @@
+{
+  "name": "hello-world-benchmarks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bench": "vitest bench --run",
+    "bench:watch": "vitest bench"
+  }
+}
