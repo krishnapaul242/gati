@@ -1,0 +1,17 @@
+apiVersion: v2
+name: gati
+description: Helm chart for Gati Framework - Cloud-native TypeScript API framework
+type: application
+version: 0.1.0
+appVersion: "0.4.5"
+keywords:
+  - gati
+  - api
+  - typescript
+  - kubernetes
+home: https://github.com/krishnapaul242/gati
+sources:
+  - https://github.com/krishnapaul242/gati
+maintainers:
+  - name: Krishna Paul
+    email: krishna.paul@example.com

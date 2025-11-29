@@ -1,0 +1,99 @@
+# Global configuration
+global:
+  namespace: gati-system
+
+# Ingress component configuration
+ingress:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: gati/ingress
+    tag: "0.4.5"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  config:
+    ROUTE_MANAGER_ADDR: "route-manager:50051"
+    TIMESCAPE_ADDR: "timescape:50052"
+    FEATURE_PLAYGROUND: "false"
+
+# Route Manager configuration
+routeManager:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: gati/route-manager
+    tag: "0.4.5"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 50051
+
+# Horizontal Pod Autoscaler
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+
+# KEDA autoscaling (alternative to HPA)
+keda:
+  enabled: false
+  scaleToZero: false
+  minReplicaCount: 2
+  maxReplicaCount: 20
+  prometheus:
+    serverAddress: "http://prometheus-server:9090"
+    threshold: 100
+
+# Prometheus ServiceMonitor
+serviceMonitor:
+  enabled: false
+  namespace: monitoring
+  interval: 15s
+  path: /metrics
+
+# Pod Disruption Budget
+pdb:
+  enabled: false
+  minAvailable: 1
+
+# RBAC configuration
+rbac:
+  create: true
+
+# Node placement
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Multi-zone configuration
+multiZone:
+  enabled: false
+  zones:
+    - us-east-1a
+    - us-east-1b
+    - us-east-1c
+
+# Custom annotations and labels
+annotations: {}
+labels: {}
+
+# Init containers
+initContainers: []
