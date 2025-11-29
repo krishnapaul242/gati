@@ -19,6 +19,8 @@ export default defineConfig({
     /\/guides\/benchmarking/,
     // Legacy architecture links
     /\.\/architecture/,
+    // Contributing index
+    /\/contributing\/index/,
   ],
   
   head: [
@@ -100,20 +102,13 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Routing & Manifests',
-          items: [
-            { text: 'File-Based Routing', link: '/guides/file-based-routing' },
-            { text: 'Manifest System', link: '/guides/manifest-system' },
-            { text: 'Hot Reloading', link: '/guides/hot-reloading' }
-          ]
-        },
-        {
           text: 'Development',
           items: [
             { text: 'GatiC CLI', link: '/guides/gatic' },
             { text: 'Development Server', link: '/guides/development-server' },
-            { text: 'Configuration', link: '/guides/configuration' },
-            { text: 'TypeScript Config', link: '/guides/typescript-config' }
+            { text: 'Hot Reloading', link: '/guides/hot-reloading' },
+            { text: 'Testing', link: '/guides/testing' },
+            { text: 'Playground', link: '/guides/playground' }
           ]
         },
         {
@@ -126,9 +121,12 @@ export default defineConfig({
           ]
         },
         {
-          text: 'Module System (Planned)',
+          text: 'Production',
           items: [
-            { text: 'Module Registry & Marketplace', link: '/guides/module-registry' }
+            { text: 'Production Hardening', link: '/guides/production' },
+            { text: 'Observability', link: '/guides/observability' },
+            { text: 'Benchmarking', link: '/guides/benchmarking' },
+            { text: 'Performance', link: '/guides/performance' }
           ]
         }
       ],
@@ -139,7 +137,8 @@ export default defineConfig({
             { text: 'Handler', link: '/api-reference/handler' },
             { text: 'Request', link: '/api-reference/request' },
             { text: 'Response', link: '/api-reference/response' },
-            { text: 'Context', link: '/api-reference/context' }
+            { text: 'Context', link: '/api-reference/context' },
+            { text: 'Manifest', link: '/api-reference/manifest' }
           ]
         }
       ],
@@ -209,11 +208,31 @@ export default defineConfig({
       ],
       '/blog/': [
         {
-          text: 'Blog',
+          text: 'Latest Posts',
           items: [
             { text: 'All Posts', link: '/blog/' },
-            { text: 'Gati Vision — Zero-Ops for AI Era', link: '/blog/gati-vision-launch' },
-            { text: 'Introducing Gati', link: '/blog/introducing-gati' }
+            { text: 'Future of Backend Development', link: '/blog/future-of-backend-development' },
+            { text: 'M3 Completion Roadmap', link: '/blog/m3-completion-roadmap' }
+          ]
+        },
+        {
+          text: 'Technical Deep Dives',
+          items: [
+            { text: 'Production Runtime Architecture', link: '/blog/production-runtime-architecture' },
+            { text: 'Kubernetes Operator Design', link: '/blog/kubernetes-operator-design' },
+            { text: 'Timescape Versioning System', link: '/blog/timescape-versioning-system' },
+            { text: 'GType Type System', link: '/blog/gtype-type-system' },
+            { text: 'Runtime Performance Benchmarks', link: '/blog/runtime-performance-benchmarks' }
+          ]
+        },
+        {
+          text: 'Developer Experience',
+          items: [
+            { text: 'Visual Debugging Playground', link: '/blog/visual-debugging-playground' },
+            { text: 'Testing Strategies', link: '/blog/testing-strategies' },
+            { text: 'Five Minute Deployment', link: '/blog/five-minute-deployment' },
+            { text: 'Hot Reload Experience', link: '/blog/hot-reload-experience' },
+            { text: 'Rapid Development Workflow', link: '/blog/rapid-development-workflow' }
           ]
         }
       ]
@@ -238,5 +257,9 @@ export default defineConfig({
       pattern: 'https://github.com/krishnapaul242/gati/edit/main/docs/:path',
       text: 'Edit this page on GitHub'
     }
-  }
+  },
+  sitemap: {
+    hostname: "https://krishnapaul.in/gati",
+  },
+  lastUpdated: true,
 })

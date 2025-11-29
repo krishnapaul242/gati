@@ -33,8 +33,8 @@ features:
     details: Everything is a module — databases, caches, auth, storage, AI models. Install modules like NPM packages with isolated processes, manifests, and contracts.
   
   - icon: ⚡
-    title: TypeScript-Native Type System
-    details: Branded types with constraint combinators (EmailString, MinLen<8>) generate validators, OpenAPI specs, SDKs, and Timescape metadata from single definitions. (Planned M2)
+    title: High Performance Runtime
+    details: 172K requests/sec with sub-millisecond latency. Queue fabric architecture, worker pool isolation, and optimized route matching. 2.6M route matches/sec.
   
   - icon: 🚀
     title: Zero-Ops Deployment
@@ -177,28 +177,38 @@ Single type definition → runtime validator, OpenAPI spec, client SDKs, Timesca
 
 One command to deploy anywhere. Gati handles containers, manifests, scaling, SSL, CDN, monitoring.
 
+## Performance
+
+**Gati runtime achieves exceptional performance:**
+
+- **172,000 RPS** - Single-threaded throughput
+- **2.6M ops/sec** - Route matching performance
+- **<6μs** - Total pipeline latency
+- **172x better** - Than MVP target (1K RPS)
+
+[Read the benchmarks →](/blog/runtime-performance-benchmarks)
+
 ## Current Status
 
 | Component | Version | Status | NPM | Description |
 |-----------|---------|--------|-----|-------------|
-| Core Framework | 0.4.5 | ✅ **Stable** | [@gati-framework/core](https://npmjs.com/package/@gati-framework/core) | Core runtime, handler engine, contexts |
-| Type System | 1.0.1 | ✅ **Stable** | [@gati-framework/types](https://npmjs.com/package/@gati-framework/types) | TypeScript-first branded types and schema system |
-| Runtime Engine | 2.0.3 | ✅ **Stable** | [@gati-framework/runtime](https://npmjs.com/package/@gati-framework/runtime) | Handler execution, lifecycle management |
-| Runtime Architecture | - | 🚧 **55% Complete** | - | GType, contexts, hooks, manifests (468 tests) |
-| CLI Tools | 1.0.14 | ✅ **Stable** | [@gati-framework/cli](https://npmjs.com/package/@gati-framework/cli) | Dev server, build, deployment commands |
-| AWS Plugin | 1.0.0 | ✅ **Stable** | [@gati-framework/cloud-aws](https://npmjs.com/package/@gati-framework/cloud-aws) | AWS cloud provider plugin |
-| GCP Plugin | 1.0.2 | ✅ **Stable** | [@gati-framework/cloud-gcp](https://npmjs.com/package/@gati-framework/cloud-gcp) | GCP cloud provider plugin |
-| Azure Plugin | 1.0.2 | ✅ **Stable** | [@gati-framework/cloud-azure](https://npmjs.com/package/@gati-framework/cloud-azure) | Azure cloud provider plugin |
-| Observability | 1.0.2 | ✅ **Stable** | [@gati-framework/observability](https://npmjs.com/package/@gati-framework/observability) | Prometheus, Grafana, Loki, Tracing |
-| Production Hardening | 1.0.2 | ✅ **Stable** | [@gati-framework/production-hardening](https://npmjs.com/package/@gati-framework/production-hardening) | Secret management, config validation, auto-scaling |
-| Playground | 1.0.0 | ✅ **Stable** | [@gati-framework/playground](https://npmjs.com/package/@gati-framework/playground) | Visual debugging (3-mode) |
-| Timescape | - | 📅 **M3 Priority** | - | Version management, schema diffing |
-| SDK Generation | - | 📅 **M5 Planned** | - | Auto-generated typed clients |
-| Control Panel | - | 📅 **M4 Planned** | - | Web UI for monitoring |
+| Core Framework | 0.4.5 | ✅ **Stable** | [@gati-framework/core](https://npmjs.com/package/@gati-framework/core) | Core types and configuration |
+| Runtime Engine | 2.0.8 | ✅ **Stable** | [@gati-framework/runtime](https://npmjs.com/package/@gati-framework/runtime) | 172K RPS execution engine |
+| Type System | 1.0.1 | ✅ **Stable** | [@gati-framework/types](https://npmjs.com/package/@gati-framework/types) | GType branded types |
+| CLI Tools | 1.0.19 | ✅ **Stable** | [@gati-framework/cli](https://npmjs.com/package/@gati-framework/cli) | Dev server, hot reload, deployment |
+| Testing | 0.1.0 | ✅ **Stable** | [@gati-framework/testing](https://npmjs.com/package/@gati-framework/testing) | Test harness and mocks |
+| Playground | 1.0.0 | ✅ **Stable** | [@gati-framework/playground](https://npmjs.com/package/@gati-framework/playground) | Visual debugging |
+| AWS Plugin | 1.0.1 | ✅ **Stable** | [@gati-framework/cloud-aws](https://npmjs.com/package/@gati-framework/cloud-aws) | EKS deployment |
+| GCP Plugin | 1.0.0 | ✅ **Stable** | [@gati-framework/cloud-gcp](https://npmjs.com/package/@gati-framework/cloud-gcp) | GKE deployment |
+| Azure Plugin | 1.0.0 | ✅ **Stable** | [@gati-framework/cloud-azure](https://npmjs.com/package/@gati-framework/cloud-azure) | AKS deployment |
+| Observability | 2.0.0 | ✅ **Stable** | [@gati-framework/observability](https://npmjs.com/package/@gati-framework/observability) | Metrics, logging, tracing |
+| Timescape | - | 🚧 **M3 In Progress** | - | API versioning system |
+| SDK Generation | - | 📅 **M5 Planned** | - | Auto-generated clients |
+| Control Panel | - | 📅 **M4 Planned** | - | Monitoring UI |
 
-### 🎉 M1 Complete — Now on NPM!
+### 🎉 M1 & M2 Complete — Production Ready!
 
-All core packages are **published to npm** and production-ready! CI/CD pipeline is passing with automated testing and releases.
+All core packages are **published to npm** and production-ready with 99.3% test coverage (841/847 tests passing).
 
 <p align="center">
   <a href="https://npmjs.com/package/@gati-framework/core">
@@ -215,33 +225,34 @@ All core packages are **published to npm** and production-ready! CI/CD pipeline 
   </a>
 </p>
 
-### Production-Ready Features (✅ M1 Complete)
+### Production-Ready Features (✅ M1 & M2 Complete)
 
-- **Core Runtime** — Handler engine, modules, middleware, contexts
+- **High Performance** — 172K RPS, <6μs latency, queue fabric architecture
 - **Development** — Hot reload (50-200ms), manifest system, file-based routing
-- **Deployment** — Local K8s (kind), AWS EKS, Docker, HPA, Ingress
-- **Observability** — Structured logging (Pino), request tracing, health checks
-- **Debugging** — Playground with API/Network/Tracking visualization modes
-- **CI/CD** — Automated testing, building, and npm publishing
-- **Project Scaffolding** — GatiC CLI for instant project creation
+- **Deployment** — AWS EKS, GCP GKE, Azure AKS, local K8s (kind)
+- **Observability** — Prometheus, Grafana, Loki, distributed tracing
+- **Debugging** — Playground with 3 visualization modes, request replay
+- **Testing** — Test harness, mocks, 99.3% coverage
+- **CI/CD** — Automated testing, building, npm publishing
 
-### Latest Update (Nov 23, 2025)
+### Latest Update (Nov 25, 2025)
 
-🚀 **Runtime Architecture Implementation** — Major progress with 468 passing tests!
-- ✅ GType System (runtime type validation)
-- ✅ Local Context (request-scoped state)
-- ✅ Global Context (app-wide context)
-- ✅ Hook Orchestrator (lifecycle management)
-- ✅ Snapshot/Restore (debugging support)
+🚀 **Performance Benchmarks** — Achieved 172K RPS!
+- ✅ 2.6M route matches/sec
+- ✅ 505K context creations/sec
+- ✅ 294K handler executions/sec
+- ✅ <6μs total pipeline latency
+- ✅ 172x better than MVP target
 
-[Read the full update →](/changelog/2025-11-23-runtime-architecture)
+[Read the benchmarks →](/blog/runtime-performance-benchmarks)
 
 ### Roadmap
 
-**M3 (November 2025)** — 🚧 IN PROGRESS - Timescape versioning, module system, type system  
-**M4 (February 2026)** — Module Registry & Marketplace ([Specs](https://github.com/krishnapaul242/gati/tree/main/apps/gati-registry))  
-**M5 (Q1 2026)** — Control Panel (monitoring and configuration UI)  
-**M6 (Q1 2026)** — SDK generation from handler signatures  
+**M1 & M2 (Q4 2025)** — ✅ COMPLETE - Core runtime, deployment, observability  
+**M3 (Q1 2026)** — 🚧 IN PROGRESS - Timescape versioning, enhanced modules  
+**M4 (Feb 2026)** — Module Registry & Marketplace  
+**M5 (Q1 2026)** — Control Panel (monitoring UI)  
+**M6 (Q1 2026)** — SDK generation  
 **M7 (Q2 2026)** — CDN integration, SSL automation
 
 ### Looking for Contributors!
@@ -256,13 +267,21 @@ Gati is currently a solo project by Krishna Paul. I'm actively looking for:
 
 ## Latest from the Blog
 
-### [Introducing Gati: The Backend That Builds, Scales, and Evolves Itself](/blog/introducing-gati)
+### [Achieving 172K RPS: Gati Runtime Benchmarks](/blog/runtime-performance-benchmarks)
 
-**November 22, 2025** • *Krishna Paul*
+**November 25, 2025** • *Krishna Paul*
 
-A revolutionary TypeScript framework that eliminates infrastructure complexity. M1 and M2 are complete, and we're now live on npm! Learn about Gati's vision, current features, and what's coming next.
+Deep dive into Gati runtime performance. How we achieved 172x better throughput than our MVP target with queue fabric architecture, worker pool isolation, and optimized route matching.
 
-[Read the announcement →](/blog/introducing-gati)
+[Read the benchmarks →](/blog/runtime-performance-benchmarks)
+
+### [From Idea to Production in 5 Minutes](/blog/rapid-development-workflow)
+
+**November 25, 2025** • *Krishna Paul*
+
+How Gati enables rapid development with instant scaffolding, hot reload, and one-command deployment. From `npx gatic create` to production in 5 minutes.
+
+[Read the workflow guide →](/blog/rapid-development-workflow)
 
 ---
 

@@ -4,13 +4,13 @@ Get your first Gati application running in under 5 minutes!
 
 ## Prerequisites
 
-- **Node.js** 20 or higher
+- **Node.js** 18 or higher
 - **pnpm** (recommended) or npm
-- **Docker** (for local Kubernetes deployment)
+- **Docker** (optional, for local Kubernetes deployment)
 
 ```bash
 # Check your versions
-node --version  # Should be v20.0.0 or higher
+node --version  # Should be v18.0.0 or higher
 pnpm --version  # Should be 8.0.0 or higher
 ```
 
@@ -95,15 +95,12 @@ Create `src/handlers/users/[id].ts`:
 ```typescript
 import type { Handler } from '@gati-framework/runtime';
 
-// HTTP method (optional, defaults to GET)
-export const METHOD = 'GET';
-
-// Handler function
-export const handler: Handler = (req, res) => {
+export const handler: Handler = async (req, res, gctx, lctx) => {
   const userId = req.params.id;
   
-  // Example: fetch user from database
-  const user = {
+  // Example: fetch user from database module
+  const db = gctx.modules['database'];
+  const user = await db?.users.findById(userId) || {
     id: userId,
     name: 'John Doe',
     email: 'john@example.com'
@@ -138,9 +135,7 @@ Response:
 Update `src/handlers/users/[id].ts`:
 
 ```typescript
-export const METHOD = 'GET';
-
-export const handler: Handler = (req, res) => {
+export const handler: Handler = async (req, res, gctx, lctx) => {
   const userId = req.params.id;
   const includeOrders = req.query.includeOrders === 'true';
   
@@ -276,10 +271,11 @@ Handlers are automatically mapped to routes based on their filename:
 | `handlers/posts/create.ts` | `/api/posts/create` |
 | `handlers/posts/[id]/comments.ts` | `/api/posts/:id/comments` |
 
-**New Features:**
+**Key Features:**
 - 🔥 **Hot Reloading**: Changes appear instantly (50-200ms)
-- 📦 **Manifest System**: Individual file manifests for fast updates
-- 🚀 **Auto Port Detection**: Finds available ports automatically
+- ⚡ **High Performance**: 172K RPS, <6μs latency
+- 📦 **Manifest System**: Auto-generated from handlers
+- 🎮 **Playground**: Visual debugging at `/__playground`
 - 📊 **Built-in Health Checks**: `/health` endpoint included
 
 ## Next Steps
@@ -347,4 +343,4 @@ Ready to build something awesome? Head to the [Getting Started Guide](./getting-
 
 ---
 
-*Last Updated: November 12, 2025*
+*Last Updated: November 25, 2025*

@@ -20,19 +20,20 @@ Gati abstracts away infrastructure concerns, letting you focus purely on busines
 
 ```typescript
 // That's it! Just write your handler
-export const handler: Handler = (req, res) => {
+export const handler: Handler = async (req, res, gctx, lctx) => {
   const userId = req.params.id;
-  res.json({ userId, message: 'Hello from Gati!' });
+  const user = await gctx.modules['database'].users.findById(userId);
+  res.json({ user });
 };
 ```
 
 Gati automatically handles:
-- ✅ HTTP routing
-- ✅ Kubernetes deployment
-- ✅ Auto-scaling
-- ✅ SSL provisioning
-- ✅ Load balancing
-- ✅ Type-safe API clients
+- ✅ HTTP routing (file-based)
+- ✅ Kubernetes deployment (AWS/GCP/Azure)
+- ✅ Auto-scaling (HPA)
+- ✅ Load balancing (ALB/NLB)
+- ✅ Hot reload (50-200ms)
+- ✅ Observability (metrics, logs, traces)
 - ✅ Multi-cloud support
 
 ## Core Philosophy
@@ -65,24 +66,25 @@ gati deploy dev --local     # Deploy
 
 ## Key Features
 
-### Current (v2.0.0)
+### Current (M1 & M2 Complete)
 
-- ✅ **Handler System** - Express.js-compatible request/response handling
-- ✅ **Module System** - Reusable, dependency-injected modules
-- ✅ **Middleware Pipeline** - Composable middleware support
-- ✅ **Context Management** - Global and local context
-- ✅ **CLI Tools** - Project scaffolding and development tools
-- ✅ **Kubernetes Deployment** - Local and cloud deployment
-- ✅ **Auto-Scaling** - Horizontal Pod Autoscaler support
-- ✅ **Health Checks** - Built-in health endpoints
+- ✅ **High Performance** - 172K RPS, <6μs latency, queue fabric architecture
+- ✅ **Handler System** - Async handlers with lifecycle hooks
+- ✅ **Module System** - Isolated processes with RPC communication
+- ✅ **Context Management** - Global (gctx) and local (lctx) contexts
+- ✅ **Hot Reload** - 50-200ms file watching and reloading
+- ✅ **Multi-Cloud** - AWS EKS, GCP GKE, Azure AKS deployment
+- ✅ **Observability** - Prometheus, Grafana, Loki, distributed tracing
+- ✅ **Testing** - Test harness, mocks, 99.3% coverage
+- ✅ **Playground** - Visual debugging with 3 modes
 
 ### Coming Soon
 
-- ⏳ **API Versioning** (M3) - Timestamp-based routing
-- ⏳ **Control Panel** (M4) - Live monitoring dashboard
-- ⏳ **SDK Generation** (M5) - Auto-generated typed clients
-- ⏳ **CDN Integration** (M6) - Global content delivery
-- ⏳ **Effects System** (M7) - Async task processing
+- 🚧 **Timescape Versioning** (M3) - Timestamp-based API versioning
+- ⏳ **Module Registry** (M4) - Marketplace for modules
+- ⏳ **Control Panel** (M5) - Live monitoring dashboard
+- ⏳ **SDK Generation** (M6) - Auto-generated typed clients
+- ⏳ **CDN Integration** (M7) - Global content delivery
 
 ## Architecture at a Glance
 
@@ -167,11 +169,14 @@ gati deploy prod --provider aws
 | Learning Curve | Low | Low | Medium | Medium |
 | Infrastructure Automation | ✅ Full | ❌ None | ⚠️ Partial | ✅ Full |
 | Type Safety | ✅ Full | ⚠️ Partial | ✅ Full | ⚠️ Partial |
+| Performance | ✅ 172K RPS | ⚠️ 50K RPS | ⚠️ 40K RPS | ⚠️ Varies |
+| Hot Reload | ✅ 50-200ms | ❌ Manual | ⚠️ Slow | ❌ N/A |
 | Auto-Scaling | ✅ Built-in | ❌ Manual | ❌ Manual | ✅ Built-in |
-| API Versioning | ⏳ Coming | ❌ Manual | ⚠️ Partial | ❌ Manual |
-| SDK Generation | ⏳ Coming | ❌ None | ⚠️ Via Tools | ❌ None |
+| API Versioning | 🚧 M3 | ❌ Manual | ⚠️ Partial | ❌ Manual |
+| SDK Generation | ⏳ M6 | ❌ None | ⚠️ Via Tools | ❌ None |
 | Vendor Lock-in | ❌ None | ❌ None | ❌ None | ✅ High |
 | Multi-Cloud | ✅ Yes | ⚠️ Manual | ⚠️ Manual | ❌ No |
+| Testing | ✅ Built-in | ⚠️ Manual | ✅ Built-in | ⚠️ Manual |
 
 ## Getting Started
 
@@ -203,4 +208,4 @@ Gati embodies this philosophy by automating everything that isn't your core busi
 
 ---
 
-*Last Updated: November 12, 2025*
+*Last Updated: November 25, 2025*
