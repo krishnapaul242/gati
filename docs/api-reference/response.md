@@ -2,10 +2,6 @@
 
 The `Response` object is used to send HTTP responses back to the client.
 
-::: warning Work in Progress
-This page is under construction. More detailed documentation coming soon.
-:::
-
 ## Overview
 
 The `Response` object is the second parameter passed to every handler function. It provides methods to send responses, set status codes, headers, and more.
@@ -130,8 +126,96 @@ export const handler: Handler = (req, res) => {
 };
 ```
 
+### Streaming Responses
+
+```typescript
+export const handler: Handler = async (req, res) => {
+  res.header('Content-Type', 'text/event-stream');
+  res.header('Cache-Control', 'no-cache');
+  res.header('Connection', 'keep-alive');
+  
+  // Stream data
+  for (let i = 0; i < 10; i++) {
+    res.write(`data: ${JSON.stringify({ count: i })}\n\n`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  
+  res.end();
+};
+```
+
+### CORS Headers
+
+```typescript
+export const handler: Handler = (req, res) => {
+  res
+    .header('Access-Control-Allow-Origin', '*')
+    .header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    .header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    .json({ data: [] });
+};
+```
+
+### Conditional Responses
+
+```typescript
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const user = await fetchUser(req.params.id);
+  
+  if (!user) {
+    res.status(404).json({ 
+      error: 'User not found',
+      requestId: lctx.requestId 
+    });
+    return;
+  }
+  
+  if (!hasPermission(user)) {
+    res.status(403).json({ 
+      error: 'Forbidden',
+      requestId: lctx.requestId 
+    });
+    return;
+  }
+  
+  res.json({ user });
+};
+```
+
+## Best Practices
+
+### Always Set Appropriate Status Codes
+
+```typescript
+// ✅ Good - Explicit status codes
+res.status(201).json({ created: true });
+res.status(404).json({ error: 'Not found' });
+
+// ❌ Bad - Implicit 200 for errors
+res.json({ error: 'Not found' }); // Still returns 200!
+```
+
+### Use Consistent Response Format
+
+```typescript
+// ✅ Good - Consistent structure
+res.json({
+  success: true,
+  data: { user },
+  timestamp: new Date().toISOString()
+});
+
+res.status(400).json({
+  success: false,
+  error: 'Validation failed',
+  details: errors,
+  timestamp: new Date().toISOString()
+});
+```
+
 ## Related
 
 - [Handler API](/api-reference/handler) - Handler function signature
 - [Request API](/api-reference/request) - Accessing request data
 - [Context API](/api-reference/context) - Global and local context
+- [Error Handling](/guides/error-handling) - Error response patterns

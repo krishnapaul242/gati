@@ -2,10 +2,6 @@
 
 The `Request` object provides access to incoming HTTP request data.
 
-::: warning Work in Progress
-This page is under construction. More detailed documentation coming soon.
-:::
-
 ## Overview
 
 The `Request` object is the first parameter passed to every handler function. It provides access to all incoming request data including headers, body, query parameters, path parameters, and more.
@@ -142,8 +138,49 @@ export const handler: Handler = (req, res) => {
 };
 ```
 
+### Working with Path Parameters
+
+```typescript
+// Route: GET /users/:userId/posts/:postId
+export const handler: Handler = (req, res) => {
+  const { userId, postId } = req.params;
+  
+  res.json({ 
+    message: `Fetching post ${postId} for user ${userId}` 
+  });
+};
+```
+
+### Type-Safe Request Handling
+
+```typescript
+import { z } from 'zod';
+
+const CreatePostSchema = z.object({
+  title: z.string().min(1).max(200),
+  content: z.string().min(1),
+  tags: z.array(z.string()).optional(),
+});
+
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const result = CreatePostSchema.safeParse(req.body);
+  
+  if (!result.success) {
+    res.status(400).json({ 
+      error: 'Validation failed',
+      details: result.error.errors 
+    });
+    return;
+  }
+  
+  const post = await createPost(result.data);
+  res.status(201).json({ post });
+};
+```
+
 ## Related
 
 - [Handler API](/api-reference/handler) - Handler function signature
 - [Response API](/api-reference/response) - Sending responses
 - [Context API](/api-reference/context) - Global and local context
+- [Error Handling](/guides/error-handling) - Error patterns
