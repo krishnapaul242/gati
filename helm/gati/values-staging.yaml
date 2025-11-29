@@ -1,0 +1,45 @@
+# Staging environment configuration
+global:
+  namespace: gati-staging
+
+ingress:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: gati/ingress
+    tag: "0.4.5"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  config:
+    ROUTE_MANAGER_ADDR: "gati-route-manager:50051"
+    TIMESCAPE_ADDR: "timescape:50052"
+    FEATURE_PLAYGROUND: "true"
+    LOG_LEVEL: "info"
+
+routeManager:
+  enabled: true
+  replicaCount: 1
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+keda:
+  enabled: false
+
+serviceMonitor:
+  enabled: true
+
+pdb:
+  enabled: false
+
+multiZone:
+  enabled: false

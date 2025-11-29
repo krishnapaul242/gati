@@ -1,0 +1,49 @@
+# Development environment configuration
+global:
+  namespace: gati-dev
+
+ingress:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: gati/ingress
+    tag: "latest"
+    pullPolicy: Always
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  config:
+    ROUTE_MANAGER_ADDR: "gati-route-manager:50051"
+    TIMESCAPE_ADDR: "timescape:50052"
+    FEATURE_PLAYGROUND: "true"
+    LOG_LEVEL: "debug"
+
+routeManager:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: gati/route-manager
+    tag: "latest"
+    pullPolicy: Always
+
+hpa:
+  enabled: false
+
+keda:
+  enabled: true
+  scaleToZero: true
+  minReplicaCount: 0
+  maxReplicaCount: 5
+
+serviceMonitor:
+  enabled: false
+
+pdb:
+  enabled: false
+
+multiZone:
+  enabled: false
