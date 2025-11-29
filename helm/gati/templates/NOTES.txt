@@ -1,0 +1,49 @@
+🎉 Gati has been successfully installed!
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Values.global.namespace }}
+
+📦 Deployed Components:
+{{- if .Values.ingress.enabled }}
+  ✅ Ingress ({{ .Values.ingress.replicaCount }} replicas)
+{{- end }}
+{{- if .Values.routeManager.enabled }}
+  ✅ Route Manager ({{ .Values.routeManager.replicaCount }} replicas)
+{{- end }}
+{{- if and .Values.hpa.enabled (not .Values.keda.enabled) }}
+  ✅ HPA ({{ .Values.hpa.minReplicas }}-{{ .Values.hpa.maxReplicas }} replicas)
+{{- end }}
+{{- if .Values.keda.enabled }}
+  ✅ KEDA ScaledObject ({{ if .Values.keda.scaleToZero }}0{{ else }}{{ .Values.keda.minReplicaCount }}{{ end }}-{{ .Values.keda.maxReplicaCount }} replicas)
+{{- end }}
+{{- if .Values.serviceMonitor.enabled }}
+  ✅ ServiceMonitor (Prometheus)
+{{- end }}
+{{- if .Values.pdb.enabled }}
+  ✅ PodDisruptionBudget
+{{- end }}
+
+🔗 Access Services:
+
+  # Port-forward to ingress:
+  kubectl port-forward -n {{ .Values.global.namespace }} svc/gati-ingress {{ .Values.ingress.service.port }}:{{ .Values.ingress.service.port }}
+
+  # Access at:
+  http://localhost:{{ .Values.ingress.service.port }}
+
+📊 Monitor Deployment:
+
+  # Check pod status:
+  kubectl get pods -n {{ .Values.global.namespace }}
+
+  # View logs:
+  kubectl logs -n {{ .Values.global.namespace }} -l app.kubernetes.io/name=gati-ingress
+
+  # Check HPA status:
+  {{- if .Values.hpa.enabled }}
+  kubectl get hpa -n {{ .Values.global.namespace }}
+  {{- end }}
+
+📚 Documentation: https://krishnapaul242.github.io/gati/
+
+⚡ Gati is not just fast—it's forward!

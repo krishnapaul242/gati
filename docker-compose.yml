@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  ingress:
+    image: gati/ingress:0.4.5
+    container_name: gati-ingress
+    ports:
+      - "8080:8080"
+    environment:
+      - ROUTE_MANAGER_ADDR=route-manager:50051
+      - TIMESCAPE_ADDR=timescape:50052
+      - FEATURE_PLAYGROUND=true
+      - LOG_LEVEL=debug
+    volumes:
+      - ./config:/app/config:ro
+    networks:
+      - gati-network
+    depends_on:
+      - route-manager
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  route-manager:
+    image: gati/route-manager:0.4.5
+    container_name: gati-route-manager
+    ports:
+      - "50051:50051"
+    environment:
+      - LOG_LEVEL=debug
+    volumes:
+      - ./config:/app/config:ro
+    networks:
+      - gati-network
+    restart: unless-stopped
+
+networks:
+  gati-network:
+    driver: bridge
