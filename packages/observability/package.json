@@ -21,8 +21,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@gati-framework/contracts": "workspace:^",
-    "@gati-framework/core": "workspace:*",
+    "@gati-framework/contracts": "^1.2.0",
+    "@gati-framework/core": "0.4.5",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/exporter-prometheus": "^0.54.2",
     "@opentelemetry/instrumentation-express": "^0.43.0",

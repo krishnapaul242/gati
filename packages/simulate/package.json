@@ -37,8 +37,8 @@
     "directory": "packages/simulate"
   },
   "peerDependencies": {
-    "@gati-framework/core": "workspace:*",
-    "@gati-framework/runtime": "workspace:*"
+    "@gati-framework/core": "^0.4.5",
+    "@gati-framework/runtime": "^2.0.8"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

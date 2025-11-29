@@ -39,8 +39,8 @@
     "pino": "^8.16.0"
   },
   "peerDependencies": {
-    "@gati-framework/contracts": "workspace:*",
-    "@gati-framework/core": "workspace:*"
+    "@gati-framework/contracts": "1.2.0",
+    "@gati-framework/core": "0.4.5"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

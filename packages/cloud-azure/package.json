@@ -22,7 +22,7 @@
     "@azure/arm-network": "^33.3.0",
     "@azure/keyvault-secrets": "^4.9.0",
     "@azure/identity": "^4.5.0",
-    "@gati-framework/core": "workspace:*"
+    "@gati-framework/core": "0.4.5"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
