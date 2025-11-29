@@ -110,7 +110,7 @@ async function generateDefaultTemplate(
           '@gati-framework/runtime': '^2.0.8',
         },
         devDependencies: {
-          '@gati-framework/cli': '^1.0.18',
+          '@gati-framework/cli': '^1.0.19',
           '@types/node': '^20.10.0',
           typescript: '^5.3.2',
           vitest: '^1.0.0',
@@ -699,7 +699,7 @@ async function generateMinimalTemplate(
           '@gati-framework/runtime': '^2.0.8',
         },
         devDependencies: {
-          '@gati-framework/cli': '^1.0.18',
+          '@gati-framework/cli': '^1.0.19',
           '@types/node': '^20.10.0',
           typescript: '^5.3.2',
         },
