@@ -1,308 +1,249 @@
 # @gati-framework/runtime
 
-> Runtime execution engine for Gati handler-based applications
+> Production-ready TypeScript runtime for handler-based cloud-native applications
+
+[![npm version](https://img.shields.io/npm/v/@gati-framework/runtime.svg)](https://www.npmjs.com/package/@gati-framework/runtime)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
+
+The Gati runtime is a high-performance execution engine that orchestrates handlers, modules, and middleware with built-in observability, lifecycle management, and distributed tracing. Achieves **172K requests/sec** with sub-millisecond latency.
 
 ## Installation
 
 ```bash
 npm install @gati-framework/runtime
-# or
-pnpm add @gati-framework/runtime
-# or
-yarn add @gati-framework/runtime
 ```
 
-## Usage
-
-### Basic Setup
+## Quick Start
 
 ```typescript
-import { createApp } from '@gati-framework/runtime';
+import { createE2EIntegration } from '@gati-framework/runtime';
 
-const app = createApp({
-  port: 3000,
-  host: 'localhost',
-  logging: true,
+const integration = createE2EIntegration({
+  handlers: [{ id: 'hello', route: '/hello', method: 'GET', filePath: './handlers/hello.ts' }],
+  modules: []
 });
 
-// Register handlers manually
-app.get('/hello', (req, res) => {
-  res.json({ message: 'Hello, World!' });
-});
-
-// Start the server
-await app.listen();
+integration.ingress.handleRequest({
+  id: 'req-1',
+  method: 'GET',
+  path: '/hello',
+  headers: {},
+  query: {},
+  timestamp: Date.now()
+}, (result) => console.log(result));
 ```
 
-### Automatic Handler Discovery
+## Features
 
-The runtime can automatically discover and register handlers from a directory:
+- ✅ **High Performance** - 172K RPS, 2.6M route matches/sec, <6μs pipeline latency
+- ✅ **Queue Fabric** - Async pub/sub coordination between components
+- ✅ **Worker Pool** - Handler and module process isolation
+- ✅ **Lifecycle Hooks** - onInit, onRequest, onResponse, onCleanup, onError
+- ✅ **Distributed Tracing** - Request/trace/client ID propagation
+- ✅ **Hot Reload** - 50-200ms file watching and reloading
+- ✅ **Observability** - Structured logging (Pino), metrics, tracing
+- 🚧 **Timescape** - Timestamp-based API versioning (M3)
 
-```typescript
-import { createApp, loadHandlers } from '@gati-framework/runtime';
+## Architecture
 
-const app = createApp();
-
-// Automatically load all handlers from ./src/handlers
-await loadHandlers(app, './src/handlers', {
-  basePath: '/api',  // Optional: prefix all routes
-  verbose: true,      // Optional: log registration
-});
-
-await app.listen();
+```
+┌─────────────┐
+│   Ingress   │ ← HTTP requests
+└──────┬──────┘
+       │ publishes to queue fabric
+       ▼
+┌─────────────┐
+│Queue Fabric │ ← Async pub/sub coordination
+└──────┬──────┘
+       │ routing topic
+       ▼
+┌─────────────┐
+│Route Manager│ ← Pattern matching
+└──────┬──────┘
+       │ matched route
+       ▼
+┌─────────────┐
+│     LCC     │ ← Context creation
+└──────┬──────┘
+       │ gctx + lctx
+       ▼
+┌─────────────┐
+│Handler Worker│ ← Execute handler
+└──────┬──────┘
+       │ result
+       ▼
+┌─────────────┐
+│   Response  │ → HTTP response
+└─────────────┘
 ```
 
-### Handler File Structure
+## Performance
 
-Handlers should export a `handler` function:
+| Component | Throughput | Latency (mean) | Latency (P99) |
+|-----------|------------|----------------|---------------|
+| Route matching | 2.6M ops/sec | 0.4μs | 0.9μs |
+| Context creation | 505K ops/sec | 2.0μs | 4.2μs |
+| Handler execution | 294K ops/sec | 3.4μs | 6.5μs |
+| **Full pipeline** | **172K RPS** | **5.8μs** | **<10μs** |
+
+**172x better than MVP target** (1K RPS) • **5000x better P99** (<50ms target)
+
+## Core Components
+
+### Handler Engine
+
+Execute handlers with lifecycle hooks and error handling.
 
 ```typescript
-// src/handlers/hello.ts
+import { HandlerEngine } from '@gati-framework/runtime/handler-engine';
+
+const engine = new HandlerEngine();
+const result = await engine.execute(handler, req, res, gctx, lctx);
+```
+
+### Route Manager
+
+Fast pattern matching with parameter extraction.
+
+```typescript
+import { RouteManager } from '@gati-framework/runtime/route-manager';
+
+const router = new RouteManager();
+router.register('GET', '/users/:id', handler);
+const match = router.match('GET', '/users/123'); // { params: { id: '123' } }
+```
+
+### Global Context
+
+Shared state across all requests.
+
+```typescript
+import { createGlobalContext } from '@gati-framework/runtime/global-context';
+
+const gctx = createGlobalContext({ handlers: [], modules: [] });
+const dbModule = gctx.modules['database'];
+```
+
+### Local Context
+
+Per-request state with lifecycle management.
+
+```typescript
+import { createLocalContext } from '@gati-framework/runtime/local-context';
+
+const lctx = createLocalContext('req-id', 'trace-id', 'client-id');
+lctx.lifecycle.onCleanup('cleanup', async () => { /* cleanup */ });
+```
+
+### Queue Fabric
+
+Async pub/sub for component coordination.
+
+```typescript
+import { QueueFabric } from '@gati-framework/runtime';
+
+const fabric = new QueueFabric();
+fabric.subscribe('routing', async (msg) => { /* handle */ });
+fabric.publish('routing', { type: 'request', data });
+```
+
+## Handler Example
+
+```typescript
 import type { Handler } from '@gati-framework/runtime';
 
-export const handler: Handler = (req, res) => {
-  const name = req.query.name || 'World';
-  res.json({ message: `Hello, ${name}!` });
-};
-
-// Optional: Export metadata for registration
-export const metadata = {
-  method: 'GET',
-  route: '/hello'
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  // Access modules
+  const db = gctx.modules['database'];
+  const user = await db.users.findById(req.params.id);
+  
+  // Lifecycle hooks
+  lctx.lifecycle.onCleanup('db', async () => db.disconnect());
+  
+  // Response
+  res.json({ user });
 };
 ```
 
-**File path routing:**
-- `src/handlers/hello.ts` → `GET /hello`
-- `src/handlers/users/create.ts` → `POST /users/create`
-- `src/handlers/api/v1/posts.ts` → `GET /api/v1/posts`
-
-### Configuration
+## Module Example
 
 ```typescript
-import { createApp } from '@gati-framework/runtime';
+import type { Module } from '@gati-framework/runtime';
 
-const app = createApp({
-  port: parseInt(process.env.PORT || '3000'),
-  host: process.env.HOST || '0.0.0.0',
-  timeout: 30000,  // 30 seconds
-  logging: process.env.NODE_ENV !== 'production',
-  logger: {        // Optional logger configuration
-    level: 'info', // 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
-    pretty: process.env.NODE_ENV !== 'production', // Pretty print in dev
-  },
-});
-```
-
-### Structured Logging
-
-The runtime includes structured logging with pino for production observability:
-
-```typescript
-import { createApp, logger, createLogger } from '@gati-framework/runtime';
-
-// Use the default logger in your handlers
-app.get('/users', (req, res, gctx, lctx) => {
-  logger.info({ requestId: lctx.requestId }, 'Fetching users');
-  
-  // Your logic here
-  const users = getUsersFromDB();
-  
-  logger.info(
-    { requestId: lctx.requestId, count: users.length },
-    'Users fetched successfully'
-  );
-  
-  res.json({ users });
-});
-
-// Create a custom logger for specific modules
-const dbLogger = createLogger({
+export const module: Module = {
   name: 'database',
-  level: 'debug',
-  pretty: false, // Force JSON output
-});
-
-dbLogger.info({ query: 'SELECT * FROM users' }, 'Running query');
-dbLogger.error({ error: err.message }, 'Database error');
+  async onInit(gctx) {
+    return { users: { findById: async (id) => ({ id, name: 'User' }) } };
+  },
+  async onShutdown() { /* cleanup */ }
+};
 ```
 
-**Log Levels:**
-- `trace` - Very detailed debugging information
-- `debug` - Debugging information
-- `info` - Informational messages (default)
-- `warn` - Warning messages
-- `error` - Error messages
-- `fatal` - Critical errors
-
-**Output Formats:**
-- Development: Pretty-printed, human-readable logs
-- Production: JSON logs for aggregation tools (e.g., ELK, Datadog)
-
-### Middleware
+## Testing
 
 ```typescript
-import { createApp, createCorsMiddleware } from '@gati-framework/runtime';
+import { createGlobalContext, createLocalContext } from '@gati-framework/runtime';
 
-const app = createApp();
+const gctx = createGlobalContext({ handlers: [], modules: [] });
+const lctx = createLocalContext('test-req', 'test-trace', 'test-client');
 
-// Add custom middleware
-app.use(async (req, res, gctx, lctx, next) => {
-  console.log(`${req.method} ${req.path}`);
-  await next();
-});
-
-// Add CORS middleware (built-in helper)
-app.use(createCorsMiddleware({
-  origin: 'https://myapp.com',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// Apply middleware to specific paths
-app.use(authMiddleware, { path: '/api/*' });
-
-// Error handling middleware
-app.useError((error, req, res, gctx, lctx) => {
-  console.error('Error:', error);
-  res.status(500).json({ error: 'Internal Server Error' });
-});
+await handler(req, res, gctx, lctx);
 ```
 
-### CORS Configuration
-
-The built-in CORS middleware supports multiple configuration options:
+## Configuration
 
 ```typescript
-import { createCorsMiddleware } from '@gati-framework/runtime';
-
-// Allow all origins (default)
-app.use(createCorsMiddleware());
-
-// Specific origin
-app.use(createCorsMiddleware({ origin: 'https://myapp.com' }));
-
-// Multiple origins
-app.use(createCorsMiddleware({ 
-  origin: ['https://app1.com', 'https://app2.com'] 
-}));
-
-// Dynamic origin validation
-app.use(createCorsMiddleware({
-  origin: (origin) => origin.endsWith('.myapp.com'),
-  credentials: true,
-  exposedHeaders: ['X-Total-Count'],
-  maxAge: 86400, // 24 hours
-}));
+interface RuntimeConfig {
+  handlers: HandlerManifest[];
+  modules: ModuleManifest[];
+  observability?: ObservabilityConfig;
+  timescape?: TimescapeConfig;
+}
 ```
 
-### Graceful Shutdown
+## Benchmarking
 
-The server supports graceful shutdown, waiting for active requests to complete:
-
-```typescript
-const app = createApp({ 
-  port: 3000,
-  timeout: 30000 // Request timeout: 30 seconds
-});
-
-await app.listen();
-
-// Handle shutdown signals
-process.on('SIGTERM', async () => {
-  console.log('Shutting down gracefully...');
-  await app.close(); // Waits up to 10 seconds for active requests
-  process.exit(0);
-});
-
-process.on('SIGINT', async () => {
-  console.log('Shutting down gracefully...');
-  await app.close();
-  process.exit(0);
-});
+```bash
+cd benchmarks
+pnpm bench              # Run all benchmarks
+pnpm bench:baseline     # Save baseline
+pnpm bench:compare      # Compare to baseline
 ```
 
-### Method-specific Routes
+See [BENCHMARKING_STRATEGY.md](./BENCHMARKING_STRATEGY.md) for details.
 
-```typescript
-app.get('/users', getUsersHandler);
-app.post('/users', createUserHandler);
-app.put('/users/:id', updateUserHandler);
-app.patch('/users/:id', patchUserHandler);
-app.delete('/users/:id', deleteUserHandler);
+## Development
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+pnpm test:coverage
 ```
 
-## API Reference
+## Related Packages
 
-### `createApp(config?: AppConfig): GatiApp`
+- [@gati-framework/core](../core) - Core types and configuration
+- [@gati-framework/cli](../cli) - Development and deployment tools
+- [@gati-framework/testing](../testing) - Test utilities and mocks
+- [@gati-framework/playground](../playground) - Visual debugging
 
-Creates a new Gati application instance.
+## Documentation
 
-**Config options:**
-- `port?: number` - Port to listen on (default: 3000)
-- `host?: string` - Host to bind to (default: 'localhost')
-- `timeout?: number` - Server timeout in ms (default: 30000)
-- `logging?: boolean` - Enable request logging (default: true)
+- [Handler Guide](./docs/HANDLER_GUIDE.md)
+- [Module Guide](./docs/MODULE_GUIDE.md)
+- [Testing Guide](./docs/TESTING_GUIDE.md)
+- [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
 
-### `loadHandlers(app, dir, options?): Promise<void>`
+## Contributing
 
-Automatically discovers and registers handlers from a directory.
-
-**Parameters:**
-- `app: GatiApp` - Application instance
-- `dir: string` - Directory path (e.g., './src/handlers')
-- `options.basePath?: string` - Route prefix (default: '')
-- `options.verbose?: boolean` - Log registration (default: false)
-
-### `GatiApp Methods`
-
-- `get(path, handler)` - Register GET route
-- `post(path, handler)` - Register POST route
-- `put(path, handler)` - Register PUT route
-- `patch(path, handler)` - Register PATCH route
-- `delete(path, handler)` - Register DELETE route
-- `use(middleware)` - Add middleware
-- `useError(errorMiddleware)` - Add error handler
-- `listen()` - Start HTTP server
-- `close()` - Stop HTTP server gracefully
-- `isRunning()` - Check if server is running
-- `getConfig()` - Get current configuration
-
-## Type Definitions
-
-All TypeScript types are exported:
-
-```typescript
-import type {
-  Handler,
-  Request,
-  Response,
-  GlobalContext,
-  LocalContext,
-  Middleware,
-  ErrorMiddleware,
-  AppConfig,
-} from '@gati-framework/runtime';
-```
-
-## Examples
-
-See the [examples directory](../../examples) for complete examples:
-- [hello-world](../../examples/hello-world) - Basic application
-- [scaffold-verify](../../examples/scaffold-verify) - Scaffolded project structure
-
-## Requirements
-
-- Node.js >= 18.0.0
-- TypeScript >= 5.3.0 (for development)
+Contributions welcome! See [Contributing Guide](../../docs/contributing/README.md).
 
 ## License
 
-MIT © Krishna Paul
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
 
-## Links
+---
 
-- [Documentation](https://github.com/krishnapaul242/gati)
-- [GitHub Repository](https://github.com/krishnapaul242/gati)
-- [Report Issues](https://github.com/krishnapaul242/gati/issues)
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡

@@ -1,6 +1,11 @@
 # @gati-framework/observability-adapters
 
-Cloud provider and APM adapters for Gati observability framework.
+> Cloud provider and APM adapters for Gati observability
+
+[![npm version](https://img.shields.io/npm/v/@gati-framework/observability-adapters.svg)](https://www.npmjs.com/package/@gati-framework/observability-adapters)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
+
+Plug-and-play adapters for AWS CloudWatch, Datadog, New Relic, Jaeger, Sentry, and more.
 
 ## Installation
 
@@ -8,165 +13,52 @@ Cloud provider and APM adapters for Gati observability framework.
 npm install @gati-framework/observability-adapters
 ```
 
-## Overview
-
-This package provides adapters for various observability providers, allowing you to integrate Gati with your preferred monitoring stack. All adapters implement the contracts defined in `@gati-framework/contracts`.
-
-## Supported Providers
-
-### AWS Stack
-- **CloudWatch Metrics** - Metrics collection
-- **CloudWatch Logs** - Centralized logging
-- **X-Ray** - Distributed tracing
-
-### APM Providers
-- **Datadog** - Full-stack monitoring
-- **New Relic** - Application performance monitoring
-
-### Open Source
-- **Jaeger** - Distributed tracing
-- **Zipkin** - Distributed tracing
-
-### Error Tracking
-- **Sentry** - Error tracking and performance monitoring
-
-## Quick Start with Presets
-
-### AWS Stack
+## Quick Start
 
 ```typescript
-import { createAWSPreset } from '@gati-framework/observability-adapters/presets';
+import { AWSAdapter } from '@gati-framework/observability-adapters/aws';
 
-const observability = createAWSPreset({
+const adapter = new AWSAdapter({
   region: 'us-east-1',
-  namespace: 'my-app',
-  logGroupName: '/aws/gati/my-app',
-  logStreamName: 'production',
-  serviceName: 'my-app',
+  logGroup: '/aws/gati/my-app'
 });
 
-// Use with Gati runtime
-const gctx = await GlobalContext.create({
-  config,
-  metricsProvider: observability.metrics,
-  tracingProvider: observability.tracing,
-  logger: observability.logging,
-});
+await adapter.initialize();
 ```
 
-### Datadog Stack
+## Adapters
+
+### AWS CloudWatch & X-Ray
 
 ```typescript
-import { createDatadogPreset } from '@gati-framework/observability-adapters/presets';
+import { AWSAdapter } from '@gati-framework/observability-adapters/aws';
 
-const observability = createDatadogPreset({
-  apiKey: process.env.DD_API_KEY!,
-  service: 'my-app',
-  env: 'production',
-  version: '1.0.0',
-});
-```
-
-### Self-Hosted (Jaeger)
-
-```typescript
-import { createSelfHostedPreset } from '@gati-framework/observability-adapters/presets';
-
-const observability = createSelfHostedPreset({
-  serviceName: 'my-app',
-  tracingProvider: 'jaeger',
-  jaegerConfig: {
-    agentHost: 'localhost',
-    agentPort: 6832,
-  },
-});
-```
-
-### Sentry Error Tracking
-
-```typescript
-import { createSentryPreset } from '@gati-framework/observability-adapters/presets';
-
-const observability = createSentryPreset({
-  dsn: process.env.SENTRY_DSN!,
-  environment: 'production',
-  tracesSampleRate: 1.0,
-});
-```
-
-## Custom Mix & Match
-
-You can mix and match providers for different concerns:
-
-```typescript
-import { 
-  CloudWatchMetricsAdapter,
-  JaegerAdapter,
-  SentryAdapter 
-} from '@gati-framework/observability-adapters';
-
-const observability = {
-  metrics: new CloudWatchMetricsAdapter({
-    region: 'us-east-1',
-    namespace: 'my-app',
-  }),
-  tracing: new JaegerAdapter({
-    serviceName: 'my-app',
-    agentHost: 'jaeger',
-  }),
-  logging: new SentryAdapter({
-    dsn: process.env.SENTRY_DSN!,
-  }),
-};
-```
-
-## Individual Adapters
-
-### AWS CloudWatch Metrics
-
-```typescript
-import { CloudWatchMetricsAdapter } from '@gati-framework/observability-adapters/aws';
-
-const metrics = new CloudWatchMetricsAdapter({
+const aws = new AWSAdapter({
   region: 'us-east-1',
-  namespace: 'my-app',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
-metrics.incrementCounter('requests', { endpoint: '/api/users' });
-metrics.setGauge('active_connections', 42);
-metrics.recordHistogram('request_duration', 123.45);
-```
-
-### AWS X-Ray
-
-```typescript
-import { XRayAdapter } from '@gati-framework/observability-adapters/aws';
-
-const tracing = new XRayAdapter({
-  serviceName: 'my-app',
-  daemonAddress: 'localhost:2000',
-  plugins: ['EC2Plugin', 'ECSPlugin'],
-});
-
-await tracing.withSpan('database-query', async (span) => {
-  span.setAttribute('query', 'SELECT * FROM users');
-  // Your code here
+  logGroup: '/aws/gati/my-app',
+  enableXRay: true
 });
 ```
 
-### Datadog APM
+### Datadog
 
 ```typescript
-import { DatadogAPMAdapter } from '@gati-framework/observability-adapters/apm';
+import { DatadogAdapter } from '@gati-framework/observability-adapters/apm';
 
-const tracing = new DatadogAPMAdapter({
-  service: 'my-app',
-  env: 'production',
-  version: '1.0.0',
+const datadog = new DatadogAdapter({
+  apiKey: process.env.DD_API_KEY,
+  service: 'my-app'
+});
+```
+
+### New Relic
+
+```typescript
+import { NewRelicAdapter } from '@gati-framework/observability-adapters/apm';
+
+const newrelic = new NewRelicAdapter({
+  licenseKey: process.env.NEW_RELIC_LICENSE_KEY,
+  appName: 'my-app'
 });
 ```
 
@@ -175,12 +67,8 @@ const tracing = new DatadogAPMAdapter({
 ```typescript
 import { JaegerAdapter } from '@gati-framework/observability-adapters/oss';
 
-const tracing = new JaegerAdapter({
-  serviceName: 'my-app',
-  agentHost: 'localhost',
-  agentPort: 6832,
-  samplerType: 'const',
-  samplerParam: 1,
+const jaeger = new JaegerAdapter({
+  endpoint: 'http://jaeger:14268/api/traces'
 });
 ```
 
@@ -190,45 +78,37 @@ const tracing = new JaegerAdapter({
 import { SentryAdapter } from '@gati-framework/observability-adapters/error-tracking';
 
 const sentry = new SentryAdapter({
-  dsn: process.env.SENTRY_DSN!,
-  environment: 'production',
-  release: 'my-app@1.0.0',
-  tracesSampleRate: 1.0,
-});
-
-// Use as logger
-sentry.error('Something went wrong', { userId: '123' });
-
-// Use as tracing provider
-await sentry.withSpan('api-call', async (span) => {
-  // Your code here
+  dsn: process.env.SENTRY_DSN,
+  environment: 'production'
 });
 ```
 
-## Peer Dependencies
+## Presets
 
-Install only the dependencies you need:
+```typescript
+import { awsPreset, datadogPreset } from '@gati-framework/observability-adapters/presets';
 
-```bash
-# AWS
-npm install @aws-sdk/client-cloudwatch @aws-sdk/client-cloudwatch-logs aws-xray-sdk-core
+// AWS preset (CloudWatch + X-Ray)
+const aws = awsPreset({ region: 'us-east-1' });
 
-# Datadog
-npm install dd-trace
-
-# New Relic
-npm install newrelic
-
-# Jaeger
-npm install jaeger-client
-
-# Zipkin
-npm install zipkin zipkin-context-cls zipkin-transport-http
-
-# Sentry
-npm install @sentry/node @sentry/tracing
+// Datadog preset (APM + Logs + Traces)
+const datadog = datadogPreset({ apiKey: process.env.DD_API_KEY });
 ```
+
+## Related Packages
+
+- [@gati-framework/observability](../observability) - Core observability
+- [@gati-framework/contracts](../contracts) - Observability contracts
+
+## Documentation
+
+- [Observability Guide](https://krishnapaul242.github.io/gati/guides/observability)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
 
 ## License
 
-MIT
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
+
+---
+
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡

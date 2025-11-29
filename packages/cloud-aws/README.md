@@ -1,131 +1,377 @@
 # @gati-framework/cloud-aws
 
-AWS cloud provider plugin for Gati framework, enabling seamless deployment to Amazon EKS.
+> AWS EKS deployment provider for Gati applications
 
-## Features
+[![npm version](https://img.shields.io/npm/v/@gati-framework/cloud-aws.svg)](https://www.npmjs.com/package/@gati-framework/cloud-aws)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
 
-- ✅ **EKS Cluster Management** - Automated cluster creation and management
-- ✅ **Load Balancer Integration** - Application Load Balancer (ALB) configuration
-- ✅ **Secrets Manager** - Secure secret storage and rotation
-- ✅ **IAM Role Automation** - Automatic role and policy management
-- ✅ **Multi-AZ Support** - High availability across availability zones
+Deploy Gati applications to AWS EKS with automatic VPC, networking, secrets management, and load balancing.
 
 ## Installation
 
 ```bash
-pnpm add @gati-framework/cloud-aws
+npm install @gati-framework/cloud-aws
 ```
 
-## Usage
+## Quick Start
 
-### Initialize AWS Provider
+```bash
+# Configure AWS credentials
+aws configure
+
+# Deploy to EKS
+gati deploy prod --cloud aws --region us-east-1 --cluster my-cluster
+```
+
+## Features
+
+- ✅ **EKS Cluster Management** - Create and manage Kubernetes clusters
+- ✅ **VPC & Networking** - Automatic VPC, subnets, security groups
+- ✅ **Secrets Management** - AWS Secrets Manager integration
+- ✅ **Load Balancing** - ALB/NLB with automatic SSL
+- ✅ **IAM Roles** - Service accounts with IRSA
+- ✅ **Auto-scaling** - HPA and cluster autoscaler
+
+## Configuration
+
+### gati.config.ts
 
 ```typescript
-import { AWSCloudProvider } from '@gati-framework/cloud-aws';
-import { CloudProviderFactory } from '@gati-framework/core/cloud-provider';
+import type { GatiConfig } from '@gati-framework/core';
 
-// Register the provider
-CloudProviderFactory.register('aws', () => new AWSCloudProvider());
-
-// Create and initialize
-const provider = CloudProviderFactory.create('aws');
-await provider.initialize({
-  region: 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-});
+export default {
+  name: 'my-app',
+  cloud: {
+    provider: 'aws',
+    region: 'us-east-1',
+    kubernetes: {
+      clusterName: 'my-cluster',
+      namespace: 'production',
+      nodeType: 't3.medium',
+      minNodes: 2,
+      maxNodes: 10
+    }
+  }
+} satisfies GatiConfig;
 ```
+
+## Deployment
 
 ### Create EKS Cluster
 
 ```typescript
-const result = await provider.createCluster({
-  name: 'my-gati-cluster',
-  version: '1.28',
-  nodePools: [
-    {
-      name: 'default',
-      instanceType: 't3.medium',
-      minNodes: 2,
-      maxNodes: 10,
-      desiredNodes: 3,
-      diskSizeGb: 20,
-    },
-  ],
-  network: {
-    privateNetworking: true,
-  },
+import { AWSProvider } from '@gati-framework/cloud-aws';
+
+const provider = new AWSProvider({
+  region: 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
 });
 
-console.log('Cluster endpoint:', result.clusterEndpoint);
-```
-
-### Manage Secrets
-
-```typescript
-// Store secret
-await provider.storeSecret({
-  name: 'my-app-secret',
-  values: {
-    DATABASE_URL: 'postgresql://...',
-    API_KEY: 'secret-key',
-  },
-  tags: {
-    Environment: 'production',
-  },
+await provider.deploy({
+  clusterName: 'my-cluster',
+  nodeType: 't3.medium',
+  minNodes: 2,
+  maxNodes: 10
 });
-
-// Retrieve secret
-const secrets = await provider.retrieveSecret('my-app-secret');
-console.log(secrets.DATABASE_URL);
 ```
 
-### Create Load Balancer
+### Deploy Application
+
+```bash
+# Deploy to existing cluster
+gati deploy prod --cloud aws --cluster my-cluster
+
+# Deploy with custom configuration
+gati deploy prod \
+  --cloud aws \
+  --region us-east-1 \
+  --cluster my-cluster \
+  --namespace production
+```
+
+## Networking
+
+### VPC Configuration
+
+Automatic VPC creation with:
+- Public subnets (2 AZs)
+- Private subnets (2 AZs)
+- NAT gateways
+- Internet gateway
+- Route tables
 
 ```typescript
-const lb = await provider.createLoadBalancer({
+const vpc = await provider.createVPC({
+  cidr: '10.0.0.0/16',
+  availabilityZones: ['us-east-1a', 'us-east-1b']
+});
+```
+
+### Security Groups
+
+Automatic security group configuration:
+- EKS control plane
+- Worker nodes
+- Load balancers
+- Database access
+
+### Load Balancing
+
+```typescript
+// Application Load Balancer
+const alb = await provider.createLoadBalancer({
   type: 'application',
   scheme: 'internet-facing',
-  targetPort: 3000,
-  healthCheck: {
-    path: '/health',
-    intervalSeconds: 30,
-    healthyThreshold: 2,
-    unhealthyThreshold: 3,
-  },
-  ssl: {
-    certificateId: 'arn:aws:acm:...',
-    redirectHttp: true,
-  },
+  subnets: vpc.publicSubnets
 });
 
-console.log('Load balancer endpoint:', lb.endpoint);
+// Network Load Balancer
+const nlb = await provider.createLoadBalancer({
+  type: 'network',
+  scheme: 'internal',
+  subnets: vpc.privateSubnets
+});
 ```
 
-## Configuration
+## Secrets Management
 
-### Environment Variables
+### Store Secrets
 
-- `AWS_ACCESS_KEY_ID` - AWS access key
-- `AWS_SECRET_ACCESS_KEY` - AWS secret key
-- `AWS_SESSION_TOKEN` - Session token (optional)
-- `AWS_REGION` - Default AWS region
+```typescript
+import { SecretsManager } from '@gati-framework/cloud-aws';
 
-### IAM Permissions Required
+const secrets = new SecretsManager({ region: 'us-east-1' });
 
-The AWS credentials must have permissions for:
-- EKS cluster management
-- EC2 instance management
-- IAM role creation and management
-- Secrets Manager access
-- Elastic Load Balancing
+await secrets.createSecret({
+  name: 'my-app/database',
+  value: {
+    host: 'db.example.com',
+    username: 'admin',
+    password: 'secret'
+  }
+});
+```
 
-## API Reference
+### Access in Handlers
 
-See [TypeScript definitions](./src/index.ts) for complete API documentation.
+```typescript
+export const handler: Handler = async (req, res, gctx) => {
+  const secrets = gctx.modules['secrets'];
+  const dbConfig = await secrets.get('my-app/database');
+  
+  // Use database config
+  const db = connect(dbConfig);
+};
+```
+
+## IAM Roles
+
+### Service Account with IRSA
+
+```typescript
+await provider.createServiceAccount({
+  name: 'my-app',
+  namespace: 'production',
+  policies: [
+    'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess',
+    'arn:aws:iam::aws:policy/SecretsManagerReadWrite'
+  ]
+});
+```
+
+### Custom IAM Policy
+
+```typescript
+await provider.createIAMPolicy({
+  name: 'my-app-policy',
+  statements: [
+    {
+      effect: 'Allow',
+      actions: ['s3:GetObject', 's3:PutObject'],
+      resources: ['arn:aws:s3:::my-bucket/*']
+    }
+  ]
+});
+```
+
+## Auto-scaling
+
+### Horizontal Pod Autoscaler
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+```
+
+### Cluster Autoscaler
+
+```typescript
+await provider.enableClusterAutoscaler({
+  minNodes: 2,
+  maxNodes: 10,
+  nodeGroups: ['my-app-nodes']
+});
+```
+
+## Monitoring
+
+### CloudWatch Integration
+
+```typescript
+await provider.enableCloudWatch({
+  logGroup: '/aws/eks/my-cluster',
+  metricsNamespace: 'MyApp'
+});
+```
+
+### Container Insights
+
+```bash
+# Enable Container Insights
+gati deploy prod --cloud aws --enable-insights
+```
+
+## Cost Optimization
+
+### Spot Instances
+
+```typescript
+await provider.createNodeGroup({
+  name: 'spot-nodes',
+  instanceTypes: ['t3.medium', 't3.large'],
+  capacityType: 'SPOT',
+  minSize: 0,
+  maxSize: 10
+});
+```
+
+### Fargate
+
+```typescript
+await provider.createFargateProfile({
+  name: 'my-app-fargate',
+  namespace: 'production',
+  selectors: [{ namespace: 'production' }]
+});
+```
+
+## Troubleshooting
+
+**Cluster creation fails**:
+```bash
+# Check AWS credentials
+aws sts get-caller-identity
+
+# Check IAM permissions
+aws iam get-user
+```
+
+**Deployment timeout**:
+```bash
+# Check cluster status
+aws eks describe-cluster --name my-cluster
+
+# Check node status
+kubectl get nodes
+```
+
+**Load balancer not accessible**:
+```bash
+# Check security groups
+aws ec2 describe-security-groups
+
+# Check ALB status
+aws elbv2 describe-load-balancers
+```
+
+## Examples
+
+### Complete Deployment
+
+```typescript
+import { AWSProvider } from '@gati-framework/cloud-aws';
+
+const provider = new AWSProvider({ region: 'us-east-1' });
+
+// Create VPC
+const vpc = await provider.createVPC({
+  cidr: '10.0.0.0/16',
+  availabilityZones: ['us-east-1a', 'us-east-1b']
+});
+
+// Create EKS cluster
+const cluster = await provider.createCluster({
+  name: 'my-cluster',
+  version: '1.28',
+  vpcId: vpc.id,
+  subnetIds: vpc.privateSubnets
+});
+
+// Create node group
+await provider.createNodeGroup({
+  clusterName: 'my-cluster',
+  name: 'my-nodes',
+  instanceTypes: ['t3.medium'],
+  minSize: 2,
+  maxSize: 10
+});
+
+// Deploy application
+await provider.deployApplication({
+  clusterName: 'my-cluster',
+  namespace: 'production',
+  image: 'my-app:latest'
+});
+```
+
+## Development
+
+```bash
+pnpm install
+pnpm build
+pnpm typecheck
+```
+
+## Related Packages
+
+- [@gati-framework/core](../core) - Core types
+- [@gati-framework/cli](../cli) - CLI tools
+- [@gati-framework/cloud-gcp](../cloud-gcp) - GCP provider
+- [@gati-framework/cloud-azure](../cloud-azure) - Azure provider
+
+## Documentation
+
+- [AWS EKS Deployment Guide](https://krishnapaul242.github.io/gati/guides/aws-eks-deployment)
+- [Multi-Cloud Deployment](https://krishnapaul242.github.io/gati/guides/deployment)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
+
+## Contributing
+
+Contributions welcome! See [Contributing Guide](../../docs/contributing/README.md).
 
 ## License
 
-MIT © Krishna Paul
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
+
+---
+
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡

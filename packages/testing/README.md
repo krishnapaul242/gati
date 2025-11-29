@@ -1,415 +1,430 @@
 # @gati-framework/testing
 
-Testing utilities for Gati handlers with fake contexts and module mocks.
+> Testing utilities and mocks for Gati applications
+
+[![npm version](https://img.shields.io/npm/v/@gati-framework/testing.svg)](https://www.npmjs.com/package/@gati-framework/testing)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
+
+Test harness, fake contexts, module mocks, and helpers for testing Gati handlers and modules.
 
 ## Installation
 
 ```bash
-pnpm add -D @gati-framework/testing
+npm install --save-dev @gati-framework/testing
 ```
 
 ## Quick Start
 
 ```typescript
-import { testHandler, createMockModule } from '@gati-framework/testing';
-import { getUserHandler } from './handlers/users';
+import { createTestHarness } from '@gati-framework/testing';
+import { handler } from './handlers/users';
 
-const mockDb = createMockModule({
-  findUser: async (id: string) => ({ id, name: 'John' }),
+const harness = createTestHarness();
+
+const result = await harness.executeHandler(handler, {
+  method: 'GET',
+  path: '/users/123',
+  params: { id: '123' }
 });
 
-const result = await testHandler(
-  getUserHandler,
-  { method: 'GET', path: '/users/123', params: { id: '123' } },
-  { db: mockDb.module }
-);
-
-expect(result.response.statusCode).toBe(200);
-expect(mockDb.calls.findUser).toHaveLength(1);
+expect(result.status).toBe(200);
+expect(result.body).toEqual({ id: '123', name: 'User' });
 ```
 
-## Core Concepts
+## Features
 
-### Test Harness
+- ✅ **Test Harness** - Execute handlers in isolation
+- ✅ **Fake Contexts** - Mock global and local contexts
+- ✅ **Module Mocks** - Mock module dependencies
+- ✅ **Request Builders** - Fluent API for requests
+- ✅ **Response Assertions** - Helper assertions
+- ✅ **Lifecycle Testing** - Test hooks and cleanup
 
-The test harness executes handlers with fake contexts and captures lifecycle events.
+## Test Harness
 
-### Module Mocks
-
-Mock modules track method calls and provide controlled responses.
-
-### Context Builders
-
-Builders create fake LocalContext and GlobalContext with custom properties.
-
-## API Reference
-
-### testHandler(handler, request?, modules?)
-
-Execute a handler with minimal setup.
+Execute handlers with full context simulation.
 
 ```typescript
-const result = await testHandler(
-  myHandler,
-  { method: 'POST', path: '/users', body: { name: 'John' } },
-  { db: mockDb }
-);
-```
+import { createTestHarness } from '@gati-framework/testing';
 
-**Returns**: `Promise<TestResult>`
-
-### createTestHarness(options?)
-
-Create a test harness for multiple handler executions.
-
-```typescript
 const harness = createTestHarness({
-  modules: { db: mockDb, cache: mockCache },
-  config: { apiKey: 'test' },
+  modules: {
+    database: {
+      users: {
+        findById: async (id) => ({ id, name: 'Test User' })
+      }
+    }
+  }
 });
 
-const result = await harness.executeHandler(myHandler, {
-  request: { method: 'GET', path: '/test' },
+const result = await harness.executeHandler(handler, {
+  method: 'GET',
+  path: '/users/123',
+  params: { id: '123' }
 });
-
-await harness.cleanup();
 ```
 
-**Options**:
-- `modules` - Module instances
-- `config` - Configuration object
-
-**Methods**:
-- `executeHandler(handler, options?)` - Execute handler
-- `getLocalContext()` - Get current LocalContext
-- `getGlobalContext()` - Get GlobalContext
-- `cleanup()` - Clean up resources
-
-### createMockModule(methods)
-
-Create a mock module with automatic call tracking.
+### With Lifecycle Hooks
 
 ```typescript
-const mockDb = createMockModule({
-  findUser: async (id: string) => ({ id, name: 'Test' }),
-  saveUser: async (user: User) => user,
+const harness = createTestHarness();
+
+const result = await harness.executeHandler(handler, {
+  method: 'POST',
+  path: '/users',
+  body: { name: 'New User' }
+});
+
+// Check lifecycle hooks were called
+expect(harness.hooks.onInit).toHaveBeenCalled();
+expect(harness.hooks.onCleanup).toHaveBeenCalled();
+```
+
+## Fake Contexts
+
+### Fake Global Context
+
+```typescript
+import { createFakeGlobalContext } from '@gati-framework/testing';
+
+const gctx = createFakeGlobalContext({
+  modules: {
+    database: mockDatabase,
+    logger: mockLogger
+  },
+  config: {
+    name: 'test-app',
+    version: '1.0.0'
+  }
+});
+
+await handler(req, res, gctx, lctx);
+```
+
+### Fake Local Context
+
+```typescript
+import { createFakeLocalContext } from '@gati-framework/testing';
+
+const lctx = createFakeLocalContext({
+  requestId: 'test-req-123',
+  traceId: 'test-trace-456',
+  clientId: 'test-client-789'
+});
+
+// Test lifecycle hooks
+lctx.lifecycle.onCleanup('test', async () => {
+  console.log('Cleanup called');
+});
+
+await lctx.lifecycle.executeCleanup();
+```
+
+## Module Mocks
+
+### Mock Database Module
+
+```typescript
+import { createModuleMock } from '@gati-framework/testing';
+
+const mockDatabase = createModuleMock({
+  users: {
+    findById: vi.fn(async (id) => ({ id, name: 'Test User' })),
+    create: vi.fn(async (data) => ({ id: '123', ...data })),
+    update: vi.fn(async (id, data) => ({ id, ...data })),
+    delete: vi.fn(async (id) => true)
+  }
 });
 
 // Use in tests
-await mockDb.module.findUser('123');
-
-// Check calls
-expect(mockDb.calls.findUser).toHaveLength(1);
-expect(mockDb.calls.findUser[0].args).toEqual(['123']);
-expect(mockDb.calls.findUser[0].result).toEqual({ id: '123', name: 'Test' });
-
-// Reset
-mockDb.reset();
+const user = await mockDatabase.users.findById('123');
+expect(mockDatabase.users.findById).toHaveBeenCalledWith('123');
 ```
 
-**Returns**: `MockModule<T>`
-
-**Properties**:
-- `module` - The mocked module
-- `calls` - Call records per method
-- `reset()` - Clear call history
-
-### createStubModule(stubs)
-
-Create a simple stub module with predefined values.
+### Mock Logger Module
 
 ```typescript
-const stubCache = createStubModule({
-  get: () => 'cached-value',
-  set: () => true,
+const mockLogger = createModuleMock({
+  info: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  debug: vi.fn()
 });
+
+// Test logging
+await handler(req, res, gctx, lctx);
+expect(mockLogger.info).toHaveBeenCalledWith('User fetched', { id: '123' });
 ```
 
-### createFakeLocalContext(options?)
+## Request Builders
 
-Create a fake LocalContext with test defaults.
+Fluent API for building test requests.
 
 ```typescript
-const lctx = createFakeLocalContext({
-  requestId: 'test-123',
-  state: { userId: '456' },
-  meta: { method: 'POST', path: '/api/users' },
-});
+import { RequestBuilder } from '@gati-framework/testing';
+
+const req = new RequestBuilder()
+  .method('POST')
+  .path('/users')
+  .header('Content-Type', 'application/json')
+  .body({ name: 'New User', email: 'user@example.com' })
+  .query({ include: 'profile' })
+  .build();
+
+const result = await harness.executeHandler(handler, req);
 ```
 
-**Options**:
-- `requestId` - Custom request ID
-- `traceId` - Custom trace ID
-- `clientId` - Custom client ID
-- `state` - Initial state
-- `meta` - Metadata overrides
-
-### FakeLocalContextBuilder
-
-Builder for creating LocalContext with fluent API.
+### With Authentication
 
 ```typescript
-const lctx = new FakeLocalContextBuilder()
-  .withRequestId('test-123')
-  .withState({ count: 0 })
-  .withMetadata({ method: 'POST' })
+const req = new RequestBuilder()
+  .method('GET')
+  .path('/users/me')
+  .auth('Bearer', 'token-123')
   .build();
 ```
 
-### createFakeGlobalContext(options?)
-
-Create a fake GlobalContext with test defaults.
+### With Params
 
 ```typescript
-const gctx = createFakeGlobalContext({
-  modules: { db: mockDb },
-  config: { env: 'test' },
-  instanceId: 'test-instance',
-});
-```
-
-**Options**:
-- `modules` - Module instances
-- `config` - Configuration
-- `instanceId` - Instance ID
-- `region` - Region name
-
-### FakeGlobalContextBuilder
-
-Builder for creating GlobalContext with fluent API.
-
-```typescript
-const gctx = new FakeGlobalContextBuilder()
-  .withModule('db', mockDb)
-  .withConfig({ apiKey: 'test' })
-  .withRegion('us-east-1')
+const req = new RequestBuilder()
+  .method('GET')
+  .path('/users/:id')
+  .params({ id: '123' })
   .build();
 ```
 
-### Helper Functions
+## Response Assertions
 
-#### createTestRequest(options?)
-
-Create a test request with defaults.
+Helper assertions for responses.
 
 ```typescript
-const req = createTestRequest({
-  method: 'POST',
-  path: '/users',
-  body: { name: 'John' },
-});
+import { assertResponse } from '@gati-framework/testing';
+
+const result = await harness.executeHandler(handler, req);
+
+// Status assertions
+assertResponse(result).hasStatus(200);
+assertResponse(result).isOk();
+assertResponse(result).isCreated();
+assertResponse(result).isNotFound();
+
+// Body assertions
+assertResponse(result).hasBody({ id: '123' });
+assertResponse(result).bodyContains({ name: 'User' });
+assertResponse(result).bodyMatches(/User/);
+
+// Header assertions
+assertResponse(result).hasHeader('Content-Type', 'application/json');
 ```
 
-#### createTestResponse()
+## Integration Testing
 
-Create a test response.
-
-```typescript
-const res = createTestResponse();
-res.status(201);
-res.json({ id: '123' });
-```
-
-#### assertStatus(response, expected)
-
-Assert response status code.
+Test full request pipeline.
 
 ```typescript
-assertStatus(result.response, 200);
-```
+import { createTestHarness } from '@gati-framework/testing';
+import { createE2EIntegration } from '@gati-framework/runtime';
 
-#### assertBody(response, expected)
+describe('User API', () => {
+  let harness;
 
-Assert response body.
-
-```typescript
-assertBody(result.response, { id: '123', name: 'John' });
-```
-
-## Examples
-
-### Basic Handler Test
-
-```typescript
-import { testHandler } from '@gati-framework/testing';
-
-it('should return user', async () => {
-  const result = await testHandler(getUserHandler, {
-    method: 'GET',
-    path: '/users/123',
-    params: { id: '123' },
+  beforeEach(() => {
+    harness = createTestHarness({
+      modules: { database: mockDatabase }
+    });
   });
-  
-  expect(result.response.statusCode).toBe(200);
-});
-```
 
-### Testing with Modules
+  it('creates user', async () => {
+    const result = await harness.executeHandler(createUserHandler, {
+      method: 'POST',
+      path: '/users',
+      body: { name: 'New User' }
+    });
 
-```typescript
-import { testHandler, createMockModule } from '@gati-framework/testing';
-
-it('should fetch from database', async () => {
-  const mockDb = createMockModule({
-    findUser: async (id: string) => ({ id, name: 'John' }),
+    expect(result.status).toBe(201);
+    expect(result.body).toHaveProperty('id');
   });
-  
-  const result = await testHandler(
-    getUserHandler,
-    { params: { id: '123' } },
-    { db: mockDb.module }
-  );
-  
-  expect(mockDb.calls.findUser).toHaveLength(1);
-  expect(mockDb.calls.findUser[0].args).toEqual(['123']);
-});
-```
 
-### Testing Error Handling
+  it('fetches user', async () => {
+    const result = await harness.executeHandler(getUserHandler, {
+      method: 'GET',
+      path: '/users/123',
+      params: { id: '123' }
+    });
 
-```typescript
-import { testHandler, createMockModule } from '@gati-framework/testing';
-
-it('should handle database errors', async () => {
-  const mockDb = createMockModule({
-    findUser: async () => {
-      throw new Error('Database error');
-    },
+    expect(result.status).toBe(200);
+    expect(result.body.name).toBe('Test User');
   });
-  
-  const result = await testHandler(
-    getUserHandler,
-    { params: { id: '123' } },
-    { db: mockDb.module }
-  );
-  
-  expect(result.error).toBeDefined();
-  expect(result.response.statusCode).toBe(500);
 });
 ```
 
-### Using Test Harness
+## Lifecycle Testing
+
+Test lifecycle hooks and cleanup.
 
 ```typescript
-import { createTestHarness, createMockModule } from '@gati-framework/testing';
+import { createFakeLocalContext } from '@gati-framework/testing';
 
-const mockDb = createMockModule({
-  findUser: async (id: string) => ({ id, name: 'John' }),
+describe('Lifecycle', () => {
+  it('executes cleanup hooks', async () => {
+    const lctx = createFakeLocalContext();
+    const cleanup = vi.fn();
+
+    lctx.lifecycle.onCleanup('test', cleanup);
+    await lctx.lifecycle.executeCleanup();
+
+    expect(cleanup).toHaveBeenCalled();
+  });
+
+  it('handles errors in hooks', async () => {
+    const lctx = createFakeLocalContext();
+    const errorHandler = vi.fn();
+
+    lctx.lifecycle.onError('test', errorHandler);
+    lctx.lifecycle.emitError(new Error('Test error'));
+
+    expect(errorHandler).toHaveBeenCalled();
+  });
 });
-
-const harness = createTestHarness({
-  modules: { db: mockDb.module },
-});
-
-const result1 = await harness.executeHandler(handler1, {
-  request: { path: '/test1' },
-});
-
-const result2 = await harness.executeHandler(handler2, {
-  request: { path: '/test2' },
-});
-
-await harness.cleanup();
 ```
 
-### Using Builders
+## Async Testing
+
+Test async handlers and modules.
 
 ```typescript
-import {
-  FakeLocalContextBuilder,
-  FakeGlobalContextBuilder,
-} from '@gati-framework/testing';
+describe('Async Operations', () => {
+  it('handles async database calls', async () => {
+    const mockDb = createModuleMock({
+      users: {
+        findById: vi.fn(async (id) => {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          return { id, name: 'User' };
+        })
+      }
+    });
 
-const lctx = new FakeLocalContextBuilder()
-  .withRequestId('test-123')
-  .withState({ authenticated: true })
-  .build();
+    const harness = createTestHarness({ modules: { database: mockDb } });
+    const result = await harness.executeHandler(handler, {
+      method: 'GET',
+      path: '/users/123',
+      params: { id: '123' }
+    });
 
-const gctx = new FakeGlobalContextBuilder()
-  .withModule('db', mockDb)
-  .withConfig({ env: 'test' })
-  .build();
+    expect(result.status).toBe(200);
+  });
+});
+```
+
+## Error Testing
+
+Test error handling.
+
+```typescript
+describe('Error Handling', () => {
+  it('handles not found', async () => {
+    const mockDb = createModuleMock({
+      users: {
+        findById: vi.fn(async () => null)
+      }
+    });
+
+    const harness = createTestHarness({ modules: { database: mockDb } });
+    const result = await harness.executeHandler(handler, {
+      method: 'GET',
+      path: '/users/999',
+      params: { id: '999' }
+    });
+
+    expect(result.status).toBe(404);
+  });
+
+  it('handles errors', async () => {
+    const mockDb = createModuleMock({
+      users: {
+        findById: vi.fn(async () => {
+          throw new Error('Database error');
+        })
+      }
+    });
+
+    const harness = createTestHarness({ modules: { database: mockDb } });
+    const result = await harness.executeHandler(handler, {
+      method: 'GET',
+      path: '/users/123',
+      params: { id: '123' }
+    });
+
+    expect(result.status).toBe(500);
+  });
+});
 ```
 
 ## Best Practices
 
-### 1. Use testHandler for Simple Tests
+### 1. Use Test Harness
 
 ```typescript
-// Good - minimal setup
-const result = await testHandler(myHandler, { path: '/test' });
+// ✅ Good
+const harness = createTestHarness();
+const result = await harness.executeHandler(handler, req);
 
-// Avoid - unnecessary complexity
-const harness = createTestHarness({});
-const result = await harness.executeHandler(myHandler, ...);
-await harness.cleanup();
+// ❌ Bad - manual setup
+const gctx = createGlobalContext(...);
+const lctx = createLocalContext(...);
+await handler(req, res, gctx, lctx);
 ```
 
-### 2. Reset Mocks Between Tests
+### 2. Mock External Dependencies
 
 ```typescript
-const mockDb = createMockModule({ ... });
+// ✅ Good
+const mockDb = createModuleMock({ users: { findById: vi.fn() } });
 
-afterEach(() => {
-  mockDb.reset();
-});
+// ❌ Bad - real database
+const db = new Database({ host: 'localhost' });
 ```
 
-### 3. Use Assertion Helpers
+### 3. Use Request Builders
 
 ```typescript
-// Good - clear intent
-assertStatus(result.response, 200);
-assertBody(result.response, { id: '123' });
+// ✅ Good
+const req = new RequestBuilder().method('GET').path('/users/123').build();
 
-// Avoid - verbose
-expect(result.response.statusCode).toBe(200);
-expect(result.response.body).toEqual({ id: '123' });
+// ❌ Bad - manual object
+const req = { method: 'GET', path: '/users/123', headers: {}, ... };
 ```
 
-### 4. Test Error Scenarios
+## Development
 
-```typescript
-const mockDb = createMockModule({
-  findUser: async () => { throw new Error('Not found'); },
-});
-
-const result = await testHandler(handler, {}, { db: mockDb.module });
-
-expect(result.error).toBeDefined();
-expect(mockDb.calls.findUser[0].error).toBeDefined();
+```bash
+pnpm install
+pnpm build
+pnpm test
+pnpm test:watch
 ```
 
-### 5. Verify Module Calls
+## Related Packages
 
-```typescript
-const mockDb = createMockModule({ ... });
+- [@gati-framework/runtime](../runtime) - Runtime engine
+- [@gati-framework/core](../core) - Core types
+- [@gati-framework/playground](../playground) - Visual debugging
 
-await testHandler(handler, {}, { db: mockDb.module });
+## Documentation
 
-expect(mockDb.calls.findUser).toHaveLength(1);
-expect(mockDb.calls.findUser[0].args).toEqual(['123']);
-expect(mockDb.calls.findUser[0].result).toBeDefined();
-```
+- [Testing Guide](https://krishnapaul242.github.io/gati/guides/testing)
+- [Testing Strategies](https://krishnapaul242.github.io/gati/blog/testing-strategies)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
 
-## TypeScript Support
+## Contributing
 
-Full TypeScript support with type inference:
-
-```typescript
-const mockDb = createMockModule({
-  findUser: async (id: string) => ({ id, name: 'Test' }),
-});
-
-// Type-safe
-mockDb.module.findUser('123'); // ✓
-mockDb.module.findUser(123); // ✗ Type error
-
-// Call tracking is typed
-mockDb.calls.findUser[0].args; // string[]
-mockDb.calls.findUser[0].result; // { id: string; name: string }
-```
+Contributions welcome! See [Contributing Guide](../../docs/contributing/README.md).
 
 ## License
 
-MIT
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
+
+---
+
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡

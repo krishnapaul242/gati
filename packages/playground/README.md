@@ -1,228 +1,393 @@
 # @gati-framework/playground
 
-**Visual API Playground and Debugger for Gati Applications**
+> Visual debugging and request flow inspection for Gati applications
 
-A native Gati module that provides an interactive 3D visualization of API request lifecycles, enabling real-time testing and debugging with visual flow representation.
+[![npm version](https://img.shields.io/npm/v/@gati-framework/playground.svg)](https://www.npmjs.com/package/@gati-framework/playground)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
 
-## Features
-
-- 🎮 **Interactive 3D Visualization** - Watch requests flow through your application in real-time using Three.js
-- 🔍 **Route Introspection** - Explore all registered routes, handlers, and middleware
-- 🐛 **Debug Mode** - Set breakpoints, step through execution, inspect variables
-- ⚡ **Real-time Events** - WebSocket-based event streaming for live updates
-- 🎯 **Request Builder** - Test APIs like Postman, but with visual feedback
-- 🏗️ **Gati-Native** - Built entirely as a Gati module using Gati handlers
+Real-time visual debugging interface with request replay, trace inspection, and debug gates. See your API in action.
 
 ## Installation
 
 ```bash
-pnpm add @gati-framework/playground
+npm install @gati-framework/playground
 ```
 
 ## Quick Start
 
-### 1. Initialize Playground Module
+```bash
+# Start dev server with playground
+gati dev --playground
+
+# Access playground
+open http://localhost:3000/__playground
+```
+
+## Features
+
+- ✅ **3 Visualization Modes** - API, Network, Tracking
+- ✅ **Request Replay** - Time-travel debugging
+- ✅ **Trace Inspection** - Distributed tracing visualization
+- ✅ **Debug Gates** - Conditional breakpoints
+- ✅ **WebSocket Integration** - Real-time updates
+- ✅ **Snapshot Inspection** - Request/response snapshots
+
+## Visualization Modes
+
+### API Mode
+
+View handlers, modules, and request flow.
+
+```
+┌─────────────────────────────────┐
+│         Handlers (3)            │
+├─────────────────────────────────┤
+│ GET  /users/:id                 │
+│ POST /users                     │
+│ GET  /health                    │
+└─────────────────────────────────┘
+
+┌─────────────────────────────────┐
+│         Modules (2)             │
+├─────────────────────────────────┤
+│ database                        │
+│ logger                          │
+└─────────────────────────────────┘
+```
+
+### Network Mode
+
+Visualize request/response flow with timing.
+
+```
+Request → Handler → Module → Response
+  2ms      5ms       3ms      1ms
+```
+
+### Tracking Mode
+
+Distributed tracing with request/trace/client IDs.
+
+```
+Request ID:  req-123
+Trace ID:    trace-456
+Client ID:   client-789
+Duration:    11ms
+Status:      200 OK
+```
+
+## Integration
+
+### Automatic (Dev Server)
+
+```bash
+gati dev --playground
+```
+
+Playground automatically available at `/__playground`.
+
+### Manual Integration
 
 ```typescript
-import { createApp } from '@gati-framework/runtime';
-import { initPlayground } from '@gati-framework/playground';
+import { PlaygroundEngine } from '@gati-framework/playground';
 
-const app = createApp();
-
-// Initialize playground module
-await initPlayground(app.getGlobalContext(), {
-  enabled: process.env.NODE_ENV !== 'production',
+const playground = new PlaygroundEngine({
   port: 3001,
-  debugMode: true,
+  enableReplay: true,
+  enableDebugGates: true
 });
 
-await app.listen();
+await playground.start();
 ```
 
-### 2. Register Playground Handlers
+### Runtime Integration
 
 ```typescript
-import {
-  getRoutesHandler,
-  getRouteHandler,
-  getInstancesHandler,
-  playgroundHandlerMetadata,
-} from '@gati-framework/playground';
+import { createE2EIntegration } from '@gati-framework/runtime';
+import { PlaygroundEngine } from '@gati-framework/playground';
 
-// Auto-register all playground handlers
-app.get(playgroundHandlerMetadata.getRoutes.route, getRoutesHandler);
-app.get(playgroundHandlerMetadata.getRoute.route, getRouteHandler);
-app.get(playgroundHandlerMetadata.getInstances.route, getInstancesHandler);
+const integration = createE2EIntegration({ handlers, modules });
+const playground = new PlaygroundEngine({ integration });
+
+await playground.start();
 ```
 
-### 3. Access the Playground
+## Request Replay
 
-Open your browser to `http://localhost:3001/playground` to access the 3D visualization interface.
+Replay any request with original context.
+
+```typescript
+// Capture request
+playground.captureRequest({
+  id: 'req-123',
+  method: 'GET',
+  path: '/users/123',
+  headers: {},
+  timestamp: Date.now()
+});
+
+// Replay later
+await playground.replayRequest('req-123');
+```
+
+### UI Usage
+
+1. Click request in history
+2. Click "Replay" button
+3. View replayed response
+4. Compare with original
+
+## Debug Gates
+
+Conditional breakpoints for debugging.
+
+```typescript
+import { DebugGateManager } from '@gati-framework/playground';
+
+const gates = new DebugGateManager();
+
+// Add debug gate
+gates.addGate({
+  id: 'user-check',
+  condition: (req) => req.params.id === '123',
+  action: 'pause' // or 'log', 'snapshot'
+});
+
+// Check in handler
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  if (gates.shouldPause(req)) {
+    // Execution paused, inspect in playground
+  }
+  
+  const user = await gctx.modules['db'].users.findById(req.params.id);
+  res.json({ user });
+};
+```
+
+### UI Usage
+
+1. Open Debug Gates panel
+2. Add condition: `req.params.id === '123'`
+3. Select action: Pause/Log/Snapshot
+4. Make request matching condition
+5. Inspect paused state
+
+## Trace Inspection
+
+View distributed tracing data.
+
+```typescript
+// Traces automatically captured
+playground.getTrace('trace-456');
+
+// View in UI
+{
+  traceId: 'trace-456',
+  spans: [
+    { name: 'handler', duration: 5ms },
+    { name: 'database', duration: 3ms },
+    { name: 'response', duration: 1ms }
+  ],
+  totalDuration: 11ms
+}
+```
+
+## Snapshot Inspection
+
+Capture request/response snapshots.
+
+```typescript
+// Automatic snapshots
+playground.enableSnapshots({
+  maxSnapshots: 100,
+  captureBody: true,
+  captureHeaders: true
+});
+
+// Manual snapshot
+playground.captureSnapshot({
+  requestId: 'req-123',
+  request: req,
+  response: res,
+  context: { gctx, lctx }
+});
+```
+
+## WebSocket API
+
+Real-time communication with playground UI.
+
+```typescript
+// Server-side
+playground.broadcast({
+  type: 'request',
+  data: { id: 'req-123', method: 'GET', path: '/users/123' }
+});
+
+// Client-side
+const ws = new WebSocket('ws://localhost:3001');
+ws.onmessage = (event) => {
+  const { type, data } = JSON.parse(event.data);
+  if (type === 'request') {
+    console.log('New request:', data);
+  }
+};
+```
 
 ## Configuration
 
 ```typescript
 interface PlaygroundConfig {
-  /** Enable playground (default: false in production) */
-  enabled: boolean;
-  
-  /** Port for playground UI (default: 3001) */
-  port: number;
-  
-  /** WebSocket port for event streaming (default: 3002) */
-  wsPort: number;
-  
-  /** Enable debug mode with breakpoints (default: false) */
-  debugMode: boolean;
-  
-  /** Maximum event buffer size (default: 10000) */
-  maxEventBuffer: number;
-  
-  /** Event retention time in ms (default: 5 minutes) */
-  eventRetentionMs: number;
+  port?: number;                    // Default: 3001
+  enableReplay?: boolean;           // Default: true
+  enableDebugGates?: boolean;       // Default: true
+  enableSnapshots?: boolean;        // Default: true
+  maxSnapshots?: number;            // Default: 100
+  maxTraces?: number;               // Default: 1000
+  wsPath?: string;                  // Default: '/ws'
 }
 ```
 
-## API Endpoints
+## UI Features
 
-The playground module exposes the following Gati handlers:
+### Request History
 
-- `GET /playground/api/routes` - List all registered routes
-- `GET /playground/api/routes/:id` - Get specific route details
-- `GET /playground/api/instances` - List active instances
-- `GET /playground/api/events/:traceId` - Get lifecycle events for a trace
-- `POST /playground/api/debug/session` - Create debug session
-- `POST /playground/api/debug/breakpoint` - Set breakpoint
-- `DELETE /playground/api/debug/breakpoint/:id` - Remove breakpoint
+- View all requests
+- Filter by method/path/status
+- Sort by timestamp/duration
+- Search by request ID
 
-## Visualization Modes
+### Handler Inspector
 
-### Go Mode (Real-time)
+- View handler code
+- See registered routes
+- Check middleware
+- View lifecycle hooks
 
-Watch requests flow through your application in real-time:
-- Request packets animate through the 3D scene
-- Middleware nodes light up as they execute
-- Handler nodes pulse during execution
-- Module calls are visualized as connections
+### Module Inspector
 
-### Debug Mode (Step-through)
+- View module state
+- Check dependencies
+- See RPC calls
+- Monitor lifecycle
 
-Set breakpoints and step through execution:
-- Click on any node to set a breakpoint
-- Execution pauses at breakpoints
-- Step through middleware and handler execution
-- Inspect request/response data at each step
+### Performance Metrics
 
-## Example: Complete Setup
+- Request duration
+- Handler execution time
+- Module call time
+- Response time
+
+## Examples
+
+### Basic Setup
 
 ```typescript
-import { createApp } from '@gati-framework/runtime';
-import {
-  initPlayground,
-  getRoutesHandler,
-  getRouteHandler,
-  getInstancesHandler,
-  getEventsHandler,
-  createDebugSessionHandler,
-  setBreakpointHandler,
-  removeBreakpointHandler,
-  playgroundHandlerMetadata as meta,
-} from '@gati-framework/playground';
+import { PlaygroundEngine } from '@gati-framework/playground';
 
-async function main() {
-  const app = createApp({ port: 3000 });
+const playground = new PlaygroundEngine({
+  port: 3001,
+  enableReplay: true
+});
 
-  // Initialize playground
-  await initPlayground(app.getGlobalContext(), {
-    enabled: true,
-    port: 3001,
-    debugMode: true,
-  });
-
-  // Register playground API handlers
-  app.get(meta.getRoutes.route, getRoutesHandler);
-  app.get(meta.getRoute.route, getRouteHandler);
-  app.get(meta.getInstances.route, getInstancesHandler);
-  app.get(meta.getEvents.route, getEventsHandler);
-  app.post(meta.createDebugSession.route, createDebugSessionHandler);
-  app.post(meta.setBreakpoint.route, setBreakpointHandler);
-  app.delete(meta.removeBreakpoint.route, removeBreakpointHandler);
-
-  // Your application routes
-  app.get('/hello', (req, res) => {
-    res.json({ message: 'Hello, World!' });
-  });
-
-  await app.listen();
-  console.log('App running on :3000, Playground on :3001');
-}
-
-main();
+await playground.start();
+console.log('Playground: http://localhost:3001');
 ```
 
-## Frontend (Three.js Visualization)
+### With Debug Gates
 
-The playground frontend is served from the `public/` directory and includes:
+```typescript
+const playground = new PlaygroundEngine({
+  enableDebugGates: true
+});
 
-- **3D Scene**: Visualizes request flow through your application
-- **Route Sidebar**: Browse and filter registered routes
-- **Request Builder**: Configure and send test requests
-- **Control Panel**: Toggle between Go and Debug modes
-- **Event Timeline**: View real-time lifecycle events
-
-## Architecture
-
+playground.debugGates.addGate({
+  id: 'slow-requests',
+  condition: (req, res, duration) => duration > 100,
+  action: 'log'
+});
 ```
-┌─────────────────────────────────────────┐
-│         Playground Module               │
-│  (Gati Module - @gati-framework/...)    │
-├─────────────────────────────────────────┤
-│                                         │
-│  ┌──────────────┐   ┌───────────────┐  │
-│  │   Handlers   │   │  WebSocket    │  │
-│  │  (Gati API)  │   │   Server      │  │
-│  └──────────────┘   └───────────────┘  │
-│                                         │
-│  ┌──────────────┐   ┌───────────────┐  │
-│  │ Introspection│   │    Event      │  │
-│  │    Engine    │   │   Emitter     │  │
-│  └──────────────┘   └───────────────┘  │
-│                                         │
-└─────────────────────────────────────────┘
-              ▲
-              │  Uses
-              │
-┌─────────────┴───────────────────────────┐
-│      Gati Runtime                       │
-│  (Middleware, Handlers, Context)        │
-└─────────────────────────────────────────┘
+
+### With Custom Snapshots
+
+```typescript
+const playground = new PlaygroundEngine({
+  enableSnapshots: true,
+  maxSnapshots: 50
+});
+
+playground.on('request', (req) => {
+  if (req.path.startsWith('/api/admin')) {
+    playground.captureSnapshot({ request: req });
+  }
+});
 ```
 
 ## Development
 
 ```bash
-# Build the module
+pnpm install
 pnpm build
-
-# Run tests
-pnpm test
-
-# Type check
-pnpm type-check
+pnpm dev          # Watch mode
+pnpm test:e2e     # E2E tests
+pnpm test:e2e:ui  # E2E tests with UI
 ```
 
-## Security Notes
-
-⚠️ **Never enable the playground in production!**
-
-The playground exposes internal application structure and allows inspection of runtime behavior. Always ensure:
+## E2E Testing
 
 ```typescript
-await initPlayground(app.getGlobalContext(), {
-  enabled: process.env.NODE_ENV !== 'production',
+import { test, expect } from '@playwright/test';
+
+test('playground loads', async ({ page }) => {
+  await page.goto('http://localhost:3001');
+  await expect(page.locator('h1')).toContainText('Gati Playground');
+});
+
+test('request replay works', async ({ page }) => {
+  await page.goto('http://localhost:3001');
+  await page.click('[data-testid="request-123"]');
+  await page.click('[data-testid="replay-button"]');
+  await expect(page.locator('[data-testid="response"]')).toBeVisible();
 });
 ```
 
+## Troubleshooting
+
+**Playground not loading**:
+- Check port availability
+- Verify WebSocket connection
+- Check browser console
+
+**Requests not appearing**:
+- Verify runtime integration
+- Check WebSocket connection
+- Enable debug logging
+
+**Replay fails**:
+- Check request ID exists
+- Verify handler still registered
+- Check module availability
+
+## Related Packages
+
+- [@gati-framework/runtime](../runtime) - Runtime engine
+- [@gati-framework/cli](../cli) - CLI tools
+- [@gati-framework/testing](../testing) - Test utilities
+
+## Documentation
+
+- [Playground Guide](https://krishnapaul242.github.io/gati/guides/playground)
+- [Visual Debugging](https://krishnapaul242.github.io/gati/blog/visual-debugging-playground)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
+
+## Contributing
+
+Contributions welcome! See [Contributing Guide](../../docs/contributing/README.md).
+
 ## License
 
-MIT © Krishna Paul
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
+
+---
+
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡

@@ -1,40 +1,54 @@
 # @gati-framework/operator
 
-Kubernetes Operator for automated deployment and orchestration of Gati handlers and modules.
+> Kubernetes operator for Gati handler and module deployment
+
+[![npm version](https://img.shields.io/npm/v/@gati-framework/operator.svg)](https://www.npmjs.com/package/@gati-framework/operator)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
+
+Kubernetes operator that manages Gati applications with custom resources for handlers, modules, and versions.
 
 ## Installation
 
 ```bash
-npm install @gati-framework/operator
+npm install -g @gati-framework/operator
 ```
 
-## Architecture
+## Quick Start
 
-The Gati Operator uses a contracts-based architecture to support multiple deployment targets:
+```bash
+# Install CRDs
+kubectl apply -f node_modules/@gati-framework/operator/crds/
 
-- **Deployment Contracts**: Pluggable backends via `IDeploymentTarget` and `IManifestGenerator`
-- **CRD-Driven**: Declarative resource definitions for handlers, modules, and versions
-- **Reconciliation Loop**: Watches CRDs and ensures desired state matches actual state
-- **Multi-Version Support**: Timescape-aware orchestration for zero-downtime deployments
+# Start operator
+gati-operator start
 
-## Custom Resource Definitions
+# Deploy handler
+kubectl apply -f handler.yaml
+```
+
+## Features
+
+- ✅ **Custom Resources** - GatiHandler, GatiModule, GatiVersion
+- ✅ **Auto-scaling** - HPA integration
+- ✅ **Rolling Updates** - Zero-downtime deployments
+- ✅ **Health Checks** - Automatic health monitoring
+- ✅ **Resource Management** - CPU/memory limits
+- ✅ **Observability** - Metrics and logging
+
+## Custom Resources
 
 ### GatiHandler
 
-Defines a Gati handler deployment:
-
 ```yaml
-apiVersion: gati.dev/v1alpha1
+apiVersion: gati.dev/v1
 kind: GatiHandler
 metadata:
   name: user-handler
-  namespace: default
 spec:
-  handlerPath: /api/users
-  version: v1.0.0
-  replicas: 2
-  image: my-app:v1.0.0
-  port: 3000
+  route: /users/:id
+  method: GET
+  image: my-app:latest
+  replicas: 3
   resources:
     requests:
       cpu: 100m
@@ -46,80 +60,107 @@ spec:
 
 ### GatiModule
 
-Defines a Gati module deployment:
-
 ```yaml
-apiVersion: gati.dev/v1alpha1
+apiVersion: gati.dev/v1
 kind: GatiModule
 metadata:
-  name: db-module
-  namespace: default
+  name: database
 spec:
-  moduleName: database
-  moduleType: node
-  runtime: node:20
+  type: postgres
+  image: my-app:latest
   replicas: 1
-  image: db-module:v1.0.0
-  port: 50051
-  capabilities:
-    - network
-    - storage
+  config:
+    host: postgres.default.svc
+    port: 5432
 ```
 
 ### GatiVersion
 
-Defines version metadata for Timescape orchestration:
-
 ```yaml
-apiVersion: gati.dev/v1alpha1
+apiVersion: gati.dev/v1
 kind: GatiVersion
 metadata:
-  name: user-handler-v1
-  namespace: default
+  name: v1-0-0
 spec:
-  versionId: v1.0.0
-  breaking: false
-  routingWeight: 100
-  transformers: []
+  version: 1.0.0
+  handlers:
+    - user-handler
+  modules:
+    - database
+  timestamp: 2025-11-25T00:00:00Z
 ```
 
-## Installation
+## Operator Commands
 
 ```bash
-# Install CRDs
-kubectl apply -f crds/
+# Start operator
+gati-operator start
 
-# Deploy operator
-kubectl apply -f operator.yaml
+# Check status
+gati-operator status
+
+# View logs
+gati-operator logs
+
+# Stop operator
+gati-operator stop
 ```
 
-## Deployment Targets
+## Auto-scaling
 
-The operator supports multiple deployment backends:
+```yaml
+apiVersion: gati.dev/v1
+kind: GatiHandler
+metadata:
+  name: user-handler
+spec:
+  route: /users/:id
+  method: GET
+  image: my-app:latest
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPU: 70
+```
 
-- **Kubernetes**: Direct API via @kubernetes/client-node
-- **Helm**: Generate Helm charts
-- **GitOps**: Integration with ArgoCD/Flux
+## Rolling Updates
 
-Configure via `DEPLOYMENT_TARGET` environment variable.
+```bash
+# Update handler image
+kubectl set image gatihandler/user-handler app=my-app:v2
 
-## Features
+# Rollback
+kubectl rollout undo gatihandler/user-handler
+```
 
-- ✅ Automated handler and module deployment
-- ✅ Horizontal Pod Autoscaling (HPA) and KEDA support
-- ✅ Timescape-aware multi-version orchestration
-- ✅ Automatic version decommissioning after traffic drains
-- ✅ Structured logging and Prometheus metrics
-- ✅ Graceful shutdown and error handling
+## Health Checks
+
+```yaml
+spec:
+  healthCheck:
+    path: /health
+    interval: 10s
+    timeout: 5s
+    failureThreshold: 3
+```
+
+## Related Packages
+
+- [@gati-framework/core](../core) - Core types
+- [@gati-framework/cli](../cli) - CLI tools
+- [@gati-framework/runtime](../runtime) - Runtime engine
 
 ## Documentation
 
-- [Architecture](./docs/architecture.md)
-- [Deployment Guide](./docs/deployment.md)
+- [Operator Guide](https://krishnapaul242.github.io/gati/guides/operator)
 - [CRD Reference](./docs/crds.md)
-- [Deployment Targets](./docs/targets.md)
-- [Troubleshooting](./docs/troubleshooting.md)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
 
 ## License
 
-MIT © Krishna Paul
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
+
+---
+
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡

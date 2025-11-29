@@ -1,185 +1,393 @@
 # @gati-framework/cli
 
-Command-line interface for the Gati framework — develop, build, and deploy cloud‑native TypeScript services.
+> Development and deployment tools for Gati applications
 
-**Version:** 1.0.0
+[![npm version](https://img.shields.io/npm/v/@gati-framework/cli.svg)](https://www.npmjs.com/package/@gati-framework/cli)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
 
-## Overview
-
-The Gati CLI provides essential tools for working with Gati applications:
-
-- **Development server** with hot reload (`gati dev`)
-- **Production builds** with TypeScript compilation (`gati build`)
-- **Kubernetes deployment** to local and cloud environments (`gati deploy`)
-- **Project creation** via the `gatic` wrapper command
+Command-line interface for creating, developing, building, and deploying Gati applications with hot reload, manifest generation, and multi-cloud deployment.
 
 ## Installation
 
-### For New Projects (Recommended)
+```bash
+# Global installation
+npm install -g @gati-framework/cli
 
-Use **GatiC** to create new projects:
+# Project dependency
+npm install --save-dev @gati-framework/cli
+```
+
+## Quick Start
+
+```bash
+# Create new project (use gatic instead)
+npx gatic create my-app
+
+# Start development server
+gati dev
+
+# Build for production
+gati build
+
+# Deploy to Kubernetes
+gati deploy dev --local
+```
+
+## Commands
+
+### `gati dev`
+
+Start development server with hot reload (50-200ms).
+
+```bash
+gati dev [options]
+
+Options:
+  -p, --port <port>     Port number (default: 3000)
+  -h, --host <host>     Host address (default: localhost)
+  --no-reload           Disable hot reload
+  --playground          Enable playground UI
+```
+
+**Features**:
+- Hot reload on file changes
+- Automatic manifest generation
+- Type checking
+- Error reporting
+- Playground integration
+
+### `gati build`
+
+Build application for production.
+
+```bash
+gati build [options]
+
+Options:
+  -o, --outDir <dir>    Output directory (default: dist)
+  --minify              Minify output
+  --sourcemap           Generate source maps
+```
+
+**Output**:
+- Compiled TypeScript
+- Generated manifests
+- Type definitions
+- Docker image (optional)
+
+### `gati deploy`
+
+Deploy to Kubernetes cluster.
+
+```bash
+gati deploy <env> [options]
+
+Arguments:
+  env                   Environment (dev, staging, prod)
+
+Options:
+  --local               Deploy to local kind cluster
+  --cloud <provider>    Cloud provider (aws, gcp, azure)
+  --region <region>     Cloud region
+  --cluster <name>      Cluster name
+```
+
+**Examples**:
+```bash
+# Local development
+gati deploy dev --local
+
+# AWS EKS
+gati deploy prod --cloud aws --region us-east-1
+
+# GCP GKE
+gati deploy prod --cloud gcp --region us-central1
+```
+
+### `gati generate`
+
+Generate code and manifests.
+
+```bash
+gati generate <type> [options]
+
+Types:
+  handler               Generate handler
+  module                Generate module
+  manifest              Generate manifests
+  types                 Generate type definitions
+```
+
+**Examples**:
+```bash
+# Generate handler
+gati generate handler users/[id]
+
+# Generate module
+gati generate module database
+
+# Regenerate manifests
+gati generate manifest
+```
+
+### `gati validate`
+
+Validate configuration and manifests.
+
+```bash
+gati validate [options]
+
+Options:
+  --config              Validate gati.config.ts
+  --manifests           Validate handler/module manifests
+  --types               Validate type definitions
+```
+
+## Configuration
+
+### gati.config.ts
+
+```typescript
+import type { GatiConfig } from '@gati-framework/core';
+
+export default {
+  name: 'my-app',
+  version: '1.0.0',
+  
+  // Development server
+  dev: {
+    port: 3000,
+    host: 'localhost',
+    hotReload: true,
+    playground: true
+  },
+  
+  // Build options
+  build: {
+    outDir: 'dist',
+    minify: true,
+    sourcemap: true
+  },
+  
+  // Deployment
+  cloud: {
+    provider: 'aws',
+    region: 'us-east-1',
+    kubernetes: {
+      clusterName: 'my-cluster',
+      namespace: 'production'
+    }
+  }
+} satisfies GatiConfig;
+```
+
+## Development Workflow
+
+### 1. Create Project
 
 ```bash
 npx gatic create my-app
 cd my-app
-
-# The 'gati' command is now available
-gati --help
 ```
 
-**What is GatiC?**
-- `gatic` - Project creation command (thin wrapper)
-- `gati` - Development and deployment tools (this package)
-- Use `npx gatic create` to scaffold new projects
-- Use `gati dev`, `gati build`, `gati deploy` within projects
-
-### Manual Installation
-
-Install in an existing project:
+### 2. Start Dev Server
 
 ```bash
-npx gatic --help          # preferred
-# legacy (will deprecate)
-npx gati --help
-pnpm exec gatic --help
+gati dev --playground
 ```
 
-## Usage
+Server starts at `http://localhost:3000`  
+Playground at `http://localhost:3000/__playground`
 
-### Create a new project
+### 3. Create Handler
 
 ```bash
-gatic create my-app
+gati generate handler users/[id]
 ```
 
-This scaffolds a minimal TypeScript project with:
+Creates `src/handlers/users/[id].ts`:
 
-- `@gati-framework/core` types
-- `tsconfig` preconfigured
-- Example handler(s)
+```typescript
+import type { Handler } from '@gati-framework/runtime';
 
-### Develop (hot reload)
+export const handler: Handler = async (req, res, gctx, lctx) => {
+  const userId = req.params.id;
+  res.json({ userId });
+};
+```
+
+### 4. Hot Reload
+
+Save file → Auto-reload (50-200ms) → Test immediately
+
+### 5. Build & Deploy
 
 ```bash
-gatic dev
+gati build
+gati deploy prod --cloud aws
 ```
 
-- Loads environment variables
-- Watches your project and restarts on changes
+## Hot Reload
 
-### Build for production
+Fast file watching with automatic reloading:
+
+- **Handler changes**: 50-100ms reload
+- **Module changes**: 100-150ms reload
+- **Config changes**: 150-200ms reload
+
+**Implementation**:
+```typescript
+import { createWatcher } from '@gati-framework/cli/utils/watcher';
+
+const watcher = createWatcher('./src', {
+  onChange: (file) => console.log(`Reloading ${file}`)
+});
+```
+
+## Manifest Generation
+
+Automatic manifest generation from TypeScript:
+
+```typescript
+// src/handlers/users/[id].ts
+export const METHOD = 'GET';
+export const ROUTE = '/users/:id';
+export const handler: Handler = async (req, res) => {
+  res.json({ id: req.params.id });
+};
+```
+
+Generates `.gati/manifests/users_[id].json`:
+
+```json
+{
+  "id": "users_[id]",
+  "route": "/users/:id",
+  "method": "GET",
+  "filePath": "./src/handlers/users/[id].ts",
+  "exportName": "handler"
+}
+```
+
+## Deployment
+
+### Local Kubernetes (kind)
 
 ```bash
-gatic build
+# Create cluster
+kind create cluster --name gati-dev
+
+# Deploy
+gati deploy dev --local
+
+# Access
+kubectl port-forward svc/my-app 3000:80
 ```
 
-- Validates project structure
-- Compiles TypeScript (`tsc`) to `dist/`
-- Prints a concise build summary
-
-### Deploy (generate manifests & local cluster)
+### AWS EKS
 
 ```bash
-gatic deploy dev --dry-run
+# Configure AWS
+aws configure
+
+# Deploy
+gati deploy prod --cloud aws --region us-east-1 --cluster my-cluster
+
+# Get endpoint
+kubectl get ingress
 ```
 
-- Generates:
-  - Dockerfile (multi-stage, non-root user)
-  - Kubernetes Deployment and Service YAML
-  - Optional Helm scaffolding (templates included)
-- `--dry-run` prints manifests without applying
-
-Options (new additions in 0.3.0 highlighted):
-
-- `-e, --env <environment>`: dev | staging | prod
-- `--dry-run`: preview only
-- `--skip-build`: skip Docker build step (future)
-- `-p, --provider <provider>`: kubernetes | aws | gcp | azure (kubernetes default; cloud providers are WIP)
-- `--local` (0.3.0): force local kind cluster deployment flow
-- `--cluster-name <name>` (0.3.0): override kind cluster name (default: `gati-local`)
-- `--skip-cluster` (0.3.0): assume cluster already exists, skip creation
-- `--health-check-path <path>` (0.3.0): run an HTTP GET probe after rollout (e.g. `/health`)
-- `--timeout <seconds>` (0.3.0): rollout timeout (default 120)
-- `--port-forward` (0.3.0): start a persistent `kubectl port-forward` session (Ctrl+C to stop)
-- `--auto-tag` (0.3.0): tag image with `YYYYMMDD-HHMMSS-<gitsha>` for reproducible builds
-- `-v, --verbose`: print helpful follow‑up commands
-
-## Example
+### GCP GKE
 
 ```bash
-# Inside your app
-pnpm exec gati deploy dev --dry-run
+# Configure GCP
+gcloud auth login
+
+# Deploy
+gati deploy prod --cloud gcp --region us-central1 --cluster my-cluster
 ```
 
-Sample (dry-run) output (truncated):
+## Utilities
 
-```text
-✔ Loaded config for: my-app
-📦 Deploying to: dev
-🔍 DRY RUN MODE - No actual deployment will occur
-✔ Manifests generated successfully
---- Dockerfile ---
-FROM node:20-alpine AS builder
-...
---- Deployment ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-app
-...
+### File Watcher
+
+```typescript
+import { createWatcher } from '@gati-framework/cli/utils/watcher';
+
+const watcher = createWatcher('./src', {
+  onChange: (file) => console.log(`Changed: ${file}`),
+  onError: (error) => console.error(error)
+});
 ```
 
-### Local cluster deployment with health probe & auto-tag
+### Environment Loader
+
+```typescript
+import { loadEnv } from '@gati-framework/cli/utils/env-loader';
+
+const env = loadEnv('.env');
+```
+
+### Bundler
+
+```typescript
+import { bundle } from '@gati-framework/cli/utils/bundler';
+
+await bundle({
+  entry: './src/index.ts',
+  outDir: './dist',
+  minify: true
+});
+```
+
+## Development
 
 ```bash
-gatic deploy dev --local --auto-tag --health-check-path /health --port-forward --timeout 240
+pnpm install
+pnpm build
+pnpm test
+pnpm dev  # Watch mode
 ```
 
-Behaviors:
+## Troubleshooting
 
-- Builds Docker image (auto-tagged) and loads it into kind
-- Applies Deployment + Service manifests to namespace
-- Waits for rollout (up to timeout seconds)
-- Ephemeral port-forward for health probe (returns status) then optional persistent port-forward if `--port-forward` specified
-- Prints endpoint and teardown hints when `-v/--verbose` is used
+**Hot reload not working**:
+- Check file watcher permissions
+- Verify `.gati` directory exists
+- Check console for errors
 
-If the health check fails, deployment still completes; you can inspect logs with:
+**Deployment fails**:
+- Verify cloud credentials
+- Check cluster connectivity
+- Validate manifests: `gati validate`
 
-```bash
-kubectl logs deployment/my-app -n <namespace>
-```
+**Build errors**:
+- Run `pnpm typecheck`
+- Check `gati.config.ts`
+- Verify dependencies
 
-### Image Auto-Tag Format
+## Related Packages
 
-`<appName>:YYYYMMDD-HHMMSS-<gitSha>` (git SHA omitted if unavailable). Example: `my-app:20251109-143205-a1b2c3`.
+- [@gati-framework/runtime](../runtime) - Runtime execution engine
+- [@gati-framework/core](../core) - Core types
+- [gatic](../gatic) - Project scaffolding
+- [@gati-framework/cloud-aws](../cloud-aws) - AWS deployment
 
-### Troubleshooting
+## Documentation
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Missing tools error | docker/kubectl/kind not installed | Install from linked URLs in error message |
-| Rollout timeout | Pods not ready within `--timeout` | Check `kubectl describe pod` and events |
-| Health check failed | Endpoint not ready or wrong path | Verify handler route & service port mapping |
-| Port-forward exits immediately | Process received signal / port conflict | Try a different local port or check for duplicates |
-
-
-## Requirements
-
-- Node.js >= 18
-- pnpm >= 8 (recommended)
-- Windows, macOS, Linux supported
-
-## Notes
-
-- CLI is ESM. Local imports in compiled output use explicit `.js` extensions.
-- Deployment templates are bundled into the package automatically.
-- Cloud provider integration (AWS/GCP/Azure) will arrive in later milestones.
+- [CLI Guide](https://krishnapaul242.github.io/gati/guides/cli)
+- [Development Server](https://krishnapaul242.github.io/gati/guides/development-server)
+- [Deployment](https://krishnapaul242.github.io/gati/guides/deployment)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
 
 ## Contributing
 
-Issues and PRs are welcome at:
-<https://github.com/krishnapaul242/gati>
+Contributions welcome! See [Contributing Guide](../../docs/contributing/README.md).
 
 ## License
 
-MIT © Krishna Paul
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
+
+---
+
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡

@@ -1,82 +1,202 @@
 # @gati-framework/core
 
-Core types & base configuration for the Gati framework.
+> Core types, interfaces, and configuration for the Gati framework
 
-This package is intentionally minimal right now (Milestone M1). It provides:
+[![npm version](https://img.shields.io/npm/v/@gati-framework/core.svg)](https://www.npmjs.com/package/@gati-framework/core)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](../../LICENSE)
 
-- Canonical TypeScript types used by handlers & contexts
-- A sharable `tsconfig.base.json` for scaffolding new services
-- Stable public package for downstream tooling & the CLI
+Foundation package providing TypeScript types, interfaces, and base configuration used across all Gati packages.
 
-Future milestones will move the runtime (execution engine, router, module system) into its own publishable package (e.g. `@gati-framework/runtime`).
-
-## Install
+## Installation
 
 ```bash
-pnpm add @gati-framework/core
-# or
-npm i @gati-framework/core
+npm install @gati-framework/core
 ```
 
-## Exports
+## Quick Start
 
-Currently exported types (subject to expansion):
+```typescript
+import type { GatiConfig, CloudProvider } from '@gati-framework/core';
 
-```ts
-import type {
-  Handler,
-  Request,
-  Response,
-  GlobalContext,
-  LocalContext,
-  AppConfig,
-  GatiApp // interface form (runtime class will live in runtime package later)
-} from '@gati-framework/core';
+const config: GatiConfig = {
+  name: 'my-app',
+  version: '1.0.0',
+  cloud: {
+    provider: 'aws',
+    region: 'us-east-1'
+  }
+};
 ```
 
-### Tsconfig Base
+## Features
 
-Reference it in your project `tsconfig.json`:
+- ✅ **TypeScript Types** - Complete type definitions for Gati ecosystem
+- ✅ **Cloud Provider Interface** - Unified interface for AWS/GCP/Azure
+- ✅ **Configuration Schema** - Type-safe configuration
+- ✅ **Base TSConfig** - Shared TypeScript configuration
+
+## Core Types
+
+### GatiConfig
+
+Application configuration schema.
+
+```typescript
+interface GatiConfig {
+  name: string;
+  version: string;
+  cloud?: CloudConfig;
+  observability?: ObservabilityConfig;
+  deployment?: DeploymentConfig;
+}
+```
+
+### CloudProvider
+
+Unified cloud provider interface.
+
+```typescript
+interface CloudProvider {
+  name: 'aws' | 'gcp' | 'azure' | 'local';
+  deploy(config: DeploymentConfig): Promise<DeploymentResult>;
+  destroy(config: DeploymentConfig): Promise<void>;
+  getStatus(config: DeploymentConfig): Promise<DeploymentStatus>;
+}
+```
+
+### CloudConfig
+
+Cloud-specific configuration.
+
+```typescript
+interface CloudConfig {
+  provider: 'aws' | 'gcp' | 'azure';
+  region: string;
+  credentials?: CloudCredentials;
+  kubernetes?: KubernetesConfig;
+}
+```
+
+## Usage
+
+### Configuration
+
+```typescript
+import type { GatiConfig } from '@gati-framework/core';
+
+export default {
+  name: 'my-api',
+  version: '1.0.0',
+  cloud: {
+    provider: 'aws',
+    region: 'us-east-1',
+    kubernetes: {
+      clusterName: 'my-cluster',
+      namespace: 'production'
+    }
+  }
+} satisfies GatiConfig;
+```
+
+### Cloud Provider
+
+```typescript
+import type { CloudProvider } from '@gati-framework/core';
+
+class AWSProvider implements CloudProvider {
+  name = 'aws' as const;
+  
+  async deploy(config) {
+    // Deploy to AWS EKS
+  }
+  
+  async destroy(config) {
+    // Cleanup AWS resources
+  }
+  
+  async getStatus(config) {
+    // Get deployment status
+  }
+}
+```
+
+### TypeScript Configuration
+
+Extend the base tsconfig in your project:
 
 ```json
 {
   "extends": "@gati-framework/core/tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src/**/*"]
+    "outDir": "./dist"
+  }
 }
 ```
 
-## Handler Type (Preview)
+## Type Exports
 
-```ts
-import type { Handler } from '@gati-framework/core';
+```typescript
+// Configuration
+export type { GatiConfig, CloudConfig, DeploymentConfig };
 
-export const handler: Handler = (req, res, gctx, lctx) => {
-  res.json({ ok: true });
-};
+// Cloud providers
+export type { CloudProvider, CloudCredentials, DeploymentResult };
+
+// Kubernetes
+export type { KubernetesConfig, KubernetesManifest };
+
+// Observability
+export type { ObservabilityConfig, MetricsConfig, LoggingConfig };
 ```
 
-## Versioning Policy
+## Base TSConfig
 
-- Minor versions: additive, non-breaking exports
-- Patch versions: internal / doc changes
-- Major versions: (not expected until runtime lands)
+Shared TypeScript configuration with optimal settings:
 
-## Roadmap Alignment
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
+```
 
-| Milestone | Relevance |
-|-----------|-----------|
-| M1        | Types & base config (this package) |
-| M2        | Deployment engines (separate packages) |
-| M3        | Versioned routing (runtime package) |
+## Development
+
+```bash
+pnpm install
+pnpm build
+pnpm clean
+```
+
+## Related Packages
+
+- [@gati-framework/runtime](../runtime) - Runtime execution engine
+- [@gati-framework/cli](../cli) - CLI tools
+- [@gati-framework/cloud-aws](../cloud-aws) - AWS provider
+- [@gati-framework/cloud-gcp](../cloud-gcp) - GCP provider
+- [@gati-framework/cloud-azure](../cloud-azure) - Azure provider
+
+## Documentation
+
+- [Configuration Guide](https://krishnapaul242.github.io/gati/guides/configuration)
+- [Cloud Providers](https://krishnapaul242.github.io/gati/guides/deployment)
+- [Full Documentation](https://krishnapaul242.github.io/gati/)
 
 ## Contributing
 
-Open an issue or PR at https://github.com/krishnapaul242/gati
+Contributions welcome! See [Contributing Guide](../../docs/contributing/README.md).
 
 ## License
 
-MIT © Krishna Paul
+MIT © 2025 [Krishna Paul](https://github.com/krishnapaul242)
+
+---
+
+**Part of the [Gati Framework](https://github.com/krishnapaul242/gati)** ⚡
