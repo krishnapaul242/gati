@@ -116,17 +116,24 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
       try {
         // Import the config from root directory
         const configJsPath = resolve(cwd, 'gati.config.js');
-        const configPath = existsSync(configJsPath) 
-          ? configJsPath 
-          : resolve(cwd, 'gati.config.ts');
+        const configTsPath = resolve(cwd, 'gati.config.ts');
+        const configPath = existsSync(configJsPath) ? configJsPath : configTsPath;
+        const isTypeScript = configPath.endsWith('.ts');
         
-        // Convert to file:// URL for Windows compatibility
-        const configUrl = new URL(`file://${configPath.replace(/\\/g, '/')}`).href;
-        
-        // Use dynamic import with cache busting for hot reload
-        const cacheBuster = `?t=${Date.now()}`;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const configModule = await import(configUrl + cacheBuster);
+        let configModule;
+        
+        if (isTypeScript) {
+          // Use tsx to load TypeScript files
+          const { tsImport } = await import('tsx/esm/api');
+          const fileUrl = `file:///${configPath.replace(/\\/g, '/')}`;
+          configModule = await tsImport(fileUrl, import.meta.url);
+        } else {
+          // Use regular import for JavaScript files
+          const configUrl = new URL(`file://${configPath.replace(/\\/g, '/')}`).href;
+          const cacheBuster = `?t=${Date.now()}`;
+          configModule = await import(configUrl + cacheBuster);
+        }
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const config = configModule.default || configModule;
         

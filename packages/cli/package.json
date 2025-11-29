@@ -1,6 +1,6 @@
 {
   "name": "@gati-framework/cli",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "CLI tool for Gati framework - create, develop, build and deploy cloud-native applications",
   "license": "MIT",
   "type": "module",
