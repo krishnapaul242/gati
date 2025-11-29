@@ -1,0 +1,37 @@
+{{- if and .Values.ingress.enabled .Values.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: gati-ingress
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: gati-ingress
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gati-ingress
+  {{- if .Values.keda.scaleToZero }}
+  minReplicaCount: 0
+  {{- else }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  {{- end }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: {{ .Values.keda.prometheus.serverAddress }}
+      metricName: http_requests_per_second
+      query: |
+        sum(rate(http_requests_total{service="gati-ingress"}[1m]))
+      threshold: {{ .Values.keda.prometheus.threshold | quote }}
+{{- end }}
