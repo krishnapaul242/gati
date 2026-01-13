@@ -13,6 +13,37 @@ export { loadHandlers, discoverHandlers } from './loader.js';
 // Middleware utilities
 export { createCorsMiddleware } from './middleware/cors.js';
 export type { CorsOptions } from './middleware/cors.js';
+export {
+  extractPropertyMiddleware,
+  propertyToMiddleware,
+} from './middleware/property-based.js';
+export type {
+  PropertyMiddleware,
+  PropertyHandler,
+} from './middleware/property-based.js';
+
+// Simplified API - String schemas
+export {
+  parseStringSchema,
+  parseObjectSchema,
+  isStringSchema,
+  isObjectSchema,
+} from './validation/string-schema.js';
+
+// Simplified API - Resource pattern
+export {
+  isResource,
+  generateResourceRoutes,
+  extractResourceName,
+} from './patterns/resource.js';
+export type {
+  Resource,
+  ResourceConfig,
+  ResourceRoutes,
+} from './patterns/resource.js';
+
+// Simplified API - Builder pattern
+export { HandlerBuilder, handler } from './patterns/builder.js';
 
 // Logger utilities
 export { createLogger, logger } from './logger.js';
@@ -27,11 +58,22 @@ export type {
 // Runtime-specific types (extended from core)
 export type {
   Handler,
+  TypedRequest,
+  TypedResponse,
+  InferInput,
+  InferOutput,
+  InferParams,
+  InferQuery,
 } from './types/handler.js';
 export type {
   GlobalContext,
   LocalContext,
 } from './types/context.js';
+export type {
+  InferGType,
+  InferPrimitive,
+  InferArray,
+} from './types/inference.js';
 
 // Runtime-specific exports
 export { HandlerError } from './types/handler.js';

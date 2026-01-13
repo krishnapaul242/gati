@@ -13,6 +13,7 @@ import type {
 } from './types/index.js';
 import { HandlerError } from './types/index.js';
 import { logger } from './logger.js';
+import { extractPropertyMiddleware, propertyToMiddleware } from './middleware/property-based.js';
 
 /**
  * Default handler execution timeout (30 seconds)
@@ -57,7 +58,24 @@ export async function executeHandler(
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
   const catchErrors = options?.catchErrors ?? true;
 
+  // Extract and apply property-based middleware
+  const propertyMiddleware = extractPropertyMiddleware(handler);
+  const middlewareFns = propertyToMiddleware(propertyMiddleware);
+
   try {
+    // Execute property middleware chain
+    for (const mw of middlewareFns) {
+      let nextCalled = false;
+      await mw(req, res, gctx, lctx, () => {
+        nextCalled = true;
+        return Promise.resolve();
+      });
+      
+      // If middleware didn't call next or response was sent, stop
+      if (!nextCalled || res.isSent()) {
+        return;
+      }
+    }
     // Resolve Timescape version context
     if (lctx.timescape) {
       lctx.timescape.resolvedState = lctx.timescape.resolver.resolve({

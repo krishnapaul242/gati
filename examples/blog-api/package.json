@@ -1,0 +1,26 @@
+{
+  "name": "gati-blog-api-example",
+  "version": "1.0.0",
+  "description": "Blog API example demonstrating Gati with authentication and database operations",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "gati dev",
+    "build": "gati build",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:record": "node test-api.js > test-session.log 2>&1"
+  },
+  "dependencies": {
+    "@gati-framework/runtime": "^2.0.3",
+    "@gati-framework/core": "^0.4.5"
+  },
+  "devDependencies": {
+    "@gati-framework/cli": "^1.0.14",
+    "@gati-framework/testing": "^1.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": ["gati", "blog", "api", "example", "authentication"],
+  "author": "Gati Framework",
+  "license": "MIT"
+}

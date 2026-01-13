@@ -3,10 +3,16 @@
  * @description Analyze handlers and modules using ts-morph
  */
 
-import type { SourceFile} from 'ts-morph';
+import type { SourceFile, Type } from 'ts-morph';
 import { Project, SyntaxKind } from 'ts-morph';
 import { resolve, relative } from 'path';
 import { existsSync, readdirSync, statSync } from 'fs';
+import { TypeExtractor } from '../extractor/type-extractor.js';
+import { extractParams } from '../extractor/params-extractor.js';
+import { extractQuery } from '../extractor/query-extractor.js';
+import { extractInput } from '../extractor/input-extractor.js';
+import { extractOutput } from '../extractor/output-extractor.js';
+import type { GType } from '@gati-framework/types/gtype';
 
 export interface HandlerInfo {
   filePath: string;
@@ -18,6 +24,10 @@ export interface HandlerInfo {
   exportType: 'default' | 'named';
   imports: string[];
   dependencies: string[];
+  paramsSchema?: GType;
+  querySchema?: GType;
+  inputSchema?: GType;
+  outputSchema?: GType;
 }
 
 export interface ModuleInfo {
@@ -51,6 +61,13 @@ export function analyzeProject(projectRoot: string): ProjectManifest {
     skipAddingFilesFromTsConfig: true
   });
 
+  const typeExtractor = new TypeExtractor({
+    tsConfigPath: resolve(projectRoot, 'tsconfig.json'),
+    sourceRoot: projectRoot,
+    incremental: true,
+    cacheDir: resolve(projectRoot, '.gati/cache/types')
+  });
+
   const srcDir = resolve(projectRoot, 'src');
   const handlers: HandlerInfo[] = [];
   const modules: ModuleInfo[] = [];
@@ -62,7 +79,7 @@ export function analyzeProject(projectRoot: string): ProjectManifest {
     const sourceFile = project.addSourceFileAtPath(filePath);
     
     if (filePath.includes('/handlers/') || filePath.includes('\\handlers\\')) {
-      const handler = analyzeHandler(sourceFile, srcDir);
+      const handler = analyzeHandler(sourceFile, srcDir, typeExtractor);
       if (handler) handlers.push(handler);
     } else if (filePath.includes('/modules/') || filePath.includes('\\modules\\')) {
       const module = analyzeModule(sourceFile);
@@ -79,7 +96,7 @@ export function analyzeProject(projectRoot: string): ProjectManifest {
 /**
  * Analyze handler file
  */
-function analyzeHandler(sourceFile: SourceFile, srcRoot: string): HandlerInfo | null {
+function analyzeHandler(sourceFile: SourceFile, srcRoot: string, typeExtractor: TypeExtractor): HandlerInfo | null {
   const filePath = sourceFile.getFilePath();
   const relativePath = relative(srcRoot, filePath);
 
@@ -87,10 +104,11 @@ function analyzeHandler(sourceFile: SourceFile, srcRoot: string): HandlerInfo | 
   // Find handler exports
   const exports = sourceFile.getExportedDeclarations();
   
-  for (const [name] of exports) {
+  for (const [name, declarations] of exports) {
     if (name.toLowerCase().includes('handler')) {
       const method = extractMethodFromExport(sourceFile) || 'GET';
       const customRoute = extractRouteFromExport(sourceFile);
+      const schemas = extractHandlerSchemas(sourceFile, name, filePath, typeExtractor);
       
       return {
         filePath,
@@ -101,7 +119,8 @@ function analyzeHandler(sourceFile: SourceFile, srcRoot: string): HandlerInfo | 
         exportName: name,
         exportType: sourceFile.getDefaultExportSymbol()?.getName() === name ? 'default' : 'named',
         imports: extractImports(sourceFile),
-        dependencies: extractDependencies(sourceFile)
+        dependencies: extractDependencies(sourceFile),
+        ...schemas
       };
     }
   }
@@ -228,6 +247,44 @@ function extractDependencies(sourceFile: SourceFile): string[] {
   return sourceFile.getImportDeclarations()
     .map(imp => imp.getModuleSpecifierValue())
     .filter(module => !module.startsWith('.') && !module.startsWith('@gati-framework'));
+}
+
+/**
+ * Extract handler schemas (PARAMS, QUERY, INPUT, OUTPUT)
+ */
+function extractHandlerSchemas(
+  sourceFile: SourceFile,
+  handlerName: string,
+  filePath: string,
+  typeExtractor: TypeExtractor
+): {
+  paramsSchema?: GType;
+  querySchema?: GType;
+  inputSchema?: GType;
+  outputSchema?: GType;
+} {
+  try {
+    // Extract PARAMS from file path
+    const paramsSchema = extractParams(filePath);
+    
+    // Extract QUERY from req.query usage
+    const querySchema = extractQuery(sourceFile, handlerName);
+    
+    // Extract INPUT from req.body usage
+    const inputSchema = extractInput(sourceFile, handlerName, typeExtractor);
+    
+    // Extract OUTPUT from res.json() calls
+    const outputSchema = extractOutput(sourceFile, handlerName, typeExtractor);
+    
+    return {
+      paramsSchema: paramsSchema || undefined,
+      querySchema: querySchema || undefined,
+      inputSchema: inputSchema || undefined,
+      outputSchema: outputSchema || undefined
+    };
+  } catch (error) {
+    return {};
+  }
 }
 
 /**

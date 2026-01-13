@@ -8,36 +8,81 @@ import type { Response } from './response.js';
 import type { GlobalContext, LocalContext } from './context.js';
 
 /**
- * Handler function signature
+ * Typed Request with INPUT, PARAMS, and QUERY generics
+ */
+export interface TypedRequest<
+  INPUT = unknown,
+  PARAMS extends Record<string, string> = Record<string, string>,
+  QUERY extends Record<string, string | string[]> = Record<string, string | string[]>
+> extends Omit<Request, 'body' | 'params' | 'query'> {
+  body: INPUT;
+  params: PARAMS;
+  query: QUERY;
+}
+
+/**
+ * Typed Response with OUTPUT generic
+ */
+export interface TypedResponse<OUTPUT = unknown> extends Omit<Response, 'json'> {
+  json: (data: OUTPUT) => void;
+}
+
+/**
+ * Handler function signature with type generics
  *
- * Handlers process HTTP requests and can be synchronous or asynchronous.
- * Compatible with @gati-framework/core Handler type.
+ * @template INPUT - Request body type (default: unknown)
+ * @template OUTPUT - Response body type (default: unknown)
+ * @template PARAMS - URL parameters type (default: Record<string, string>)
+ * @template QUERY - Query parameters type (default: Record<string, string | string[]>)
+ * @template CTX - Combined context type (default: GlobalContext & LocalContext)
  *
- * @param req - HTTP request object
- * @param res - HTTP response object
+ * @param req - HTTP request object with typed body, params, and query
+ * @param res - HTTP response object with typed json method
  * @param gctx - Global context (shared resources)
  * @param lctx - Local context (request-scoped data)
  * @returns any value (typically void, but can return data for testing)
  *
- * @example
+ * @example Basic usage (no types)
  * ```typescript
- * const getUserHandler: Handler = async (req, res, gctx, lctx) => {
- *   const userId = req.params.id;
- *   const user = await gctx.modules['db'].users.findById(userId);
+ * export const handler: Handler = async (req, res, gctx, lctx) => {
+ *   const { title } = req.body; // unknown
+ *   res.json({ todo: { id: '1', title } });
+ * };
+ * ```
  *
- *   if (!user) {
- *     return res.status(404).json({ error: 'User not found' });
- *   }
+ * @example With INPUT/OUTPUT types
+ * ```typescript
+ * type INPUT = { title: string };
+ * type OUTPUT = { todo: { id: string; title: string } };
  *
- *   res.json({ user });
+ * export const handler: Handler<INPUT, OUTPUT> = async (req, res, gctx, lctx) => {
+ *   const { title } = req.body; // ✅ string
+ *   res.json({ todo: { id: '1', title } }); // ✅ Typed
+ * };
+ * ```
+ *
+ * @example With PARAMS and QUERY
+ * ```typescript
+ * type PARAMS = { id: string };
+ * type QUERY = { includeCompleted?: string };
+ *
+ * export const handler: Handler<void, Todo, PARAMS, QUERY> = async (req, res) => {
+ *   const { id } = req.params; // ✅ string
+ *   const { includeCompleted } = req.query; // ✅ string | undefined
  * };
  * ```
  */
-export type Handler = (
-  req: Request,
-  res: Response,
-  gctx: GlobalContext,
-  lctx: LocalContext
+export type Handler<
+  INPUT = unknown,
+  OUTPUT = unknown,
+  PARAMS extends Record<string, string> = Record<string, string>,
+  QUERY extends Record<string, string | string[]> = Record<string, string | string[]>,
+  CTX extends GlobalContext & LocalContext = GlobalContext & LocalContext
+> = (
+  req: TypedRequest<INPUT, PARAMS, QUERY>,
+  res: TypedResponse<OUTPUT>,
+  gctx: CTX extends GlobalContext & LocalContext ? GlobalContext : never,
+  lctx: CTX extends GlobalContext & LocalContext ? LocalContext : never
 ) => unknown | Promise<unknown>;
 
 /**
@@ -71,3 +116,23 @@ export interface HandlerExecutionOptions {
    */
   catchErrors?: boolean;
 }
+
+/**
+ * Type utility to infer INPUT type from Handler
+ */
+export type InferInput<T> = T extends Handler<infer I, any, any, any, any> ? I : never;
+
+/**
+ * Type utility to infer OUTPUT type from Handler
+ */
+export type InferOutput<T> = T extends Handler<any, infer O, any, any, any> ? O : never;
+
+/**
+ * Type utility to infer PARAMS type from Handler
+ */
+export type InferParams<T> = T extends Handler<any, any, infer P, any, any> ? P : never;
+
+/**
+ * Type utility to infer QUERY type from Handler
+ */
+export type InferQuery<T> = T extends Handler<any, any, any, infer Q, any> ? Q : never;

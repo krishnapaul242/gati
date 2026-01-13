@@ -50,43 +50,60 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
       }
     }
 
-    // Auto-generate manifests from handlers
+    // Auto-generate handler types
     const srcDir = resolve(cwd, 'src');
+    const generatedDir = resolve(cwd, '.gati', 'generated');
     const manifestsDir = resolve(cwd, '.gati', 'manifests');
+    
     if (existsSync(srcDir)) {
       try {
-        const { analyzeFile } = await import('../analyzer/simple-analyzer.js');
+        const { analyzeProject } = await import('../analyzer/handler-analyzer.js');
+        const { generateGCTX } = await import('../codegen/gctx-generator.js');
+        const { generateLCTX } = await import('../codegen/lctx-generator.js');
+        const { generateHandlerTypes } = await import('../codegen/handler-types-generator.js');
         const { glob } = await import('glob');
         
         if (!existsSync(manifestsDir)) {
           mkdirSync(manifestsDir, { recursive: true });
         }
+        if (!existsSync(generatedDir)) {
+          mkdirSync(generatedDir, { recursive: true });
+        }
         
-        const handlers: any[] = [];
-        const modules: any[] = [];
+        // Analyze project
+        const manifest = analyzeProject(cwd);
         
-        // Find all TypeScript/JavaScript files
-        const files = await glob('src/**/*.{ts,js}', { cwd, absolute: true });
+        // Generate GCTX
+        const gctxCode = await generateGCTX({ projectRoot: cwd });
         
-        for (const filePath of files) {
-          const result = analyzeFile(filePath, srcDir);
+        // Generate LCTX
+        const lctxCode = generateLCTX({ hasAuth: false });
+        
+        // Generate handler types
+        for (const handler of manifest.handlers) {
+          const handlerName = handler.exportName.replace(/Handler$/, '');
+          const typeCode = generateHandlerTypes(
+            {
+              name: handlerName,
+              paramsSchema: handler.paramsSchema,
+              querySchema: handler.querySchema,
+              inputSchema: handler.inputSchema,
+              outputSchema: handler.outputSchema
+            },
+            gctxCode,
+            lctxCode
+          );
           
-          if (result) {
-            // Add to collections
-            if ((result as any).route) {
-              handlers.push(result);
-            } else {
-              modules.push(result);
-            }
-          }
+          const typeFilePath = resolve(generatedDir, `${handlerName}.types.ts`);
+          writeFileSync(typeFilePath, typeCode);
         }
         
         // Write app manifest
-        const appManifest = { handlers, modules, timestamp: Date.now() };
+        const appManifest = { handlers: manifest.handlers, modules: manifest.modules, timestamp: Date.now() };
         const appManifestPath = resolve(manifestsDir, '_app.json');
         writeFileSync(appManifestPath, JSON.stringify(appManifest, null, 2));
         
-        console.log(chalk.gray(`🔧 Auto-generated manifests (${handlers.length} handlers, ${modules.length} modules)`));
+        console.log(chalk.gray(`🔧 Auto-generated types (${manifest.handlers.length} handlers, ${manifest.modules.length} modules)`));
       } catch (error) {
         console.log(chalk.yellow('⚠ Failed to auto-generate manifests'));
       }
@@ -159,7 +176,7 @@ async function startDevServer(cwd: string, options: DevOptions): Promise<void> {
           if (existsSync(appManifestPath)) {
             try {
               const appManifest = JSON.parse(readFileSync(appManifestPath, 'utf-8'));
-              for (const handler of appManifest.handlers || []) {
+              for (const handler of (appManifest.handlers || [])) {
                 // In dev mode, load TypeScript files directly using tsx
                 const handlerFilePath = handler.filePath;
                 
