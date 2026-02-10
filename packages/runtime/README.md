@@ -36,12 +36,14 @@ integration.ingress.handleRequest({
 ## Features
 
 - ✅ **High Performance** - 172K RPS, 2.6M route matches/sec, <6μs pipeline latency
+- ✅ **WebSocket & SSE** - Real-time communication with lifecycle management
+- ✅ **Auth Middleware** - JWT, API Key, RBAC, and policy-based authorization
+- ✅ **Observability** - Structured logging, distributed tracing, health checks
 - ✅ **Queue Fabric** - Async pub/sub coordination between components
 - ✅ **Worker Pool** - Handler and module process isolation
 - ✅ **Lifecycle Hooks** - onInit, onRequest, onResponse, onCleanup, onError
-- ✅ **Distributed Tracing** - Request/trace/client ID propagation
+- ✅ **Distributed Tracing** - Request/trace/client ID propagation with W3C Trace Context
 - ✅ **Hot Reload** - 50-200ms file watching and reloading
-- ✅ **Observability** - Structured logging (Pino), metrics, tracing
 - 🚧 **Timescape** - Timestamp-based API versioning (M3)
 
 ## Architecture
@@ -146,6 +148,101 @@ const fabric = new QueueFabric();
 fabric.subscribe('routing', async (msg) => { /* handle */ });
 fabric.publish('routing', { type: 'request', data });
 ```
+
+### WebSocket Handler
+
+Real-time WebSocket communication with lifecycle management.
+
+```typescript
+import { createWebSocketHandler } from '@gati-framework/runtime';
+
+const wsHandler = createWebSocketHandler({
+  onConnect: async (connection, request, gctx, lctx, wsctx) => {
+    console.log('New connection:', connection.id);
+    connection.sendJSON({ type: 'welcome', message: 'Connected!' });
+  },
+  onMessage: async (message, gctx, lctx, wsctx) => {
+    // Broadcast to all connections
+    wsctx.broadcast({ type: 'chat', data: message.data });
+  },
+  onDisconnect: async (connection, code, reason, gctx, lctx, wsctx) => {
+    console.log('Connection closed:', connection.id);
+  },
+  options: {
+    heartbeatInterval: 30000,
+    compress: true,
+  },
+}, gctx);
+
+wsHandler.initialize(httpServer, '/ws');
+```
+
+See [WebSocket & SSE Guide](../../docs/features/websocket-sse.md) for more details.
+
+### Authentication Middleware
+
+JWT, API Key, RBAC, and policy-based authorization.
+
+```typescript
+import {
+  createAuthMiddleware,
+  createRBACMiddleware,
+  JWTAuthProvider,
+} from '@gati-framework/runtime';
+
+// JWT authentication
+const authMiddleware = createAuthMiddleware({
+  provider: new JWTAuthProvider({
+    secret: process.env.JWT_SECRET,
+    issuer: 'my-app',
+  }),
+  skipPaths: ['/health', '/login'],
+  enrichContext: true,
+});
+
+// Role-based authorization
+const adminOnly = createRBACMiddleware({
+  roles: ['admin'],
+});
+
+app.use(authMiddleware, { path: '/api/*', priority: 100 });
+app.use(adminOnly, { path: '/admin/*', priority: 90 });
+```
+
+See [Authentication Guide](../../docs/features/authentication.md) for more details.
+
+### Logging & Tracing
+
+Structured logging, distributed tracing, and health checks.
+
+```typescript
+import {
+  createLoggingMiddleware,
+  createTracingMiddleware,
+  createHealthCheckMiddleware,
+} from '@gati-framework/runtime';
+
+// Request/response logging
+app.use(createLoggingMiddleware({
+  logQuery: true,
+  skipPaths: ['/health'],
+}), { path: '*', priority: 105 });
+
+// Distributed tracing (W3C Trace Context)
+app.use(createTracingMiddleware({
+  serviceName: 'my-api',
+  injectTraceContext: true,
+}), { path: '*', priority: 110 });
+
+// Health checks
+app.use(createHealthCheckMiddleware({
+  dependencies: [
+    createDatabaseHealthCheck('postgres', checkDB, true),
+  ],
+}));
+```
+
+See [Observability Guide](../../docs/features/observability.md) for more details.
 
 ## Handler Example
 
