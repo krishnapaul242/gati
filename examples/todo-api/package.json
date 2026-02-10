@@ -11,11 +11,11 @@
     "test:record": "node scripts/test-and-record.js"
   },
   "dependencies": {
-    "@gati-framework/runtime": "^2.0.8",
-    "@gati-framework/core": "^0.4.5"
+    "@gati-framework/runtime": "workspace:*",
+    "@gati-framework/core": "workspace:*"
   },
   "devDependencies": {
-    "@gati-framework/cli": "^1.0.19",
+    "@gati-framework/cli": "workspace:*",
     "@types/node": "^20.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"

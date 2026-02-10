@@ -17,10 +17,10 @@
   "author": "Krishna Paul",
   "license": "MIT",
   "dependencies": {
-    "@gati-framework/core": "file:../../.kiro/local-packages/gati-framework-core-0.4.5.tgz",
-    "@gati-framework/types": "file:../../.kiro/local-packages/gati-framework-types-1.0.1.tgz",
-    "@gati-framework/contracts": "file:../../.kiro/local-packages/gati-framework-contracts-1.1.0.tgz",
-    "@gati-framework/runtime": "file:../../.kiro/local-packages/gati-framework-runtime-2.0.5.tgz"
+    "@gati-framework/core": "workspace:*",
+    "@gati-framework/types": "workspace:*",
+    "@gati-framework/contracts": "workspace:*",
+    "@gati-framework/runtime": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
