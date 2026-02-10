@@ -2,24 +2,6 @@
 
 Gati provides first-class support for real-time communication through WebSocket and Server-Sent Events (SSE) handlers.
 
-## Installation
-
-WebSocket support requires the `ws` package to be installed separately:
-
-```bash
-npm install ws
-# or
-pnpm add ws
-# or
-yarn add ws
-```
-
-For TypeScript projects, also install the type definitions:
-
-```bash
-npm install -D @types/ws
-```
-
 ## Table of Contents
 
 - [WebSocket Handler](#websocket-handler)
