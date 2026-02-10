@@ -13,6 +13,13 @@ The Gati runtime is a high-performance execution engine that orchestrates handle
 npm install @gati-framework/runtime
 ```
 
+For WebSocket support, also install:
+
+```bash
+npm install ws
+npm install -D @types/ws  # TypeScript only
+```
+
 ## Quick Start
 
 ```typescript
