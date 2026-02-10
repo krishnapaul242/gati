@@ -22,6 +22,51 @@ export type {
   PropertyHandler,
 } from './middleware/property-based.js';
 
+// Authentication & Authorization Middleware
+export {
+  createAuthMiddleware,
+  createRBACMiddleware,
+  createPolicyAuthMiddleware,
+  JWTAuthProvider,
+  APIKeyAuthProvider,
+} from './middleware/auth.js';
+export type {
+  AuthMiddlewareConfig,
+  AuthProvider,
+  JWTPayload,
+  UserIdentity,
+  RBACConfig,
+  PolicyAuthConfig,
+} from './middleware/auth.js';
+
+// Logging & Tracing Middleware
+export {
+  createLoggingMiddleware,
+  createTracingMiddleware,
+  createPerformanceMiddleware,
+  createAuditMiddleware,
+} from './middleware/logging.js';
+export type {
+  RequestLoggingConfig,
+  TracingConfig,
+  AuditConfig,
+} from './middleware/logging.js';
+
+// Health Check Middleware
+export {
+  createHealthCheckMiddleware,
+  createDatabaseHealthCheck,
+  createRedisHealthCheck,
+  createServiceHealthCheck,
+  clearHealthCheckCache,
+  HealthStatus,
+} from './middleware/health.js';
+export type {
+  HealthCheckConfig,
+  HealthCheckResult,
+  DependencyCheck,
+} from './middleware/health.js';
+
 // Simplified API - String schemas
 export {
   parseStringSchema,
@@ -310,3 +355,28 @@ export type { DebugGateManagerConfig, GateTriggerEvent } from './debug-gate-mana
 // E2E Integration
 export { createE2EIntegration } from './e2e-integration.js';
 export type { E2EIntegration, E2EIntegrationConfig } from './e2e-integration.js';
+
+// WebSocket Handler Support
+export { WebSocketHandlerManager, createWebSocketHandler } from './websocket-handler.js';
+export type {
+  WebSocketConnection,
+  WebSocketContext,
+  WebSocketHandlerConfig,
+  WebSocketMessage,
+  WebSocketEventType,
+  WebSocketConnectHandler,
+  WebSocketDisconnectHandler,
+  WebSocketMessageHandler,
+  WebSocketErrorHandler,
+} from './types/websocket-handler.js';
+
+// Server-Sent Events (SSE) Support
+export { SSEHandlerManager, createSSEHandler } from './sse-handler.js';
+export type {
+  SSEConnection,
+  SSEContext,
+  SSEEvent,
+  SSEHandlerConfig,
+  SSEConnectHandler,
+  SSEDisconnectHandler,
+} from './types/websocket-handler.js';
