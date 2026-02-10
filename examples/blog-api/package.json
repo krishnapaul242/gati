@@ -11,12 +11,11 @@
     "test:record": "node test-api.js > test-session.log 2>&1"
   },
   "dependencies": {
-    "@gati-framework/runtime": "^2.0.3",
-    "@gati-framework/core": "^0.4.5"
+    "@gati-framework/runtime": "workspace:*",
+    "@gati-framework/core": "workspace:*"
   },
   "devDependencies": {
-    "@gati-framework/cli": "^1.0.14",
-    "@gati-framework/testing": "^1.0.0",
+    "@gati-framework/cli": "workspace:*",
     "typescript": "^5.0.0",
     "vitest": "^1.0.0"
   },

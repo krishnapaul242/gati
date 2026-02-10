@@ -10,6 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gati-framework/core": "^0.4.0"
+    "@gati-framework/core": "workspace:*"
   }
 }

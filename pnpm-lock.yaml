@@ -131,6 +131,47 @@ importers:
         specifier: ^1.0.4
         version: 1.6.1(@types/node@20.19.24)
 
+  examples/blog-api:
+    dependencies:
+      '@gati-framework/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@gati-framework/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+    devDependencies:
+      '@gati-framework/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1(@types/node@20.19.24)
+
+  examples/e2e-test-app:
+    dependencies:
+      '@gati-framework/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@gati-framework/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@gati-framework/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@gati-framework/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.24
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/hello-world:
     dependencies:
       '@gati-framework/playground':
@@ -182,6 +223,12 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/scaffold-verify:
+    dependencies:
+      '@gati-framework/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+
   examples/timescape-beginner:
     dependencies:
       '@gati-framework/runtime':
@@ -217,6 +264,28 @@ importers:
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
+
+  examples/todo-api:
+    dependencies:
+      '@gati-framework/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@gati-framework/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+    devDependencies:
+      '@gati-framework/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.24
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1(@types/node@20.19.24)
 
   packages/cli:
     dependencies:
